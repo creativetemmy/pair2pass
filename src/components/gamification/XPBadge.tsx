@@ -1,0 +1,30 @@
+import { Star, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface XPBadgeProps {
+  xp: number;
+  level: number;
+  className?: string;
+}
+
+export function XPBadge({ xp, level, className }: XPBadgeProps) {
+  return (
+    <div className={cn("flex items-center space-x-3", className)}>
+      <div className="relative">
+        <div className="h-12 w-12 rounded-full gradient-primary flex items-center justify-center shadow-primary animate-glow">
+          <Zap className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-success text-success-foreground text-xs font-bold flex items-center justify-center">
+          {level}
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center space-x-1">
+          <Star className="h-4 w-4 text-yellow-500" />
+          <span className="font-semibold text-foreground">{xp} XP</span>
+        </div>
+        <p className="text-sm text-muted-foreground">Level {level}</p>
+      </div>
+    </div>
+  );
+}
