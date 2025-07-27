@@ -12,15 +12,17 @@ const navItems = [
 
 export function Navigation() {
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 border-b border-border/20 glass-card">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <NavLink to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+          <NavLink to="/" className="flex items-center space-x-2 hover-lift">
+            <div className="h-8 w-8 rounded-lg gradient-mesh flex items-center justify-center shadow-glow animate-pulse-slow">
               <span className="text-primary-foreground font-bold text-lg">P2</span>
             </div>
-            <span className="text-xl font-bold text-foreground">Pair2Pass</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Pair2Pass
+            </span>
           </NavLink>
 
           {/* Desktop Navigation */}
@@ -31,10 +33,10 @@ export function Navigation() {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover-lift",
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "gradient-primary text-primary-foreground shadow-primary"
+                      : "text-muted-foreground hover:text-foreground hover:glass-card"
                   )
                 }
               >
@@ -45,7 +47,7 @@ export function Navigation() {
           </div>
 
           {/* Wallet Connect Button */}
-          <Button variant="wallet" size="sm" className="hidden md:flex">
+          <Button variant="neon" size="sm" className="hidden md:flex animate-pulse-slow">
             <Wallet className="h-4 w-4" />
             Connect Wallet
           </Button>

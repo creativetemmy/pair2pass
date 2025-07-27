@@ -46,12 +46,18 @@ All colors MUST be HSL.
     --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
     --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+    --gradient-mesh: conic-gradient(from 0deg at 50% 50%, hsl(var(--primary)) 0deg, hsl(var(--secondary)) 120deg, hsl(var(--primary-glow)) 240deg, hsl(var(--primary)) 360deg);
+    --gradient-glass: linear-gradient(135deg, hsl(var(--background) / 0.1), hsl(var(--foreground) / 0.05));
+    --gradient-rainbow: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--primary-glow)), hsl(var(--secondary-glow)));
 
     /* Shadows */
     --shadow-primary: 0 10px 40px -15px hsl(var(--primary) / 0.3);
     --shadow-secondary: 0 10px 40px -15px hsl(var(--secondary) / 0.3);
     --shadow-card: 0 4px 20px -8px hsl(var(--foreground) / 0.1);
     --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
+    --shadow-glass: 0 8px 32px 0 hsl(var(--foreground) / 0.05);
+    --shadow-floating: 0 20px 60px -12px hsl(var(--primary) / 0.25);
+    --shadow-neon: 0 0 5px hsl(var(--primary)), 0 0 25px hsl(var(--primary)), 0 0 50px hsl(var(--primary));
 
     --radius: 0.5rem;
 
@@ -138,6 +144,22 @@ All colors MUST be HSL.
     background: var(--gradient-card);
   }
   
+  .gradient-mesh {
+    background: var(--gradient-mesh);
+  }
+  
+  .gradient-glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+  
+  .gradient-rainbow {
+    background: var(--gradient-rainbow);
+    background-size: 300% 300%;
+    animation: gradient-shift 6s ease infinite;
+  }
+  
   .shadow-primary {
     box-shadow: var(--shadow-primary);
   }
@@ -154,6 +176,18 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-glow);
   }
   
+  .shadow-glass {
+    box-shadow: var(--shadow-glass);
+  }
+  
+  .shadow-floating {
+    box-shadow: var(--shadow-floating);
+  }
+  
+  .shadow-neon {
+    box-shadow: var(--shadow-neon);
+  }
+  
   .animate-fade-in {
     animation: fade-in 0.6s ease-out;
   }
@@ -164,6 +198,36 @@ All colors MUST be HSL.
   
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
+  
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+  
+  .glass-card {
+    @apply gradient-glass shadow-glass border border-border/20 backdrop-blur-xl;
+  }
+  
+  .neon-border {
+    border: 1px solid hsl(var(--primary));
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.3), inset 0 0 10px hsl(var(--primary) / 0.1);
+  }
+  
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-floating);
   }
 }
 
@@ -193,5 +257,37 @@ All colors MUST be HSL.
   }
   to {
     box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.8);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
