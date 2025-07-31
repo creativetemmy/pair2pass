@@ -8,22 +8,22 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 45 23% 97%;
-    --foreground: 263 44% 15%;
+    --background: 30 20% 98%;
+    --foreground: 270 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 263 44% 15%;
+    --card-foreground: 270 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 263 44% 15%;
+    --popover-foreground: 270 15% 15%;
 
-    --primary: 263 70% 50%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 263 70% 65%;
+    --primary: 270 50% 30%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 270 50% 45%;
 
-    --secondary: 180 42% 55%;
-    --secondary-foreground: 0 0% 100%;
-    --secondary-glow: 180 42% 70%;
+    --secondary: 180 70% 40%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-glow: 180 70% 55%;
 
     --muted: 45 23% 94%;
     --muted-foreground: 263 20% 45%;
@@ -79,20 +79,20 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 270 20% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 270 20% 10%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 270 20% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 270 60% 65%;
+    --primary-foreground: 270 20% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 180 60% 50%;
+    --secondary-foreground: 270 20% 8%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
