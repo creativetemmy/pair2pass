@@ -5,28 +5,21 @@ import {
   darkTheme,
   lightTheme,
 } from '@rainbow-me/rainbowkit';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { WagmiConfig } from 'wagmi';
 import { base, baseSepolia } from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
 import { useTheme } from 'next-themes';
-
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [base, baseSepolia],
-  [publicProvider()]
-);
 
 const { connectors } = getDefaultWallets({
   appName: 'Pair2Pass',
   projectId: 'c5bbfe4ce3c95a7b11c03dd3bb2e18db',
-  chains,
+  chains: [base, baseSepolia],
 });
 
-const wagmiConfig = createConfig({
+// Simple config without explicit public client to avoid version conflicts
+const wagmiConfig = {
   autoConnect: true,
   connectors,
-  publicClient,
-  webSocketPublicClient,
-});
+} as any;
 
 interface Web3ProviderProps {
   children: React.ReactNode;
@@ -38,7 +31,7 @@ export function Web3Provider({ children }: Web3ProviderProps) {
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
-        chains={chains}
+        chains={[base, baseSepolia]}
         theme={theme === 'dark' ? darkTheme() : lightTheme()}
       >
         {children}
