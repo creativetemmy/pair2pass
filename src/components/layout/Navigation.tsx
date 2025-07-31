@@ -1,9 +1,7 @@
 import { NavLink } from "react-router-dom";
-import { Home, Users, Calendar, User } from "lucide-react";
+import { Home, Users, Calendar, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -48,11 +46,11 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Wallet Connect & Theme Toggle */}
-          <div className="hidden md:flex items-center space-x-2">
-            <ThemeToggle />
-            <ConnectButton />
-          </div>
+          {/* Wallet Connect Button */}
+          <Button variant="neon" size="sm" className="hidden md:flex animate-pulse-slow">
+            <Wallet className="h-4 w-4" />
+            Connect Wallet
+          </Button>
 
           {/* Mobile Menu Button */}
           <Button variant="ghost" size="icon" className="md:hidden">
