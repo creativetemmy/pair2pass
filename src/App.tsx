@@ -25,8 +25,8 @@ const App = () => (
     enableSystem
     disableTransitionOnChange
   >
-    <Web3Provider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <Web3Provider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -49,8 +49,8 @@ const App = () => (
             </div>
           </BrowserRouter>
         </TooltipProvider>
-      </QueryClientProvider>
-    </Web3Provider>
+      </Web3Provider>
+    </QueryClientProvider>
   </ThemeProvider>
 );
 
