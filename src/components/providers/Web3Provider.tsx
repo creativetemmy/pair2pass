@@ -10,20 +10,22 @@ import { base, baseSepolia } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { useTheme } from 'next-themes';
 
-const { chains, publicClient } = configureChains(
+const { chains, publicClient, webSocketPublicClient } = configureChains(
   [base, baseSepolia],
   [publicProvider()]
 );
 
 const { connectors } = getDefaultWallets({
   appName: 'Pair2Pass',
-  projectId: 'YOUR_PROJECT_ID', // Replace with your WalletConnect project ID
-} as any);
+  projectId: 'c5bbfe4ce3c95a7b11c03dd3bb2e18db',
+  chains,
+});
 
 const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
   publicClient,
+  webSocketPublicClient,
 });
 
 interface Web3ProviderProps {
@@ -36,6 +38,7 @@ export function Web3Provider({ children }: Web3ProviderProps) {
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
+        chains={chains}
         theme={theme === 'dark' ? darkTheme() : lightTheme()}
       >
         {children}
