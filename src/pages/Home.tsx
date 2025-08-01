@@ -60,7 +60,7 @@ export default function Home() {
                 className="text-lg px-8 py-4"
                 onClick={() => setShowWalletDialog(true)}
               >
-                Enter App
+                Open App
                 <ArrowRight className="h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary">
@@ -141,8 +141,13 @@ export default function Home() {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join thousands of students already building their academic reputation on Pair2Pass
           </p>
-          <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
-            Get Started Now
+          <Button 
+            variant="secondary" 
+            size="lg" 
+            className="text-lg px-8 py-4"
+            onClick={() => setShowWalletDialog(true)}
+          >
+            Open App
             <CheckCircle className="h-5 w-5" />
           </Button>
         </div>

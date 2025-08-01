@@ -3,14 +3,22 @@ import { Home, Users, Calendar, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const allNavItems = [
   { icon: Home, label: "Home", path: "/" },
-  { icon: Users, label: "Find Partner", path: "/find-partner" },
-  { icon: Calendar, label: "Sessions", path: "/dashboard" },
-  { icon: User, label: "Profile", path: "/profile" },
+  { icon: Users, label: "Find Partner", path: "/find-partner", protected: true },
+  { icon: Calendar, label: "Sessions", path: "/dashboard", protected: true },
+  { icon: User, label: "Profile", path: "/profile", protected: true },
 ];
 
+// Check if wallet is connected (simple localStorage check)
+const isWalletConnected = () => {
+  return localStorage.getItem('walletConnected') === 'true';
+};
+
 export function Navigation() {
+  const walletConnected = isWalletConnected();
+  const navItems = allNavItems.filter(item => !item.protected || walletConnected);
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border/20 glass-card">
       <div className="container mx-auto px-4">
@@ -46,10 +54,10 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Wallet Connect Button */}
+          {/* Open App Button */}
           <Button variant="neon" size="sm" className="hidden md:flex animate-pulse-slow">
             <Wallet className="h-4 w-4" />
-            Connect Wallet
+            Open App
           </Button>
 
           {/* Mobile Menu Button */}

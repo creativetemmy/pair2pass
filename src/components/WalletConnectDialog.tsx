@@ -26,7 +26,11 @@ export function WalletConnectDialog({ open, onOpenChange }: WalletConnectDialogP
     setTimeout(() => {
       setIsConnecting(false);
       onOpenChange(false);
+      // Set wallet connected status in localStorage
+      localStorage.setItem('walletConnected', 'true');
       navigate("/profile");
+      // Force navigation refresh to update nav items
+      window.location.reload();
     }, 2000);
   };
 
