@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle } from "lucide-react";
+import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import heroImage from "@/assets/hero-image.jpg";
 
 const features = [
@@ -34,6 +36,8 @@ const steps = [
 ];
 
 export default function Home() {
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -50,8 +54,13 @@ export default function Home() {
               Build your academic reputation while earning XP and NFT badges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
-                Connect Wallet
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="text-lg px-8 py-4"
+                onClick={() => setShowWalletDialog(true)}
+              >
+                Enter App
                 <ArrowRight className="h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary">
@@ -138,6 +147,11 @@ export default function Home() {
           </Button>
         </div>
       </section>
+      
+      <WalletConnectDialog 
+        open={showWalletDialog} 
+        onOpenChange={setShowWalletDialog} 
+      />
     </div>
   );
 }
