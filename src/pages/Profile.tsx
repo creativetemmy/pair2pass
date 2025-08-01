@@ -203,11 +203,11 @@ export default function Profile() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Freshman">Freshman</SelectItem>
-                          <SelectItem value="Sophomore">Sophomore</SelectItem>
-                          <SelectItem value="Junior">Junior</SelectItem>
-                          <SelectItem value="Senior">Senior</SelectItem>
-                          <SelectItem value="Graduate">Graduate</SelectItem>
+                          <SelectItem value="100 Level">100 Level</SelectItem>
+                          <SelectItem value="200 Level">200 Level</SelectItem>
+                          <SelectItem value="300 Level">300 Level</SelectItem>
+                          <SelectItem value="400 Level">400 Level</SelectItem>
+                          <SelectItem value="500 Level">500 Level</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

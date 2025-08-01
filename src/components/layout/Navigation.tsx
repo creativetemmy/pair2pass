@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Home, Users, Calendar, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 
 const allNavItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -16,6 +18,7 @@ const isWalletConnected = () => {
 };
 
 export function Navigation() {
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
   const walletConnected = isWalletConnected();
   const navItems = allNavItems.filter(item => !item.protected || walletConnected);
 
@@ -55,7 +58,12 @@ export function Navigation() {
           </div>
 
           {/* Open App Button */}
-          <Button variant="neon" size="sm" className="hidden md:flex animate-pulse-slow">
+          <Button 
+            variant="neon" 
+            size="sm" 
+            className="hidden md:flex animate-pulse-slow"
+            onClick={() => setShowWalletDialog(true)}
+          >
             <Wallet className="h-4 w-4" />
             Open App
           </Button>
@@ -89,6 +97,11 @@ export function Navigation() {
           </div>
         </div>
       </div>
+      
+      <WalletConnectDialog 
+        open={showWalletDialog} 
+        onOpenChange={setShowWalletDialog} 
+      />
     </nav>
   );
 }
