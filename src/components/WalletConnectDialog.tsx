@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -10,29 +10,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { Wallet, ArrowRight } from "lucide-react";
 
+import { useConnect, useAccount } from "wagmi";
+import { injected } from 'wagmi/connectors'
+import { config } from "../config";
+
+
 interface WalletConnectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function WalletConnectDialog({ open, onOpenChange }: WalletConnectDialogProps) {
-  const [isConnecting, setIsConnecting] = useState(false);
   const navigate = useNavigate();
+  const { connect, isPending } = useConnect()
 
-  const handleConnectWallet = async () => {
-    setIsConnecting(true);
-    
-    // Simulate wallet connection
-    setTimeout(() => {
-      setIsConnecting(false);
+  const { isConnected } = useAccount();
+
+  useEffect(() => {
+    if (isConnected) {
       onOpenChange(false);
-      // Set wallet connected status in localStorage
-      localStorage.setItem('walletConnected', 'true');
-      navigate("/profile");
-      // Force navigation refresh to update nav items
-      window.location.reload();
-    }, 2000);
-  };
+      navigate("/profile", { replace: true });
+    }
+  }, [isConnected, navigate, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -59,12 +58,12 @@ export function WalletConnectDialog({ open, onOpenChange }: WalletConnectDialogP
           </div>
           
           <Button 
-            onClick={handleConnectWallet}
-            disabled={isConnecting}
+            onClick={() => connect({ connector: injected() })}
+            disabled={isPending}
             className="w-full"
             size="lg"
           >
-            {isConnecting ? (
+            {isPending ? (
               "Connecting..."
             ) : (
               <>

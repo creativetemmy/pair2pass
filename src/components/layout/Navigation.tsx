@@ -4,6 +4,7 @@ import { Home, Users, Calendar, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
+import { useAccount } from "wagmi";
 
 const allNavItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -21,6 +22,7 @@ export function Navigation() {
   const [showWalletDialog, setShowWalletDialog] = useState(false);
   const walletConnected = isWalletConnected();
   const navItems = allNavItems.filter(item => !item.protected || walletConnected);
+   const { address, isConnected } = useAccount()
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/20 glass-card">
@@ -57,15 +59,17 @@ export function Navigation() {
             ))}
           </div>
 
+
+
           {/* Open App Button */}
           <Button 
             variant="neon" 
             size="sm" 
             className="hidden md:flex animate-pulse-slow"
-            onClick={() => setShowWalletDialog(true)}
+            onClick={() => isConnected ? null : setShowWalletDialog(true)}
           >
             <Wallet className="h-4 w-4" />
-            Open App
+            {isConnected ?   address : ' Connect Wallet'}
           </Button>
 
           {/* Mobile Menu Button */}

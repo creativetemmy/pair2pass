@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
 import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen } from "lucide-react";
+import { useAccount } from "wagmi";
+import { Navigate } from "react-router-dom";
 
 const userProfile = {
   name: "Alex Thompson",
@@ -42,6 +44,14 @@ const achievements = [
 ];
 
 export default function Profile() {
+
+   const { address, isConnected } = useAccount()
+
+  if (!isConnected) {
+    return <Navigate to="/" replace />
+  }
+
+  
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(userProfile);
 
@@ -82,7 +92,7 @@ export default function Profile() {
               </h1>
               <p className="text-muted-foreground mb-2">{userProfile.ensName}</p>
               <p className="text-xs text-muted-foreground mb-4 font-mono">
-                {userProfile.walletAddress}
+                {address}
               </p>
               
               <XPBadge xp={userProfile.xp} level={userProfile.level} className="justify-center" />
