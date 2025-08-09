@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navigation } from "@/components/layout/Navigation";
 import Home from "./pages/Home";
-import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import FindPartner from "./pages/FindPartner";
 import MatchConfirmation from "./pages/MatchConfirmation";
@@ -28,7 +27,6 @@ const App = () => (
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/homepage" element={<Homepage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/find-partner" element={<FindPartner />} />
               <Route path="/match-confirmation" element={<MatchConfirmation />} />
