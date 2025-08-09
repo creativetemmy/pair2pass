@@ -82,17 +82,17 @@ export default function FindPartner() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 transition-colors duration-300">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Find Study Partner</h1>
-        <p className="text-muted-foreground">Connect with verified students for your courses</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2 transition-colors duration-300">Find Study Partner</h1>
+        <p className="text-muted-foreground transition-colors duration-300">Connect with verified students for your courses</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Filters */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 transition-colors duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 transition-colors duration-300">
               <Filter className="h-5 w-5" />
               <span>Filters</span>
             </CardTitle>
@@ -175,7 +175,7 @@ export default function FindPartner() {
         {/* Results */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-xl font-semibold text-foreground transition-colors duration-300">
               Available Study Partners ({matchedStudents.length})
             </h2>
             <Select defaultValue="rating">
@@ -191,7 +191,7 @@ export default function FindPartner() {
           </div>
 
           {matchedStudents.map((student) => (
-            <Card key={student.id} className="hover:shadow-card transition-all duration-300">
+            <Card key={student.id} className="hover:shadow-card transition-all duration-300 border-border/20 dark:border-border/10">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="flex items-start space-x-4">

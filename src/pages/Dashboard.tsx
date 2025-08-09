@@ -51,27 +51,27 @@ const badges = [
 
 export default function Dashboard() {
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-4 py-8 space-y-8 transition-colors duration-300">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Track your study progress and achievements</p>
+          <h1 className="text-3xl font-bold text-foreground transition-colors duration-300">Dashboard</h1>
+          <p className="text-muted-foreground transition-colors duration-300">Track your study progress and achievements</p>
         </div>
         <XPBadge xp={2450} level={12} />
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="transition-colors duration-300">
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-colors duration-300">
                 <Users className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">24</p>
-                <p className="text-sm text-muted-foreground">Study Partners</p>
+                <p className="text-2xl font-bold text-foreground transition-colors duration-300">24</p>
+                <p className="text-sm text-muted-foreground transition-colors duration-300">Study Partners</p>
               </div>
             </div>
           </CardContent>

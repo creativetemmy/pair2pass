@@ -4,6 +4,7 @@ import { Home, Users, Calendar, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAccount } from "wagmi";
 
 const allNavItems = [
@@ -25,7 +26,7 @@ export function Navigation() {
    const { address, isConnected } = useAccount()
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/20 glass-card">
+    <nav className="sticky top-0 z-50 border-b border-border/20 glass-card transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -59,27 +60,36 @@ export function Navigation() {
             ))}
           </div>
 
+          {/* Theme Toggle & Wallet Button */}
+          <div className="hidden md:flex items-center space-x-2">
 
 
-          {/* Open App Button */}
-          <Button 
-            variant="neon" 
-            size="sm" 
-            className="hidden md:flex animate-pulse-slow"
-            onClick={() => isConnected ? null : setShowWalletDialog(true)}
-          >
-            <Wallet className="h-4 w-4" />
-            {isConnected ?   address : ' Connect Wallet'}
-          </Button>
 
-          {/* Mobile Menu Button */}
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Users className="h-5 w-5" />
-          </Button>
+            <ThemeToggle />
+            
+            {/* Open App Button */}
+            <Button 
+              variant="neon" 
+              size="sm" 
+              className="animate-pulse-slow transition-colors duration-300"
+              onClick={() => isConnected ? null : setShowWalletDialog(true)}
+            >
+              <Wallet className="h-4 w-4" />
+              {isConnected ? address : 'Open App'}
+            </Button>
+          </div>
+
+          {/* Mobile Theme Toggle */}
+          <div className="flex md:hidden items-center space-x-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon">
+              <Users className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-border">
+        <div className="md:hidden border-t border-border transition-colors duration-300">
           <div className="flex justify-around py-2">
             {navItems.map((item) => (
               <NavLink
@@ -87,7 +97,7 @@ export function Navigation() {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center space-y-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200",
+                    "flex flex-col items-center space-y-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground"

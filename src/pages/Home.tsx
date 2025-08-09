@@ -39,9 +39,9 @@ export default function Home() {
   const [showWalletDialog, setShowWalletDialog] = useState(false);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen transition-colors duration-300">
       {/* Hero Section */}
-      <section className="relative py-24 bg-gradient-to-br from-primary via-primary/90 to-secondary">
+      <section className="relative py-24 bg-gradient-to-br from-primary via-primary/90 to-secondary dark:from-primary/80 dark:via-primary/70 dark:to-secondary/80 transition-colors duration-300">
         <div className="container mx-auto px-4 text-center">
           <div>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
@@ -57,13 +57,13 @@ export default function Home() {
               <Button 
                 variant="secondary" 
                 size="lg" 
-                className="text-lg px-8 py-4"
+                className="text-lg px-8 py-4 transition-all duration-300"
                 onClick={() => setShowWalletDialog(true)}
               >
                 Open App
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary">
+              <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary transition-all duration-300">
                 Learn More
               </Button>
             </div>
@@ -72,26 +72,26 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-background transition-colors duration-300">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 transition-colors duration-300">
               Why Choose Pair2Pass?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto transition-colors duration-300">
               Transform your study experience with verified partnerships and gamified learning
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-shadow duration-300">
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-border/20 dark:border-border/10">
                 <CardContent className="p-6 text-center">
-                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <div className="h-16 w-16 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
                     <feature.icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-2 transition-colors duration-300">{feature.title}</h3>
+                  <p className="text-muted-foreground transition-colors duration-300">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -100,13 +100,13 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30 dark:bg-muted/10 transition-colors duration-300">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 transition-colors duration-300">
               How It Works
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto transition-colors duration-300">
               Get started in just four simple steps
             </p>
           </div>
@@ -114,12 +114,12 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
               <div key={index} className="relative">
-                <div className="text-center bg-card border rounded-xl p-6 hover:shadow-md transition-shadow duration-300">
+                <div className="text-center bg-card border rounded-xl p-6 hover:shadow-md transition-all duration-300 border-border/20 dark:border-border/10">
                   <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 font-bold text-lg">
                     {step.step}
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground">{step.description}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2 transition-colors duration-300">{step.title}</h3>
+                  <p className="text-muted-foreground transition-colors duration-300">{step.description}</p>
                 </div>
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-6 left-full w-full">
@@ -133,7 +133,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary">
+      <section className="py-20 bg-primary dark:bg-primary/80 transition-colors duration-300">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Transform Your Study Experience?
@@ -144,7 +144,7 @@ export default function Home() {
           <Button 
             variant="secondary" 
             size="lg" 
-            className="text-lg px-8 py-4"
+            className="text-lg px-8 py-4 transition-all duration-300"
             onClick={() => setShowWalletDialog(true)}
           >
             Open App
