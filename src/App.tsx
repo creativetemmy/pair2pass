@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navigation } from "@/components/layout/Navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
@@ -28,12 +29,12 @@ const App = () => (
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/homepage" element={<Homepage />} />
+              <Route path="/homepage" element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/find-partner" element={<FindPartner />} />
-              <Route path="/match-confirmation" element={<MatchConfirmation />} />
-              <Route path="/session-checkin" element={<SessionCheckIn />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/find-partner" element={<ProtectedRoute><FindPartner /></ProtectedRoute>} />
+              <Route path="/match-confirmation" element={<ProtectedRoute><MatchConfirmation /></ProtectedRoute>} />
+              <Route path="/session-checkin" element={<ProtectedRoute><SessionCheckIn /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
