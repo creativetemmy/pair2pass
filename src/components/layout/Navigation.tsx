@@ -9,6 +9,7 @@ import { useAccount } from "wagmi";
 
 const allNavItems = [
   { icon: Home, label: "Home", path: "/" },
+  { icon: Home, label: "Dashboard", path: "/homepage", protected: true },
   { icon: Users, label: "Find Partner", path: "/find-partner", protected: true },
   { icon: Calendar, label: "Sessions", path: "/dashboard", protected: true },
   { icon: User, label: "Profile", path: "/profile", protected: true },
@@ -72,10 +73,10 @@ export function Navigation() {
               variant="neon" 
               size="sm" 
               className="animate-pulse-slow transition-colors duration-300"
-              onClick={() => isConnected ? null : setShowWalletDialog(true)}
+              onClick={() => isConnected ? window.location.href = '/homepage' : setShowWalletDialog(true)}
             >
               <Wallet className="h-4 w-4" />
-              {isConnected ? address : 'Open App'}
+              {isConnected ? 'Dashboard' : 'Open App'}
             </Button>
           </div>
 
