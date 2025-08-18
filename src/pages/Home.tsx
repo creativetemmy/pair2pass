@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle } from "lucide-react";
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import heroImage from "@/assets/hero-image.jpg";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const features = [
   {
@@ -54,7 +55,7 @@ export default function Home() {
               Build your academic reputation while earning XP and NFT badges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+              {/* <Button 
                 variant="secondary" 
                 size="lg" 
                 className="text-lg px-8 py-4 transition-all duration-300"
@@ -65,7 +66,9 @@ export default function Home() {
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary transition-all duration-300">
                 Learn More
-              </Button>
+              </Button> */}
+
+              <ConnectButton label="Open App"/>
             </div>
           </div>
         </div>
@@ -141,7 +144,7 @@ export default function Home() {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join thousands of students already building their academic reputation on Pair2Pass
           </p>
-          <Button 
+          {/* <Button 
             variant="secondary" 
             size="lg" 
             className="text-lg px-8 py-4 transition-all duration-300"
@@ -149,7 +152,12 @@ export default function Home() {
           >
             Open App
             <CheckCircle className="h-5 w-5" />
-          </Button>
+          </Button> */}
+
+          <div className="text-lg px-8 py-4 transition-all duration-300" >
+
+          <ConnectButton  label="Open App"/>
+          </div>
         </div>
       </section>
       

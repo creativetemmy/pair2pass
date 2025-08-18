@@ -1,6 +1,6 @@
-import React from 'react';
-import { useWallet } from '../contexts/WalletContext';
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import React from "react";
+import { useWallet } from "../contexts/WalletContext";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const LandingPage = () => {
   const { wallet } = useWallet();
@@ -13,8 +13,8 @@ const LandingPage = () => {
             Pair<span className="text-blue-400">2</span>Pass
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Connect your wallet to access the decentralized future. 
-            Secure, fast, and built on Base chain.
+            Connect your wallet to access the decentralized future. Secure,
+            fast, and built on Base chain.
           </p>
         </div>
 
@@ -26,7 +26,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <ConnectWalletButton className="w-full" />
+          <ConnectButton label="Open App" />
 
           {wallet.connected && (
             <div className="mt-6 p-4 bg-green-100/20 border border-green-300/20 rounded-lg">

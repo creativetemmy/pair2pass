@@ -1,7 +1,7 @@
-import React from 'react';
-import { useWallet } from '../contexts/WalletContext';
-import ProtectedRoute from '../components/ProtectedRoute';
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import React from "react";
+import { useWallet } from "../contexts/WalletContext";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const ProfilePage = () => {
   const { wallet } = useWallet();
@@ -12,7 +12,7 @@ const ProfilePage = () => {
         <nav className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-800">Profile</h1>
-            <ConnectWalletButton />
+            <ConnectButton />
           </div>
         </nav>
 
@@ -21,7 +21,7 @@ const ProfilePage = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
               Your Wallet Information
             </h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

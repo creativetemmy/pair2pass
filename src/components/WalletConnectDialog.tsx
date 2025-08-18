@@ -29,7 +29,7 @@ export function WalletConnectDialog({ open, onOpenChange }: WalletConnectDialogP
   useEffect(() => {
     if (isConnected) {
       onOpenChange(false);
-      navigate("/profile", { replace: true });
+      navigate("/homepage", { replace: true });
     }
   }, [isConnected, navigate, onOpenChange]);
 

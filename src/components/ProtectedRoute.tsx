@@ -8,8 +8,11 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isConnected } = useAccount();
+   console.log("is connected", isConnected);
 
   if (!isConnected) {
+   
+    
     return <Navigate to="/" replace />;
   }
 

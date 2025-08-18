@@ -1,8 +1,9 @@
 import React from 'react';
-import { useWallet } from '../contexts/WalletContext';
+import { useAccount } from 'wagmi';
+
 
 const ConnectWalletButton = ({ className = '' }) => {
-  const { wallet, connectWallet, disconnectWallet } = useWallet();
+  const { wallet, connectWallet, disconnectWallet } = useAccount()
 
   if (wallet.connected) {
     return (

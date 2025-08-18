@@ -3,28 +3,34 @@ import { NavLink } from "react-router-dom";
 import { Home, Users, Calendar, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAccount } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+
 
 const allNavItems = [
-  { icon: Home, label: "Home", path: "/" },
-  { icon: Home, label: "Dashboard", path: "/homepage", protected: true },
-  { icon: Users, label: "Find Partner", path: "/find-partner", protected: true },
-  { icon: Calendar, label: "Sessions", path: "/dashboard", protected: true },
-  { icon: User, label: "Profile", path: "/profile", protected: true },
+  { icon: Home, label: "Home", path: "/", protected:false},
+  { icon: Home, label: "Dashboard", path: "/homepage" ,protected:true},
+  { icon: Users, label: "Find Partner", path: "/find-partner", protected:true},
+  { icon: Calendar, label: "Sessions", path: "/dashboard", protected:true},
+  { icon: User, label: "Profile", path: "/profile",protected:true },
 ];
 
-// Check if wallet is connected (simple localStorage check)
-const isWalletConnected = () => {
-  return localStorage.getItem('walletConnected') === 'true';
-};
+
 
 export function Navigation() {
-  const [showWalletDialog, setShowWalletDialog] = useState(false);
-  const walletConnected = isWalletConnected();
-  const navItems = allNavItems.filter(item => !item.protected || walletConnected);
-   const { address, isConnected } = useAccount()
+
+  const {  isConnected } = useAccount()
+ 
+  
+ 
+
+ const navItems = allNavItems.filter((item) => {
+  if (item.path === "/" && isConnected) return false; // hide Home when connected
+  if (item.protected && !isConnected) return false;   // hide protected if not connected
+  return true; // otherwise keep it
+});
+ 
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/20 glass-card transition-colors duration-300">
@@ -69,7 +75,7 @@ export function Navigation() {
             <ThemeToggle />
             
             {/* Open App Button */}
-            <Button 
+            {/* <Button 
               variant="neon" 
               size="sm" 
               className="animate-pulse-slow transition-colors duration-300"
@@ -77,7 +83,9 @@ export function Navigation() {
             >
               <Wallet className="h-4 w-4" />
               {isConnected ? 'Dashboard' : 'Open App'}
-            </Button>
+            </Button> */}
+
+            <ConnectButton/>
           </div>
 
           {/* Mobile Theme Toggle */}
@@ -113,10 +121,7 @@ export function Navigation() {
         </div>
       </div>
       
-      <WalletConnectDialog 
-        open={showWalletDialog} 
-        onOpenChange={setShowWalletDialog} 
-      />
+     
     </nav>
   );
 }

@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navigation } from "@/components/layout/Navigation";
-import ProtectedRoute from "@/components/ProtectedRoute";
+
 import Home from "./pages/Home";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
@@ -14,6 +14,7 @@ import MatchConfirmation from "./pages/MatchConfirmation";
 import SessionCheckIn from "./pages/SessionCheckIn";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
