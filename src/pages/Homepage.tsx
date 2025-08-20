@@ -110,12 +110,6 @@ export default function Homepage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
-              <nav className="flex items-center space-x-6">
-                <Button variant="ghost" className="text-primary font-medium">Home</Button>
-                <Button variant="ghost" className="text-muted-foreground">Browse</Button>
-                <Button variant="ghost" className="text-muted-foreground">My Sessions</Button>
-                <Button variant="ghost" className="text-muted-foreground">Leaderboard</Button>
-              </nav>
             </div>
 
             <div className="flex-1 max-w-md mx-8">
@@ -358,7 +352,7 @@ export default function Homepage() {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-foreground transition-colors duration-300">PASS Tokens</span>
+                    <span className="text-foreground transition-colors duration-300">PASS Points</span>
                     <span className="text-muted-foreground transition-colors duration-300">420/500</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 transition-colors duration-300">

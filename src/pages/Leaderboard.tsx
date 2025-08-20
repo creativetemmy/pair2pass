@@ -118,7 +118,7 @@ const Leaderboard = () => {
                   Top Learners This Month
                 </CardTitle>
                 <CardDescription>
-                  Rankings based on PASS tokens earned, sessions completed, and study hours
+                  Rankings based on PASS Points earned, sessions completed, and study hours
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
