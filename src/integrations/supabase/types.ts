@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          academic_level: string | null
+          avatar_url: string | null
+          average_rating: number | null
+          bio: string | null
+          created_at: string
+          department: string | null
+          email: string | null
+          ens_name: string | null
+          hours_studied: number | null
+          id: string
+          institution: string | null
+          interests: string[] | null
+          level: number | null
+          name: string | null
+          partners_helped: number | null
+          reliability_score: number | null
+          sessions_completed: number | null
+          skills: string[] | null
+          updated_at: string
+          wallet_address: string
+          xp: number | null
+        }
+        Insert: {
+          academic_level?: string | null
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          ens_name?: string | null
+          hours_studied?: number | null
+          id?: string
+          institution?: string | null
+          interests?: string[] | null
+          level?: number | null
+          name?: string | null
+          partners_helped?: number | null
+          reliability_score?: number | null
+          sessions_completed?: number | null
+          skills?: string[] | null
+          updated_at?: string
+          wallet_address: string
+          xp?: number | null
+        }
+        Update: {
+          academic_level?: string | null
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          ens_name?: string | null
+          hours_studied?: number | null
+          id?: string
+          institution?: string | null
+          interests?: string[] | null
+          level?: number | null
+          name?: string | null
+          partners_helped?: number | null
+          reliability_score?: number | null
+          sessions_completed?: number | null
+          skills?: string[] | null
+          updated_at?: string
+          wallet_address?: string
+          xp?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
