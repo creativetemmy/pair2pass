@@ -1,10 +1,10 @@
 import React from "react";
-import { useWallet } from "../contexts/WalletContext";
+import { useAccount } from "wagmi";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const ProfilePage = () => {
-  const { wallet } = useWallet();
+  const { address } = useAccount();
 
   return (
     <ProtectedRoute>
@@ -29,7 +29,7 @@ const ProfilePage = () => {
                 </label>
                 <div className="p-3 bg-gray-100 rounded-lg">
                   <code className="text-sm font-mono break-all">
-                    {wallet.address}
+                    {address}
                   </code>
                 </div>
               </div>

@@ -1,9 +1,9 @@
 import React from "react";
-import { useWallet } from "../contexts/WalletContext";
+import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const LandingPage = () => {
-  const { wallet } = useWallet();
+  const { isConnected } = useAccount();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
@@ -28,7 +28,7 @@ const LandingPage = () => {
 
           <ConnectButton label="Open App" />
 
-          {wallet.connected && (
+          {isConnected && (
             <div className="mt-6 p-4 bg-green-100/20 border border-green-300/20 rounded-lg">
               <p className="text-green-300 text-center">
                 ✅ Wallet connected! You can now access all features.

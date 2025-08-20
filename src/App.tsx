@@ -13,6 +13,7 @@ import FindPartner from "./pages/FindPartner";
 import MatchConfirmation from "./pages/MatchConfirmation";
 import SessionCheckIn from "./pages/SessionCheckIn";
 import Profile from "./pages/Profile";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/find-partner" element={<ProtectedRoute><FindPartner /></ProtectedRoute>} />
               <Route path="/match-confirmation" element={<ProtectedRoute><MatchConfirmation /></ProtectedRoute>} />
               <Route path="/session-checkin" element={<ProtectedRoute><SessionCheckIn /></ProtectedRoute>} />
+              <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
