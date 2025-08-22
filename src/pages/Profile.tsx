@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,33 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
-import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen } from "lucide-react";
+import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2 } from "lucide-react";
 import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
-
-const userProfile = {
-  name: "Alex Thompson",
-  avatar: "AT",
-  email: "alex.thompson@university.edu",
-  ensName: "alex.eth",
-  walletAddress: "0x1234...5678",
-  level: 18,
-  xp: 4250,
-  joinDate: "September 2024",
-  department: "Computer Science",
-  institution: "Stanford University",
-  academicLevel: "Junior",
-  bio: "Passionate about algorithms and machine learning. Love collaborative learning and helping others succeed in tech.",
-  skills: ["Python", "JavaScript", "React", "Machine Learning", "Algorithms", "Data Structures"],
-  interests: ["AI/ML", "Web Development", "Competitive Programming", "Open Source"],
-  stats: {
-    sessionsCompleted: 127,
-    hoursStudied: 284,
-    partnersHelped: 45,
-    averageRating: 4.8,
-    reliabilityScore: 96,
-  },
-};
+import { useProfile, type Profile } from "@/hooks/useProfile";
 
 const achievements = [
   { type: "studious" as const, title: "Study Warrior", description: "100+ study sessions", earned: true },
@@ -43,28 +20,264 @@ const achievements = [
   { type: "streak" as const, title: "Study Streak", description: "30 days in a row", earned: true },
 ];
 
-export default function Profile() {
+const initialProfileData: Partial<Profile> = {
+  name: "",
+  email: "",
+  ens_name: "",
+  institution: "",
+  department: "",
+  academic_level: "100 Level",
+  bio: "",
+  skills: [],
+  interests: [],
+  level: 1,
+  xp: 0,
+  sessions_completed: 0,
+  hours_studied: 0,
+  partners_helped: 0,
+  average_rating: 0,
+  reliability_score: 0,
+};
 
-   const { address, isConnected } = useAccount()
+export default function Profile() {
+  const { address, isConnected } = useAccount();
+  const { profile, loading, saving, saveProfile } = useProfile(address);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
+  const [skillInput, setSkillInput] = useState("");
+  const [interestInput, setInterestInput] = useState("");
 
   if (!isConnected) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/" replace />;
   }
 
-  
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState(userProfile);
+  // Update editedProfile when profile loads
+  useEffect(() => {
+    if (profile) {
+      setEditedProfile(profile);
+    }
+  }, [profile]);
 
-  const handleSave = () => {
-    // Save profile changes
-    setIsEditing(false);
-    // In real app, would update via API
+  // Show setup form if no profile exists
+  const isFirstTimeSetup = !loading && !profile;
+
+  const handleSave = async () => {
+    const success = await saveProfile(editedProfile);
+    if (success) {
+      setIsEditing(false);
+    }
   };
 
   const handleCancel = () => {
-    setEditedProfile(userProfile);
+    if (profile) {
+      setEditedProfile(profile);
+    } else {
+      setEditedProfile(initialProfileData);
+    }
     setIsEditing(false);
   };
+
+  const addSkill = () => {
+    if (skillInput.trim() && !editedProfile.skills?.includes(skillInput.trim())) {
+      setEditedProfile(prev => ({
+        ...prev,
+        skills: [...(prev.skills || []), skillInput.trim()]
+      }));
+      setSkillInput("");
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setEditedProfile(prev => ({
+      ...prev,
+      skills: prev.skills?.filter(s => s !== skill) || []
+    }));
+  };
+
+  const addInterest = () => {
+    if (interestInput.trim() && !editedProfile.interests?.includes(interestInput.trim())) {
+      setEditedProfile(prev => ({
+        ...prev,
+        interests: [...(prev.interests || []), interestInput.trim()]
+      }));
+      setInterestInput("");
+    }
+  };
+
+  const removeInterest = (interest: string) => {
+    setEditedProfile(prev => ({
+      ...prev,
+      interests: prev.interests?.filter(i => i !== interest) || []
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  // First time setup form
+  if (isFirstTimeSetup || (isEditing && !profile)) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              {isFirstTimeSetup ? "Welcome! Let's set up your profile" : "Edit Profile"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  value={editedProfile.name || ""}
+                  onChange={(e) => setEditedProfile(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={editedProfile.email || ""}
+                  onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="your.email@university.edu"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="institution">Institution</Label>
+                <Input
+                  id="institution"
+                  value={editedProfile.institution || ""}
+                  onChange={(e) => setEditedProfile(prev => ({ ...prev, institution: e.target.value }))}
+                  placeholder="University name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  value={editedProfile.department || ""}
+                  onChange={(e) => setEditedProfile(prev => ({ ...prev, department: e.target.value }))}
+                  placeholder="Computer Science"
+                />
+              </div>
+              <div>
+                <Label htmlFor="level">Academic Level</Label>
+                <Select
+                  value={editedProfile.academic_level || "100 Level"}
+                  onValueChange={(value) => setEditedProfile(prev => ({ ...prev, academic_level: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="100 Level">100 Level</SelectItem>
+                    <SelectItem value="200 Level">200 Level</SelectItem>
+                    <SelectItem value="300 Level">300 Level</SelectItem>
+                    <SelectItem value="400 Level">400 Level</SelectItem>
+                    <SelectItem value="500 Level">500 Level</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={editedProfile.bio || ""}
+                onChange={(e) => setEditedProfile(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Tell us about yourself, your interests, and what you're studying..."
+                className="min-h-[100px]"
+              />
+            </div>
+
+            <div>
+              <Label>Skills</Label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  placeholder="Add a skill (e.g., Python, JavaScript)"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                />
+                <Button type="button" onClick={addSkill} variant="outline">
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {editedProfile.skills?.map((skill) => (
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => removeSkill(skill)}
+                  >
+                    {skill} ×
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Interests</Label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={interestInput}
+                  onChange={(e) => setInterestInput(e.target.value)}
+                  placeholder="Add an interest (e.g., AI/ML, Web Development)"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
+                />
+                <Button type="button" onClick={addInterest} variant="outline">
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {editedProfile.interests?.map((interest) => (
+                  <Badge
+                    key={interest}
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => removeInterest(interest)}
+                  >
+                    {interest} ×
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <Button 
+                onClick={handleSave} 
+                className="flex-1"
+                disabled={saving || !editedProfile.name?.trim()}
+              >
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                {isFirstTimeSetup ? "Create Profile" : "Save Changes"}
+              </Button>
+              {!isFirstTimeSetup && (
+                <Button onClick={handleCancel} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -76,7 +289,7 @@ export default function Profile() {
             <CardContent className="p-6 text-center">
               <div className="relative mb-4">
                 <div className="h-24 w-24 rounded-full gradient-primary flex items-center justify-center mx-auto text-primary-foreground font-bold text-3xl">
-                  {userProfile.avatar}
+                  {profile?.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
                 </div>
                 <Button
                   size="sm"
@@ -88,18 +301,18 @@ export default function Profile() {
               </div>
               
               <h1 className="text-2xl font-bold text-foreground mb-1">
-                {userProfile.name}
+                {profile?.name || "Anonymous User"}
               </h1>
-              <p className="text-muted-foreground mb-2">{userProfile.ensName}</p>
+              <p className="text-muted-foreground mb-2">{profile?.ens_name || "No ENS"}</p>
               <p className="text-xs text-muted-foreground mb-4 font-mono">
                 {address}
               </p>
               
-              <XPBadge xp={userProfile.xp} level={userProfile.level} className="justify-center" />
+              <XPBadge xp={profile?.xp || 0} level={profile?.level || 1} className="justify-center" />
               
               <div className="mt-4 pt-4 border-t border-border">
                 <div className="text-sm text-muted-foreground">
-                  Member since {userProfile.joinDate}
+                  Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
                 </div>
               </div>
             </CardContent>
@@ -116,7 +329,7 @@ export default function Profile() {
                   <Calendar className="h-4 w-4 text-primary" />
                   <span className="text-sm">Sessions</span>
                 </div>
-                <span className="font-semibold">{userProfile.stats.sessionsCompleted}</span>
+                <span className="font-semibold">{profile?.sessions_completed || 0}</span>
               </div>
               
               <div className="flex justify-between items-center">
@@ -124,7 +337,7 @@ export default function Profile() {
                   <BookOpen className="h-4 w-4 text-primary" />
                   <span className="text-sm">Hours Studied</span>
                 </div>
-                <span className="font-semibold">{userProfile.stats.hoursStudied}</span>
+                <span className="font-semibold">{profile?.hours_studied || 0}</span>
               </div>
               
               <div className="flex justify-between items-center">
@@ -132,7 +345,7 @@ export default function Profile() {
                   <Users className="h-4 w-4 text-primary" />
                   <span className="text-sm">Partners Helped</span>
                 </div>
-                <span className="font-semibold">{userProfile.stats.partnersHelped}</span>
+                <span className="font-semibold">{profile?.partners_helped || 0}</span>
               </div>
               
               <div className="flex justify-between items-center">
@@ -141,7 +354,7 @@ export default function Profile() {
                   <span className="text-sm">Avg Rating</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <span className="font-semibold">{userProfile.stats.averageRating}</span>
+                  <span className="font-semibold">{profile?.average_rating || 0}</span>
                   <span className="text-yellow-500">⭐</span>
                 </div>
               </div>
@@ -171,7 +384,7 @@ export default function Profile() {
                       <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
-                        value={editedProfile.name}
+                        value={editedProfile.name || ""}
                         onChange={(e) => setEditedProfile(prev => ({ ...prev, name: e.target.value }))}
                       />
                     </div>
@@ -180,7 +393,7 @@ export default function Profile() {
                       <Input
                         id="email"
                         type="email"
-                        value={editedProfile.email}
+                        value={editedProfile.email || ""}
                         onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
                       />
                     </div>
@@ -191,7 +404,7 @@ export default function Profile() {
                       <Label htmlFor="institution">Institution</Label>
                       <Input
                         id="institution"
-                        value={editedProfile.institution}
+                        value={editedProfile.institution || ""}
                         onChange={(e) => setEditedProfile(prev => ({ ...prev, institution: e.target.value }))}
                       />
                     </div>
@@ -199,15 +412,15 @@ export default function Profile() {
                       <Label htmlFor="department">Department</Label>
                       <Input
                         id="department"
-                        value={editedProfile.department}
+                        value={editedProfile.department || ""}
                         onChange={(e) => setEditedProfile(prev => ({ ...prev, department: e.target.value }))}
                       />
                     </div>
                     <div>
                       <Label htmlFor="level">Academic Level</Label>
                       <Select
-                        value={editedProfile.academicLevel}
-                        onValueChange={(value) => setEditedProfile(prev => ({ ...prev, academicLevel: value }))}
+                        value={editedProfile.academic_level || "100 Level"}
+                        onValueChange={(value) => setEditedProfile(prev => ({ ...prev, academic_level: value }))}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -227,14 +440,68 @@ export default function Profile() {
                     <Label htmlFor="bio">Bio</Label>
                     <Textarea
                       id="bio"
-                      value={editedProfile.bio}
+                      value={editedProfile.bio || ""}
                       onChange={(e) => setEditedProfile(prev => ({ ...prev, bio: e.target.value }))}
                       className="min-h-[100px]"
                     />
                   </div>
+
+                  <div>
+                    <Label>Skills</Label>
+                    <div className="flex gap-2 mb-2">
+                      <Input
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        placeholder="Add a skill"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                      />
+                      <Button type="button" onClick={addSkill} variant="outline">
+                        Add
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {editedProfile.skills?.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant="secondary"
+                          className="cursor-pointer"
+                          onClick={() => removeSkill(skill)}
+                        >
+                          {skill} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Interests</Label>
+                    <div className="flex gap-2 mb-2">
+                      <Input
+                        value={interestInput}
+                        onChange={(e) => setInterestInput(e.target.value)}
+                        placeholder="Add an interest"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
+                      />
+                      <Button type="button" onClick={addInterest} variant="outline">
+                        Add
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {editedProfile.interests?.map((interest) => (
+                        <Badge
+                          key={interest}
+                          variant="outline"
+                          className="cursor-pointer"
+                          onClick={() => removeInterest(interest)}
+                        >
+                          {interest} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                   
-                  <Button onClick={handleSave} className="w-full">
-                    <Save className="h-4 w-4 mr-2" />
+                  <Button onClick={handleSave} className="w-full" disabled={saving}>
+                    {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                     Save Changes
                   </Button>
                 </div>
@@ -244,45 +511,53 @@ export default function Profile() {
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Contact</h3>
                       <div className="space-y-2 text-sm">
-                        <p><span className="text-muted-foreground">Email:</span> {userProfile.email}</p>
-                        <p><span className="text-muted-foreground">ENS:</span> {userProfile.ensName}</p>
+                        <p><span className="text-muted-foreground">Email:</span> {profile?.email || "Not provided"}</p>
+                        <p><span className="text-muted-foreground">ENS:</span> {profile?.ens_name || "Not set"}</p>
                       </div>
                     </div>
                     
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Academic Info</h3>
                       <div className="space-y-2 text-sm">
-                        <p><span className="text-muted-foreground">Institution:</span> {userProfile.institution}</p>
-                        <p><span className="text-muted-foreground">Department:</span> {userProfile.department}</p>
-                        <p><span className="text-muted-foreground">Level:</span> {userProfile.academicLevel}</p>
+                        <p><span className="text-muted-foreground">Institution:</span> {profile?.institution || "Not provided"}</p>
+                        <p><span className="text-muted-foreground">Department:</span> {profile?.department || "Not provided"}</p>
+                        <p><span className="text-muted-foreground">Level:</span> {profile?.academic_level || "Not set"}</p>
                       </div>
                     </div>
                   </div>
                   
                   <div>
                     <h3 className="font-semibold text-foreground mb-2">About</h3>
-                    <p className="text-muted-foreground text-sm">{userProfile.bio}</p>
+                    <p className="text-muted-foreground text-sm">{profile?.bio || "No bio provided yet."}</p>
                   </div>
                   
                   <div>
                     <h3 className="font-semibold text-foreground mb-3">Skills</h3>
                     <div className="flex flex-wrap gap-2">
-                      {userProfile.skills.map((skill) => (
-                        <Badge key={skill} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
+                      {profile?.skills?.length ? (
+                        profile.skills.map((skill) => (
+                          <Badge key={skill} variant="secondary">
+                            {skill}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No skills added yet</p>
+                      )}
                     </div>
                   </div>
                   
                   <div>
                     <h3 className="font-semibold text-foreground mb-3">Interests</h3>
                     <div className="flex flex-wrap gap-2">
-                      {userProfile.interests.map((interest) => (
-                        <Badge key={interest} variant="outline">
-                          {interest}
-                        </Badge>
-                      ))}
+                      {profile?.interests?.length ? (
+                        profile.interests.map((interest) => (
+                          <Badge key={interest} variant="outline">
+                            {interest}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No interests added yet</p>
+                      )}
                     </div>
                   </div>
                 </div>
