@@ -63,7 +63,11 @@ export function useProfile(walletAddress?: string) {
   };
 
   const createProfile = async (profileData: Partial<Profile>) => {
-    if (!walletAddress) return null;
+    console.log('createProfile called:', { walletAddress, profileData });
+    if (!walletAddress) {
+      console.log('No wallet address provided');
+      return null;
+    }
 
     try {
       setSaving(true);
@@ -77,6 +81,8 @@ export function useProfile(walletAddress?: string) {
         })
         .select()
         .single();
+      
+      console.log('createProfile result:', { data, error });
 
       if (error) {
         console.error('Error creating profile:', error);
@@ -108,7 +114,11 @@ export function useProfile(walletAddress?: string) {
   };
 
   const updateProfile = async (profileData: Partial<Profile>) => {
-    if (!walletAddress || !profile) return null;
+    console.log('updateProfile called:', { walletAddress, profile, profileData });
+    if (!walletAddress || !profile) {
+      console.log('Missing wallet address or profile:', { walletAddress, profile });
+      return null;
+    }
 
     try {
       setSaving(true);
@@ -118,6 +128,8 @@ export function useProfile(walletAddress?: string) {
         .eq('wallet_address', walletAddress.toLowerCase())
         .select()
         .single();
+      
+      console.log('updateProfile result:', { data, error });
 
       if (error) {
         console.error('Error updating profile:', error);
@@ -149,6 +161,7 @@ export function useProfile(walletAddress?: string) {
   };
 
   const saveProfile = async (profileData: Partial<Profile>) => {
+    console.log('saveProfile called with:', { profileData, walletAddress, profile });
     if (profile) {
       return await updateProfile(profileData);
     } else {
