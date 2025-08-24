@@ -327,12 +327,12 @@ export default function Profile() {
             </div>
 
             <div>
-              <Label>Interests</Label>
+              <Label>Subjects of Interest</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={interestInput}
                   onChange={(e) => setInterestInput(e.target.value)}
-                  placeholder="Add an interest (e.g., AI/ML, Web Development)"
+                  placeholder="Add a subject of interest (e.g., AI/ML, Web Development)"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
                 />
                 <Button type="button" onClick={addInterest} variant="outline">
@@ -343,8 +343,8 @@ export default function Profile() {
                 {editedProfile.interests?.map((interest) => (
                   <Badge
                     key={interest}
-                    variant="outline"
-                    className="cursor-pointer"
+                    variant="default"
+                    className="cursor-pointer bg-primary/10 text-primary hover:bg-primary/20"
                     onClick={() => removeInterest(interest)}
                   >
                     {interest} ×
@@ -559,59 +559,59 @@ export default function Profile() {
                     />
                   </div>
 
-                  <div>
-                    <Label>Skills</Label>
-                    <div className="flex gap-2 mb-2">
-                      <Input
-                        value={skillInput}
-                        onChange={(e) => setSkillInput(e.target.value)}
-                        placeholder="Add a skill"
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                      />
-                      <Button type="button" onClick={addSkill} variant="outline">
-                        Add
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {editedProfile.skills?.map((skill) => (
-                        <Badge
-                          key={skill}
-                          variant="secondary"
-                          className="cursor-pointer"
-                          onClick={() => removeSkill(skill)}
-                        >
-                          {skill} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+            <div>
+              <Label>Subjects of Interest</Label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={interestInput}
+                  onChange={(e) => setInterestInput(e.target.value)}
+                  placeholder="Add a subject of interest"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
+                />
+                <Button type="button" onClick={addInterest} variant="outline">
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {editedProfile.interests?.map((interest) => (
+                  <Badge
+                    key={interest}
+                    variant="default"
+                    className="cursor-pointer bg-primary/10 text-primary hover:bg-primary/20"
+                    onClick={() => removeInterest(interest)}
+                  >
+                    {interest} ×
+                  </Badge>
+                ))}
+              </div>
+            </div>
 
-                  <div>
-                    <Label>Interests</Label>
-                    <div className="flex gap-2 mb-2">
-                      <Input
-                        value={interestInput}
-                        onChange={(e) => setInterestInput(e.target.value)}
-                        placeholder="Add an interest"
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
-                      />
-                      <Button type="button" onClick={addInterest} variant="outline">
-                        Add
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {editedProfile.interests?.map((interest) => (
-                        <Badge
-                          key={interest}
-                          variant="outline"
-                          className="cursor-pointer"
-                          onClick={() => removeInterest(interest)}
-                        >
-                          {interest} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+            <div>
+              <Label>Skills</Label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  placeholder="Add a skill"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                />
+                <Button type="button" onClick={addSkill} variant="outline">
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {editedProfile.skills?.map((skill) => (
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => removeSkill(skill)}
+                  >
+                    {skill} ×
+                  </Badge>
+                ))}
+              </div>
+            </div>
                   
                   <Button onClick={handleSave} className="w-full" disabled={saving}>
                     {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
@@ -644,35 +644,35 @@ export default function Profile() {
                     <p className="text-muted-foreground text-sm">{profile?.bio || "No bio provided yet."}</p>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-3">Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile?.skills?.length ? (
-                        profile.skills.map((skill) => (
-                          <Badge key={skill} variant="secondary">
-                            {skill}
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-muted-foreground text-sm">No skills added yet</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-3">Interests</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile?.interests?.length ? (
-                        profile.interests.map((interest) => (
-                          <Badge key={interest} variant="outline">
-                            {interest}
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-muted-foreground text-sm">No interests added yet</p>
-                      )}
-                    </div>
-                  </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Subjects of Interest</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile?.interests?.length ? (
+                  profile.interests.map((interest) => (
+                    <Badge key={interest} variant="default" className="bg-primary/10 text-primary">
+                      {interest}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-sm">No subjects of interest added yet</p>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile?.skills?.length ? (
+                  profile.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-sm">No skills added yet</p>
+                )}
+              </div>
+            </div>
                 </div>
               )}
             </CardContent>
