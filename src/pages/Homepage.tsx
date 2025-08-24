@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfileCheckModal } from "@/components/ProfileCheckModal";
+import { useProfile } from "@/hooks/useProfile";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 
 // Mock data
 const mockCategories = [
@@ -77,6 +80,9 @@ export default function Homepage() {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState("Programming");
+  const { profile } = useProfile(address);
+  const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     if (!isConnected) {
@@ -101,6 +107,15 @@ export default function Homepage() {
       minute: '2-digit',
       hour12: true 
     });
+  };
+
+  const handleJoinSession = () => {
+    if (!isComplete) {
+      setShowProfileModal(true);
+    } else {
+      // Handle joining session logic here
+      console.log("Joining session...");
+    }
   };
 
   return (
@@ -197,7 +212,7 @@ export default function Homepage() {
             <section>
               <h2 className="text-2xl font-bold text-foreground mb-6 transition-colors duration-300">Quick Actions</h2>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
+                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800" onClick={handleJoinSession}>
                   <CardContent className="p-6 text-center">
                     <Play className="h-8 w-8 text-blue-600 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
                     <h3 className="font-semibold text-blue-900 dark:text-blue-100">Join Session</h3>
@@ -389,6 +404,14 @@ export default function Homepage() {
           </div>
         </div>
       </div>
+      
+      {/* Profile Check Modal */}
+      <ProfileCheckModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        profileItems={items}
+        completionPercentage={completionPercentage}
+      />
     </div>
   );
 }
