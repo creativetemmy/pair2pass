@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge } from "@/components/gamification/Badge";
+import { ProfileCheckModal } from "@/components/ProfileCheckModal";
+import { useProfile } from "@/hooks/useProfile";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
+import { useAccount } from "wagmi";
 import { Calendar, Clock, Users, BookOpen, TrendingUp } from "lucide-react";
 
 const upcomingSessions = [
@@ -50,6 +55,20 @@ const badges = [
 ];
 
 export default function Dashboard() {
+  const { address } = useAccount();
+  const { profile } = useProfile(address);
+  const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  const handleJoinSession = () => {
+    if (!isComplete) {
+      setShowProfileModal(true);
+    } else {
+      // Handle joining session logic here
+      console.log("Joining session...");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 transition-colors duration-300">
       {/* Header */}
@@ -147,7 +166,13 @@ export default function Dashboard() {
                       <p>{session.time}</p>
                       <p>Duration: {session.duration}</p>
                     </div>
-                    <Button size="sm" variant="outline">Join Session</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={handleJoinSession}
+                    >
+                      Join Session
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -216,6 +241,14 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Profile Check Modal */}
+      <ProfileCheckModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        profileItems={items}
+        completionPercentage={completionPercentage}
+      />
     </div>
   );
 }
