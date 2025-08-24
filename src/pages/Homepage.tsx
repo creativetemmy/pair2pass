@@ -83,6 +83,7 @@ export default function Homepage() {
   const { profile } = useProfile(address);
   const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showProfileCheck, setShowProfileCheck] = useState(false);
 
   useEffect(() => {
     if (!isConnected) {
@@ -111,7 +112,7 @@ export default function Homepage() {
 
   const handleJoinSession = () => {
     if (!isComplete) {
-      setShowProfileModal(true);
+      setShowProfileCheck(true);
     } else {
       // Handle joining session logic here
       console.log("Joining session...");
@@ -418,10 +419,11 @@ export default function Homepage() {
       
       {/* Profile Check Modal */}
       <ProfileCheckModal
-        open={showProfileModal}
-        onOpenChange={setShowProfileModal}
+        open={showProfileCheck}
+        onOpenChange={setShowProfileCheck}
         profileItems={items}
         completionPercentage={completionPercentage}
+        profile={profile}
       />
     </div>
   );

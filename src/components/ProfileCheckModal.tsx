@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Check, X, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NewStudySessionModal } from "./NewStudySessionModal";
+import { Profile } from "@/hooks/useProfile";
 
 interface ProfileCheckItem {
   label: string;
@@ -17,16 +19,19 @@ interface ProfileCheckModalProps {
   onOpenChange: (open: boolean) => void;
   profileItems: ProfileCheckItem[];
   completionPercentage: number;
+  profile?: Profile | null;
 }
 
 export function ProfileCheckModal({ 
   open, 
   onOpenChange, 
   profileItems, 
-  completionPercentage 
+  completionPercentage,
+  profile 
 }: ProfileCheckModalProps) {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showNewSessionModal, setShowNewSessionModal] = useState(false);
 
   const handleGoToProfile = async () => {
     setIsNavigating(true);
@@ -36,6 +41,19 @@ export function ProfileCheckModal({
 
   const handleRemindLater = () => {
     onOpenChange(false);
+  };
+
+  const handleJoinSession = () => {
+    if (completionPercentage === 100) {
+      onOpenChange(false);
+      setShowNewSessionModal(true);
+    }
+  };
+
+  const handleStartSession = (sessionData: any) => {
+    console.log("Starting session with data:", sessionData);
+    // Here you would typically navigate to the session or matching flow
+    navigate("/session");
   };
 
   return (
@@ -122,13 +140,22 @@ export function ProfileCheckModal({
 
           {/* Action Buttons */}
           <div className="flex flex-col space-y-3">
-            <Button 
-              onClick={handleGoToProfile}
-              disabled={isNavigating}
-              className="w-full gradient-primary hover:opacity-90 shadow-primary transition-all duration-300 hover:scale-105 hover:shadow-glow"
-            >
-              {isNavigating ? "Loading..." : "Go to Profile"}
-            </Button>
+            {completionPercentage === 100 ? (
+              <Button 
+                onClick={handleJoinSession}
+                className="w-full gradient-primary hover:opacity-90 shadow-primary transition-all duration-300 hover:scale-105 hover:shadow-glow"
+              >
+                Join Session
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleGoToProfile}
+                disabled={isNavigating}
+                className="w-full gradient-primary hover:opacity-90 shadow-primary transition-all duration-300 hover:scale-105 hover:shadow-glow"
+              >
+                {isNavigating ? "Loading..." : "Go to Profile"}
+              </Button>
+            )}
             
             <Button 
               onClick={handleRemindLater}
@@ -140,6 +167,13 @@ export function ProfileCheckModal({
           </div>
         </div>
       </DialogContent>
+
+      <NewStudySessionModal 
+        open={showNewSessionModal}
+        onOpenChange={setShowNewSessionModal}
+        profile={profile}
+        onStartSession={handleStartSession}
+      />
     </Dialog>
   );
 }
