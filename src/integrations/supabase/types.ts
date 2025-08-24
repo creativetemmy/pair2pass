@@ -34,6 +34,7 @@ export type Database = {
           reliability_score: number | null
           sessions_completed: number | null
           skills: string[] | null
+          study_goals: string[]
           updated_at: string
           wallet_address: string
           xp: number | null
@@ -57,6 +58,7 @@ export type Database = {
           reliability_score?: number | null
           sessions_completed?: number | null
           skills?: string[] | null
+          study_goals?: string[]
           updated_at?: string
           wallet_address: string
           xp?: number | null
@@ -80,6 +82,7 @@ export type Database = {
           reliability_score?: number | null
           sessions_completed?: number | null
           skills?: string[] | null
+          study_goals?: string[]
           updated_at?: string
           wallet_address?: string
           xp?: number | null
