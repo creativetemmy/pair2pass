@@ -10,17 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
 
-const courses = [
-  "Computer Science 101",
-  "Calculus II",
-  "Physics Lab",
-  "Chemistry",
-  "English Literature",
-  "Statistics",
-  "Biology",
-  "Economics",
-];
-
 const timeSlots = [
   "Morning (8:00 AM - 12:00 PM)",
   "Afternoon (12:00 PM - 5:00 PM)", 
@@ -53,6 +42,11 @@ export default function FindPartner() {
   const [skillLevel, setSkillLevel] = useState("");
   const [location, setLocation] = useState("");
   const [sortBy, setSortBy] = useState("rating");
+  
+  // Real data from database
+  const [availableInterests, setAvailableInterests] = useState<string[]>([]);
+  const [availableAcademicLevels, setAvailableAcademicLevels] = useState<string[]>([]);
+  const [availableInstitutions, setAvailableInstitutions] = useState<string[]>([]);
 
   const handleTimeToggle = (time: string) => {
     setSelectedTimes(prev => 
@@ -74,13 +68,15 @@ export default function FindPartner() {
 
       // Apply filters
       if (skillLevel) {
-        // Filter by academic level if it matches skill level
         query = query.eq('academic_level', skillLevel);
       }
 
       if (selectedCourse) {
-        // Filter by interests containing the course
         query = query.contains('interests', [selectedCourse]);
+      }
+
+      if (location && location !== "any") {
+        query = query.eq('institution', location);
       }
 
       // Apply sorting
@@ -117,7 +113,47 @@ export default function FindPartner() {
     }
   };
 
+  const fetchFilterOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('interests, academic_level, institution')
+        .not('name', 'is', null); // Only get data from profiles with names
+
+      if (error) {
+        console.error('Error fetching filter options:', error);
+        return;
+      }
+
+      // Extract unique interests
+      const uniqueInterests = new Set<string>();
+      const uniqueAcademicLevels = new Set<string>();
+      const uniqueInstitutions = new Set<string>();
+
+      data?.forEach(profile => {
+        if (profile.interests) {
+          profile.interests.forEach((interest: string) => {
+            if (interest) uniqueInterests.add(interest);
+          });
+        }
+        if (profile.academic_level) {
+          uniqueAcademicLevels.add(profile.academic_level);
+        }
+        if (profile.institution) {
+          uniqueInstitutions.add(profile.institution);
+        }
+      });
+
+      setAvailableInterests(Array.from(uniqueInterests).sort());
+      setAvailableAcademicLevels(Array.from(uniqueAcademicLevels).sort());
+      setAvailableInstitutions(Array.from(uniqueInstitutions).sort());
+    } catch (error) {
+      console.error('Error fetching filter options:', error);
+    }
+  };
+
   useEffect(() => {
+    fetchFilterOptions();
     fetchProfiles();
   }, [address, sortBy]);
 
@@ -147,35 +183,54 @@ export default function FindPartner() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Course Selection */}
+            {/* Course/Interest Selection */}
             <div>
-              <Label htmlFor="course">Course</Label>
+              <Label htmlFor="course">Course/Interest</Label>
               <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select course" />
+                  <SelectValue placeholder="Select course or interest" />
                 </SelectTrigger>
                 <SelectContent>
-                  {courses.map((course) => (
-                    <SelectItem key={course} value={course}>
-                      {course}
+                  {availableInterests.map((interest) => (
+                    <SelectItem key={interest} value={interest}>
+                      {interest}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Skill Level */}
+            {/* Academic Level */}
             <div>
-              <Label htmlFor="skill-level">Skill Level</Label>
+              <Label htmlFor="skill-level">Academic Level</Label>
               <Select value={skillLevel} onValueChange={setSkillLevel}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select skill level" />
+                  <SelectValue placeholder="Select academic level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                  <SelectItem value="expert">Expert</SelectItem>
+                  {availableAcademicLevels.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Institution */}
+            <div>
+              <Label htmlFor="institution">Institution</Label>
+              <Select value={location} onValueChange={setLocation}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select institution" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any Institution</SelectItem>
+                  {availableInstitutions.map((institution) => (
+                    <SelectItem key={institution} value={institution}>
+                      {institution}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -197,21 +252,6 @@ export default function FindPartner() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Location */}
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Select value={location} onValueChange={setLocation}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="on-campus">On-campus</SelectItem>
-                  <SelectItem value="remote">Remote</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <Button variant="gradient" className="w-full" onClick={handleSearch}>
