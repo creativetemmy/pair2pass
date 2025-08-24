@@ -14,6 +14,7 @@ import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useEnsName } from "wagmi";
 
 const achievements = [
   { type: "studious" as const, title: "Study Warrior", description: "100+ study sessions", earned: true },
@@ -43,12 +44,14 @@ const initialProfileData: Partial<Profile> = {
 
 export default function Profile() {
   const { address, isConnected } = useAccount();
+  const { data: ensName } = useEnsName({ address });
   const { profile, loading, saving, saveProfile } = useProfile(address);
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
   const [skillInput, setSkillInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -60,8 +63,18 @@ export default function Profile() {
   useEffect(() => {
     if (profile) {
       setEditedProfile(profile);
+      setAvatarUrl(profile.avatar_url || "");
     }
   }, [profile]);
+
+  // Auto-update ENS name when it changes
+  useEffect(() => {
+    if (ensName && profile && profile.ens_name !== ensName) {
+      const updatedProfile = { ...editedProfile, ens_name: ensName };
+      setEditedProfile(updatedProfile);
+      saveProfile(updatedProfile);
+    }
+  }, [ensName, profile]);
 
   // Show setup form if no profile exists
   const isFirstTimeSetup = !loading && !profile;
@@ -137,9 +150,11 @@ export default function Profile() {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      const avatarUrl = data.publicUrl;
+      // Add cache buster to ensure image refreshes
+      const avatarUrl = `${data.publicUrl}?v=${Date.now()}`;
       
-      // Update the profile with the new avatar URL
+      // Update both local state and profile
+      setAvatarUrl(avatarUrl);
       const updatedProfile = { ...editedProfile, avatar_url: avatarUrl };
       setEditedProfile(updatedProfile);
       
@@ -368,11 +383,12 @@ export default function Profile() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="relative mb-4">
-                {profile?.avatar_url ? (
+                {avatarUrl || profile?.avatar_url ? (
                   <img
-                    src={profile.avatar_url}
+                    src={avatarUrl || profile?.avatar_url}
                     alt="Profile avatar"
                     className="h-24 w-24 rounded-full object-cover mx-auto"
+                    key={avatarUrl || profile?.avatar_url} // Force re-render on URL change
                   />
                 ) : (
                   <div className="h-24 w-24 rounded-full gradient-primary flex items-center justify-center mx-auto text-primary-foreground font-bold text-3xl">
@@ -400,7 +416,7 @@ export default function Profile() {
               <h1 className="text-2xl font-bold text-foreground mb-1">
                 {profile?.name || "Anonymous User"}
               </h1>
-              <p className="text-muted-foreground mb-2">{profile?.ens_name || "No ENS"}</p>
+              <p className="text-muted-foreground mb-2">{profile?.ens_name || ensName || "No ENS"}</p>
               <p className="text-xs text-muted-foreground mb-4 font-mono">
                 {address}
               </p>
@@ -609,7 +625,7 @@ export default function Profile() {
                       <h3 className="font-semibold text-foreground mb-2">Contact</h3>
                       <div className="space-y-2 text-sm">
                         <p><span className="text-muted-foreground">Email:</span> {profile?.email || "Not provided"}</p>
-                        <p><span className="text-muted-foreground">ENS:</span> {profile?.ens_name || "Not set"}</p>
+                        <p><span className="text-muted-foreground">ENS:</span> {profile?.ens_name || ensName || "Not set"}</p>
                       </div>
                     </div>
                     
