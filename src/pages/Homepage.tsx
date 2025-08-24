@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, Clock, Play, Users, BookOpen, Trophy, Star, TrendingUp } from "lucide-react";
+import { Bell, Search, Clock, Play, Users, BookOpen, Trophy, Star, TrendingUp, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -212,9 +212,14 @@ export default function Homepage() {
             <section>
               <h2 className="text-2xl font-bold text-foreground mb-6 transition-colors duration-300">Quick Actions</h2>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800" onClick={handleJoinSession}>
+                <Card 
+                  className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800"
+                  onClick={handleJoinSession}
+                >
                   <CardContent className="p-6 text-center">
-                    <Play className="h-8 w-8 text-blue-600 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="h-12 w-12 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <Users className="h-6 w-6 text-blue-600" />
+                    </div>
                     <h3 className="font-semibold text-blue-900 dark:text-blue-100">Join Session</h3>
                     <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">Start learning now</p>
                   </CardContent>
@@ -222,25 +227,31 @@ export default function Homepage() {
                 
                 <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
                   <CardContent className="p-6 text-center">
-                    <Users className="h-8 w-8 text-green-600 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <h3 className="font-semibold text-green-900 dark:text-green-100">Create Group</h3>
-                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">Form study teams</p>
+                    <div className="h-12 w-12 rounded-lg bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <BookOpen className="h-6 w-6 text-green-600" />
+                    </div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100">Find Partner</h3>
+                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">Connect & study</p>
                   </CardContent>
                 </Card>
                 
                 <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
                   <CardContent className="p-6 text-center">
-                    <BookOpen className="h-8 w-8 text-purple-600 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">Study Plans</h3>
-                    <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">Organize learning</p>
+                    <div className="h-12 w-12 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <Calendar className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">Schedule</h3>
+                    <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">Book sessions</p>
                   </CardContent>
                 </Card>
                 
                 <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800">
                   <CardContent className="p-6 text-center">
-                    <Trophy className="h-8 w-8 text-orange-600 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <h3 className="font-semibold text-orange-900 dark:text-orange-100">Challenges</h3>
-                    <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">Compete & earn</p>
+                    <div className="h-12 w-12 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <TrendingUp className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <h3 className="font-semibold text-orange-900 dark:text-orange-100">Progress</h3>
+                    <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">View stats</p>
                   </CardContent>
                 </Card>
               </div>
