@@ -10,8 +10,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfileCheckModal } from "@/components/ProfileCheckModal";
 import { NewStudySessionModal } from "@/components/NewStudySessionModal";
 import { MatchmakingResults } from "@/components/MatchmakingResults";
+import { StudySessionLobby } from "@/components/StudySessionLobby";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
+import { toast } from "sonner";
 
 // Mock data
 const mockCategories = [
@@ -88,7 +90,11 @@ export default function Homepage() {
   const [showProfileCheck, setShowProfileCheck] = useState(false);
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
   const [showMatchmakingResults, setShowMatchmakingResults] = useState(false);
+  const [showLobby, setShowLobby] = useState(false);
   const [sessionData, setSessionData] = useState<any>(null);
+  const [currentPartner, setCurrentPartner] = useState<any>(null);
+  const [userReady, setUserReady] = useState(false);
+  const [partnerReady, setPartnerReady] = useState(false);
 
   useEffect(() => {
     if (!isConnected) {
@@ -132,7 +138,45 @@ export default function Homepage() {
 
   const handleInvitePartner = (partner: any) => {
     console.log("Inviting partner:", partner);
-    // Here you would typically send invitation and navigate to session
+    toast.success("Invitation sent! Waiting for response...");
+    
+    // Simulate partner acceptance after 2 seconds
+    setTimeout(() => {
+      const partnerData = {
+        id: partner.id,
+        name: partner.name,
+        avatar: partner.avatar_url,
+        level: partner.level,
+        xp: partner.xp,
+        isReady: false,
+        isOnline: true,
+      };
+      
+      setCurrentPartner(partnerData);
+      setShowMatchmakingResults(false);
+      setShowLobby(true);
+      toast.success("Partner accepted! Entering lobby...");
+    }, 2000);
+  };
+
+  const handleUserReady = () => {
+    setUserReady(true);
+    toast.success("You're ready! Waiting for your partner...");
+    
+    // Simulate partner getting ready after 1-3 seconds
+    setTimeout(() => {
+      setPartnerReady(true);
+    }, Math.random() * 2000 + 1000);
+  };
+
+  const handleStartSession = () => {
+    console.log("Starting study session!");
+    setShowLobby(false);
+    setUserReady(false);
+    setPartnerReady(false);
+    setCurrentPartner(null);
+    toast.success("Study session started! Good luck!");
+    // Navigate to actual session page
     navigate("/session");
   };
 
@@ -470,6 +514,25 @@ export default function Homepage() {
         onInvitePartner={handleInvitePartner}
         onBack={handleBackToSetup}
       />
+
+      {/* Study Session Lobby */}
+      {currentPartner && sessionData && (
+        <StudySessionLobby
+          open={showLobby}
+          onClose={() => setShowLobby(false)}
+          sessionData={sessionData}
+          partner={{ ...currentPartner, isReady: partnerReady }}
+          currentUser={{
+            id: "current_user",
+            name: "You",
+            level: 5,
+            xp: 1247,
+            isReady: userReady,
+          }}
+          onReady={handleUserReady}
+          onStartSession={handleStartSession}
+        />
+      )}
     </div>
   );
 }
