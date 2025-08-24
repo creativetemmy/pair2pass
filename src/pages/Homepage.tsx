@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfileCheckModal } from "@/components/ProfileCheckModal";
+import { NewStudySessionModal } from "@/components/NewStudySessionModal";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 
@@ -84,6 +85,7 @@ export default function Homepage() {
   const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileCheck, setShowProfileCheck] = useState(false);
+  const [showNewSessionModal, setShowNewSessionModal] = useState(false);
 
   useEffect(() => {
     if (!isConnected) {
@@ -114,9 +116,14 @@ export default function Homepage() {
     if (!isComplete) {
       setShowProfileCheck(true);
     } else {
-      // Handle joining session logic here
-      console.log("Joining session...");
+      setShowNewSessionModal(true);
     }
+  };
+
+  const handleStartSession = (sessionData: any) => {
+    console.log("Starting session with data:", sessionData);
+    // Here you would typically navigate to the session or matching flow
+    navigate("/session");
   };
 
   return (
@@ -424,6 +431,14 @@ export default function Homepage() {
         profileItems={items}
         completionPercentage={completionPercentage}
         profile={profile}
+      />
+
+      {/* New Study Session Modal */}
+      <NewStudySessionModal 
+        open={showNewSessionModal}
+        onOpenChange={setShowNewSessionModal}
+        profile={profile}
+        onStartSession={handleStartSession}
       />
     </div>
   );
