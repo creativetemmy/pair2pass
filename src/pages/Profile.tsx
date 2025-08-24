@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
-import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2 } from "lucide-react";
+import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target } from "lucide-react";
 import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
@@ -33,6 +34,7 @@ const initialProfileData: Partial<Profile> = {
   bio: "",
   skills: [],
   interests: [],
+  study_goals: [],
   level: 1,
   xp: 0,
   sessions_completed: 0,
@@ -327,6 +329,35 @@ export default function Profile() {
             </div>
 
             <div>
+              <Label className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Select Your Study Goals
+              </Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                These goals help us match you with the right study partners. You can update anytime.
+              </p>
+              <ToggleGroup 
+                type="multiple" 
+                value={editedProfile.study_goals || []}
+                onValueChange={(value) => setEditedProfile(prev => ({ ...prev, study_goals: value }))}
+                className="justify-start flex-wrap gap-2"
+              >
+                <ToggleGroupItem value="Exam Prep" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  Exam Prep
+                </ToggleGroupItem>
+                <ToggleGroupItem value="Assignment Help" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  Assignment Help
+                </ToggleGroupItem>
+                <ToggleGroupItem value="Concept Mastery" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  Concept Mastery
+                </ToggleGroupItem>
+                <ToggleGroupItem value="Group Project" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  Group Project
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            <div>
               <Label>Subjects of Interest</Label>
               <div className="flex gap-2 mb-2">
                 <Input
@@ -548,16 +579,45 @@ export default function Profile() {
                       </Select>
                     </div>
                   </div>
-                  
-                  <div>
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={editedProfile.bio || ""}
-                      onChange={(e) => setEditedProfile(prev => ({ ...prev, bio: e.target.value }))}
-                      className="min-h-[100px]"
-                    />
-                  </div>
+                   
+                   <div>
+                     <Label htmlFor="bio">Bio</Label>
+                     <Textarea
+                       id="bio"
+                       value={editedProfile.bio || ""}
+                       onChange={(e) => setEditedProfile(prev => ({ ...prev, bio: e.target.value }))}
+                       className="min-h-[100px]"
+                     />
+                   </div>
+
+                   <div>
+                     <Label className="flex items-center gap-2">
+                       <Target className="h-4 w-4" />
+                       Select Your Study Goals
+                     </Label>
+                     <p className="text-sm text-muted-foreground mb-3">
+                       These goals help us match you with the right study partners. You can update anytime.
+                     </p>
+                     <ToggleGroup 
+                       type="multiple" 
+                       value={editedProfile.study_goals || []}
+                       onValueChange={(value) => setEditedProfile(prev => ({ ...prev, study_goals: value }))}
+                       className="justify-start flex-wrap gap-2"
+                     >
+                       <ToggleGroupItem value="Exam Prep" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                         Exam Prep
+                       </ToggleGroupItem>
+                       <ToggleGroupItem value="Assignment Help" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                         Assignment Help
+                       </ToggleGroupItem>
+                       <ToggleGroupItem value="Concept Mastery" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                         Concept Mastery
+                       </ToggleGroupItem>
+                       <ToggleGroupItem value="Group Project" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                         Group Project
+                       </ToggleGroupItem>
+                     </ToggleGroup>
+                   </div>
 
             <div>
               <Label>Subjects of Interest</Label>
@@ -639,11 +699,29 @@ export default function Profile() {
                     </div>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-2">About</h3>
-                    <p className="text-muted-foreground text-sm">{profile?.bio || "No bio provided yet."}</p>
-                  </div>
-                  
+                   <div>
+                     <h3 className="font-semibold text-foreground mb-2">About</h3>
+                     <p className="text-muted-foreground text-sm">{profile?.bio || "No bio provided yet."}</p>
+                   </div>
+
+                   <div>
+                     <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                       <Target className="h-4 w-4" />
+                       Study Goals
+                     </h3>
+                     <div className="flex flex-wrap gap-2">
+                       {profile?.study_goals?.length ? (
+                         profile.study_goals.map((goal) => (
+                           <Badge key={goal} variant="outline" className="border-primary text-primary">
+                             {goal}
+                           </Badge>
+                         ))
+                       ) : (
+                         <p className="text-muted-foreground text-sm">No study goals selected yet</p>
+                       )}
+                     </div>
+                   </div>
+                   
             <div>
               <h3 className="font-semibold text-foreground mb-3">Subjects of Interest</h3>
               <div className="flex flex-wrap gap-2">

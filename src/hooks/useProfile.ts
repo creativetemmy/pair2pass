@@ -14,6 +14,7 @@ export interface Profile {
   bio?: string;
   skills: string[];
   interests: string[];
+  study_goals: string[];
   avatar_url?: string;
   level: number;
   xp: number;
@@ -54,7 +55,10 @@ export function useProfile(walletAddress?: string) {
         return;
       }
 
-      setProfile(data);
+      setProfile(data ? {
+        ...data,
+        study_goals: (data as any)?.study_goals || []
+      } : null);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -78,6 +82,7 @@ export function useProfile(walletAddress?: string) {
           ...profileData,
           skills: profileData.skills || [],
           interests: profileData.interests || [],
+          study_goals: profileData.study_goals || [],
         })
         .select()
         .single();
@@ -94,7 +99,10 @@ export function useProfile(walletAddress?: string) {
         return null;
       }
 
-      setProfile(data);
+      setProfile({
+        ...data,
+        study_goals: (data as any)?.study_goals || []
+      });
       toast({
         title: "Success",
         description: "Profile created successfully!",
@@ -141,7 +149,10 @@ export function useProfile(walletAddress?: string) {
         return null;
       }
 
-      setProfile(data);
+      setProfile({
+        ...data,
+        study_goals: (data as any)?.study_goals || []
+      });
       toast({
         title: "Success",
         description: "Profile updated successfully!",
