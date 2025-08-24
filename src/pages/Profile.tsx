@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2 } from "
 import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const achievements = [
   { type: "studious" as const, title: "Study Warrior", description: "100+ study sessions", earned: true },
@@ -46,6 +48,9 @@ export default function Profile() {
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
   const [skillInput, setSkillInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   if (!isConnected) {
     return <Navigate to="/" replace />;
@@ -109,6 +114,81 @@ export default function Profile() {
       ...prev,
       interests: prev.interests?.filter(i => i !== interest) || []
     }));
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!address) return;
+
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${address.toLowerCase()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = data.publicUrl;
+      
+      // Update the profile with the new avatar URL
+      const updatedProfile = { ...editedProfile, avatar_url: avatarUrl };
+      setEditedProfile(updatedProfile);
+      
+      // Save the profile with the new avatar
+      await saveProfile(updatedProfile);
+      
+      toast({
+        title: "Success",
+        description: "Avatar updated successfully!",
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload avatar. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Error",
+          description: "File size must be less than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      uploadAvatar(file);
+    }
   };
 
   if (loading) {
@@ -288,16 +368,33 @@ export default function Profile() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="relative mb-4">
-                <div className="h-24 w-24 rounded-full gradient-primary flex items-center justify-center mx-auto text-primary-foreground font-bold text-3xl">
-                  {profile?.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
-                </div>
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile avatar"
+                    className="h-24 w-24 rounded-full object-cover mx-auto"
+                  />
+                ) : (
+                  <div className="h-24 w-24 rounded-full gradient-primary flex items-center justify-center mx-auto text-primary-foreground font-bold text-3xl">
+                    {profile?.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
+                  </div>
+                )}
                 <Button
                   size="sm"
                   variant="secondary"
                   className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
+                  onClick={handleAvatarClick}
+                  disabled={uploading}
                 >
-                  <Camera className="h-4 w-4" />
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                 </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
               </div>
               
               <h1 className="text-2xl font-bold text-foreground mb-1">
