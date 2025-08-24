@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Clock, MapPin, BookOpen, Users, Search, Filter } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccount } from "wagmi";
+import { useToast } from "@/hooks/use-toast";
 
 const courses = [
   "Computer Science 101",
@@ -25,53 +28,31 @@ const timeSlots = [
   "Night (9:00 PM - 12:00 AM)",
 ];
 
-const matchedStudents = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    avatar: "SC",
-    level: 15,
-    xp: 3200,
-    rating: 4.9,
-    course: "Computer Science 101",
-    availability: ["Morning", "Afternoon"],
-    skills: ["Programming", "Algorithms", "Data Structures"],
-    location: "On-campus",
-    lastOnline: "2 hours ago",
-  },
-  {
-    id: 2,
-    name: "Michael Johnson", 
-    avatar: "MJ",
-    level: 12,
-    xp: 2800,
-    rating: 4.7,
-    course: "Computer Science 101",
-    availability: ["Afternoon", "Evening"],
-    skills: ["Web Development", "React", "JavaScript"],
-    location: "Remote",
-    lastOnline: "30 mins ago",
-  },
-  {
-    id: 3,
-    name: "Emma Davis",
-    avatar: "ED",
-    level: 18,
-    xp: 4100,
-    rating: 5.0,
-    course: "Computer Science 101",
-    availability: ["Evening", "Night"],
-    skills: ["Machine Learning", "Python", "Data Science"],
-    location: "On-campus",
-    lastOnline: "1 hour ago",
-  },
-];
+interface Profile {
+  id: string;
+  wallet_address: string;
+  name: string | null;
+  avatar_url: string | null;
+  level: number;
+  xp: number;
+  average_rating: number;
+  skills: string[];
+  interests: string[];
+  institution: string | null;
+  academic_level: string | null;
+  bio: string | null;
+}
 
 export default function FindPartner() {
+  const { address } = useAccount();
+  const { toast } = useToast();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [skillLevel, setSkillLevel] = useState("");
   const [location, setLocation] = useState("");
+  const [sortBy, setSortBy] = useState("rating");
 
   const handleTimeToggle = (time: string) => {
     setSelectedTimes(prev => 
@@ -79,6 +60,74 @@ export default function FindPartner() {
         ? prev.filter(t => t !== time)
         : [...prev, time]
     );
+  };
+
+  const fetchProfiles = async () => {
+    try {
+      setLoading(true);
+      
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .neq('wallet_address', address || '') // Exclude current user
+        .not('name', 'is', null); // Only show profiles with names
+
+      // Apply filters
+      if (skillLevel) {
+        // Filter by academic level if it matches skill level
+        query = query.eq('academic_level', skillLevel);
+      }
+
+      if (selectedCourse) {
+        // Filter by interests containing the course
+        query = query.contains('interests', [selectedCourse]);
+      }
+
+      // Apply sorting
+      if (sortBy === 'rating') {
+        query = query.order('average_rating', { ascending: false });
+      } else if (sortBy === 'level') {
+        query = query.order('level', { ascending: false });
+      } else if (sortBy === 'recent') {
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching profiles:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load study partners",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setProfiles(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load study partners",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfiles();
+  }, [address, sortBy]);
+
+  const handleSearch = () => {
+    fetchProfiles();
+  };
+
+  const getInitials = (name: string | null) => {
+    if (!name) return "??";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
@@ -165,7 +214,7 @@ export default function FindPartner() {
               </Select>
             </div>
 
-            <Button variant="gradient" className="w-full">
+            <Button variant="gradient" className="w-full" onClick={handleSearch}>
               <Search className="h-4 w-4 mr-2" />
               Find Partners
             </Button>
@@ -176,9 +225,9 @@ export default function FindPartner() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-foreground transition-colors duration-300">
-              Available Study Partners ({matchedStudents.length})
+              Available Study Partners ({loading ? "..." : profiles.length})
             </h2>
-            <Select defaultValue="rating">
+            <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -190,76 +239,120 @@ export default function FindPartner() {
             </Select>
           </div>
 
-          {matchedStudents.map((student) => (
-            <Card key={student.id} className="hover:shadow-card transition-all duration-300 border-border/20 dark:border-border/10">
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="h-16 w-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
-                      {student.avatar}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="text-lg font-semibold text-foreground">{student.name}</h3>
-                        <Badge variant="secondary">Level {student.level}</Badge>
-                      </div>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
-                        <div className="flex items-center space-x-1">
-                          <span>⭐</span>
-                          <span>{student.rating}</span>
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-16 w-16 rounded-full bg-muted"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded w-1/4"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                        <div className="flex space-x-2">
+                          <div className="h-6 w-16 bg-muted rounded"></div>
+                          <div className="h-6 w-16 bg-muted rounded"></div>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <span>🔥</span>
-                          <span>{student.xp} XP</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="h-3 w-3" />
-                          <span>{student.location}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {student.skills.map((skill) => (
-                          <Badge key={skill} variant="outline" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="h-3 w-3" />
-                          <span>Available: {student.availability.join(", ")}</span>
-                        </div>
-                        <span>Last online: {student.lastOnline}</span>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col space-y-2 min-w-[120px]">
-                    <Button variant="default" size="sm">
-                      <Users className="h-4 w-4 mr-1" />
-                      Connect
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      View Profile
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <>
+              {profiles.map((profile) => (
+                <Card key={profile.id} className="hover:shadow-card transition-all duration-300 border-border/20 dark:border-border/10">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div className="flex items-start space-x-4">
+                        {profile.avatar_url ? (
+                          <img
+                            src={profile.avatar_url}
+                            alt="Profile avatar"
+                            className="h-16 w-16 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-16 w-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
+                            {getInitials(profile.name)}
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="text-lg font-semibold text-foreground">{profile.name || "Anonymous"}</h3>
+                            <Badge variant="secondary">Level {profile.level}</Badge>
+                          </div>
+                          <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                            <div className="flex items-center space-x-1">
+                              <span>⭐</span>
+                              <span>{profile.average_rating.toFixed(1)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <span>🔥</span>
+                              <span>{profile.xp} XP</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-3 w-3" />
+                              <span>{profile.institution || "Not specified"}</span>
+                            </div>
+                          </div>
+                          {profile.skills && profile.skills.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {profile.skills.slice(0, 4).map((skill) => (
+                                <Badge key={skill} variant="outline" className="text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                              {profile.skills.length > 4 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{profile.skills.length - 4} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                            <span>Academic Level: {profile.academic_level || "Not specified"}</span>
+                            {profile.bio && (
+                              <span className="truncate max-w-xs">{profile.bio}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col space-y-2 min-w-[120px]">
+                        <Button variant="default" size="sm">
+                          <Users className="h-4 w-4 mr-1" />
+                          Connect
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          View Profile
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-          {matchedStudents.length === 0 && (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No matches found</h3>
-                <p className="text-muted-foreground mb-4">
-                  Try adjusting your filters or check back later for new study partners
-                </p>
-                <Button variant="default">
-                  Expand Search Criteria
-                </Button>
-              </CardContent>
-            </Card>
+              {!loading && profiles.length === 0 && (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">No matches found</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Try adjusting your filters or check back later for new study partners
+                    </p>
+                    <Button variant="default" onClick={() => {
+                      setSelectedCourse("");
+                      setSkillLevel("");
+                      setLocation("");
+                      setSelectedTimes([]);
+                      fetchProfiles();
+                    }}>
+                      Clear Filters
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </div>
