@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfileCheckModal } from "@/components/ProfileCheckModal";
 import { NewStudySessionModal } from "@/components/NewStudySessionModal";
+import { MatchmakingResults } from "@/components/MatchmakingResults";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 
@@ -86,6 +87,8 @@ export default function Homepage() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileCheck, setShowProfileCheck] = useState(false);
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
+  const [showMatchmakingResults, setShowMatchmakingResults] = useState(false);
+  const [sessionData, setSessionData] = useState<any>(null);
 
   useEffect(() => {
     if (!isConnected) {
@@ -120,10 +123,27 @@ export default function Homepage() {
     }
   };
 
-  const handleStartSession = (sessionData: any) => {
-    console.log("Starting session with data:", sessionData);
-    // Here you would typically navigate to the session or matching flow
+  const handleFindPartner = (data: any) => {
+    console.log("Finding partner with data:", data);
+    setSessionData(data);
+    setShowNewSessionModal(false);
+    setShowMatchmakingResults(true);
+  };
+
+  const handleInvitePartner = (partner: any) => {
+    console.log("Inviting partner:", partner);
+    // Here you would typically send invitation and navigate to session
     navigate("/session");
+  };
+
+  const handleBackToSetup = () => {
+    setShowMatchmakingResults(false);
+    setShowNewSessionModal(true);
+  };
+
+  const getEstimatedXP = (duration: number) => {
+    const xpRates = { 30: 25, 45: 40, 60: 60, 120: 150 };
+    return xpRates[duration as keyof typeof xpRates] || 60;
   };
 
   return (
@@ -438,7 +458,17 @@ export default function Homepage() {
         open={showNewSessionModal}
         onOpenChange={setShowNewSessionModal}
         profile={profile}
-        onStartSession={handleStartSession}
+        onFindPartner={handleFindPartner}
+      />
+
+      {/* Matchmaking Results Modal */}
+      <MatchmakingResults
+        open={showMatchmakingResults}
+        onOpenChange={setShowMatchmakingResults}
+        sessionData={sessionData}
+        estimatedXP={sessionData ? getEstimatedXP(sessionData.duration) : 0}
+        onInvitePartner={handleInvitePartner}
+        onBack={handleBackToSetup}
       />
     </div>
   );

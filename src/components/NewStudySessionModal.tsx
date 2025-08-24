@@ -49,13 +49,15 @@ interface NewStudySessionModalProps {
   onOpenChange: (open: boolean) => void;
   profile: Profile | null;
   onStartSession?: (sessionData: any) => void;
+  onFindPartner?: (sessionData: any) => void;
 }
 
 export function NewStudySessionModal({ 
   open, 
   onOpenChange, 
   profile,
-  onStartSession 
+  onStartSession,
+  onFindPartner
 }: NewStudySessionModalProps) {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
@@ -85,7 +87,7 @@ export function NewStudySessionModal({
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    onStartSession?.(sessionData);
+    onFindPartner?.(sessionData);
     onOpenChange(false);
     setIsLoading(false);
   };
