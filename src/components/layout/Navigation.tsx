@@ -12,7 +12,7 @@ const allNavItems = [
   { icon: Home, label: "Home", path: "/", protected:false},
   { icon: Home, label: "Dashboard", path: "/homepage" ,protected:true},
   { icon: Users, label: "Find Partner", path: "/find-partner", protected:true},
-  { icon: Calendar, label: "Sessions", path: "/dashboard", protected:true},
+  { icon: Calendar, label: "Sessions", path: "/session", protected:true},
   { icon: Trophy, label: "Leaderboard", path: "/leaderboard", protected:true},
   { icon: User, label: "Profile", path: "/profile",protected:true },
 ];
