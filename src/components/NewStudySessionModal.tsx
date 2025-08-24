@@ -174,9 +174,9 @@ export function NewStudySessionModal({
                     <SelectValue placeholder="Choose your subject..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {profile?.skills?.map(skill => (
-                      <SelectItem key={skill} value={skill}>
-                        {skill}
+                    {profile?.interests?.map(subject => (
+                      <SelectItem key={subject} value={subject}>
+                        {subject}
                       </SelectItem>
                     )) || []}
                     <SelectItem value="other">Other Subject</SelectItem>
