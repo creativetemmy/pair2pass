@@ -20,6 +20,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { XPBadge } from "@/components/gamification/XPBadge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccount } from "wagmi";
+import { useToast } from "@/hooks/use-toast";
 
 interface MatchingPartner {
   id: string;
@@ -114,9 +117,94 @@ export function MatchmakingResults({
   onInvitePartner,
   onBack 
 }: MatchmakingResultsProps) {
+  const { address } = useAccount();
+  const { toast } = useToast();
   const [isSearching, setIsSearching] = useState(true);
   const [partners, setPartners] = useState<MatchingPartner[]>([]);
   const [searchProgress, setSearchProgress] = useState(0);
+
+  const fetchMatchingPartners = async () => {
+    try {
+      console.log("Fetching matching partners for user:", address);
+      console.log("Session data:", sessionData);
+      
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .neq('wallet_address', address || '') // Exclude current user
+        .not('name', 'is', null); // Only show profiles with names
+
+      const { data, error } = await query.limit(10);
+
+      if (error) {
+        console.error('Error fetching profiles:', error);
+        toast({
+          title: "Error",
+          description: "Failed to find matching partners",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      console.log("Raw database profiles:", data);
+
+      // Transform database profiles to MatchingPartner format
+      const transformedPartners = data?.map(profile => ({
+        id: profile.id,
+        name: profile.name || "Anonymous",
+        avatar_url: profile.avatar_url,
+        academic_level: profile.academic_level || "Not specified",
+        skills: profile.skills || [],
+        interests: profile.interests || [],
+        xp: profile.xp || 0,
+        level: profile.level || 1,
+        average_rating: profile.average_rating || 0,
+        availability_status: "online" as const, // Default to online for now
+        institution: profile.institution || "Not specified",
+        bio: profile.bio || "No bio available",
+        matching_subjects: profile.interests || [],
+        study_goal_compatibility: "Study Partner" // Default compatibility text
+      })) || [];
+
+      console.log("Transformed partners:", transformedPartners);
+
+      // Filter partners based on session data if provided
+      let filteredPartners = transformedPartners;
+      if (sessionData?.subject) {
+        console.log("Filtering by subject:", sessionData.subject);
+        filteredPartners = transformedPartners.filter(partner =>
+          partner.interests.some(interest => 
+            interest.toLowerCase().includes(sessionData.subject.toLowerCase()) ||
+            sessionData.subject.toLowerCase().includes(interest.toLowerCase())
+          ) || 
+          partner.skills.some(skill => 
+            skill.toLowerCase().includes(sessionData.subject.toLowerCase()) ||
+            sessionData.subject.toLowerCase().includes(skill.toLowerCase())
+          )
+        );
+        console.log("Filtered partners:", filteredPartners);
+      }
+
+      // If no matches with subject filter, show all available partners
+      if (filteredPartners.length === 0) {
+        console.log("No specific matches found, showing all partners");
+        filteredPartners = transformedPartners;
+      }
+
+      const finalPartners = filteredPartners.slice(0, 5); // Limit to 5 partners
+      console.log("Final partners to display:", finalPartners);
+      
+      return finalPartners;
+    } catch (error) {
+      console.error('Error in fetchMatchingPartners:', error);
+      toast({
+        title: "Error",
+        description: "Failed to find matching partners",
+        variant: "destructive",
+      });
+      return [];
+    }
+  };
 
   useEffect(() => {
     if (open && sessionData) {
@@ -125,28 +213,29 @@ export function MatchmakingResults({
       setPartners([]);
       setSearchProgress(0);
 
-      // Simulate searching animation
+      // Simulate searching animation while fetching real data
       const progressInterval = setInterval(() => {
         setSearchProgress(prev => {
           if (prev >= 100) {
             clearInterval(progressInterval);
-            setIsSearching(false);
-            // Filter partners based on session data
-            const filteredPartners = mockPartners.filter(partner =>
-              partner.matching_subjects.some(subject => 
-                sessionData.subject === subject || partner.skills.includes(sessionData.subject)
-              )
-            ).slice(0, 3);
-            setPartners(filteredPartners);
             return 100;
           }
           return prev + 10;
         });
       }, 200);
 
+      // Fetch real partners from database
+      fetchMatchingPartners().then(matchedPartners => {
+        setTimeout(() => {
+          setIsSearching(false);
+          setPartners(matchedPartners);
+          clearInterval(progressInterval);
+        }, 2000); // Minimum 2 seconds for UX
+      });
+
       return () => clearInterval(progressInterval);
     }
-  }, [open, sessionData]);
+  }, [open, sessionData, address]);
 
   const getAvailabilityIcon = (status: string) => {
     switch (status) {
