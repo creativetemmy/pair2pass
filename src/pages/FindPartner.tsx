@@ -9,6 +9,7 @@ import { Clock, MapPin, BookOpen, Users, Search, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const timeSlots = [
   "Morning (8:00 AM - 12:00 PM)",
@@ -44,6 +45,7 @@ interface Profile {
 export default function FindPartner() {
   const { address } = useAccount();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -372,7 +374,7 @@ export default function FindPartner() {
                           <Users className="h-4 w-4 mr-1" />
                           Connect
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/profile/${profile.id}`)}>
                           View Profile
                         </Button>
                       </div>
