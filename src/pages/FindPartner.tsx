@@ -18,16 +18,12 @@ const timeSlots = [
 ];
 
 const academicLevels = [
-  "High School",
-  "Undergraduate - Freshman", 
-  "Undergraduate - Sophomore",
-  "Undergraduate - Junior",
-  "Undergraduate - Senior",
-  "Graduate - Master's",
-  "Graduate - PhD",
-  "Postdoctoral",
-  "Professional",
-  "Other"
+  "Any Level",
+  "100 Level",
+  "200 Level", 
+  "300 Level",
+  "400 Level",
+  "500 Level"
 ];
 
 interface Profile {
@@ -80,7 +76,7 @@ export default function FindPartner() {
         .not('name', 'is', null); // Only show profiles with names
 
       // Apply filters
-      if (skillLevel) {
+      if (skillLevel && skillLevel !== "Any Level") {
         query = query.eq('academic_level', skillLevel);
       }
 
