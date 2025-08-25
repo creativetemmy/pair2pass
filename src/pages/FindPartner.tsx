@@ -17,6 +17,19 @@ const timeSlots = [
   "Night (9:00 PM - 12:00 AM)",
 ];
 
+const academicLevels = [
+  "High School",
+  "Undergraduate - Freshman", 
+  "Undergraduate - Sophomore",
+  "Undergraduate - Junior",
+  "Undergraduate - Senior",
+  "Graduate - Master's",
+  "Graduate - PhD",
+  "Postdoctoral",
+  "Professional",
+  "Other"
+];
+
 interface Profile {
   id: string;
   wallet_address: string;
@@ -208,7 +221,7 @@ export default function FindPartner() {
                   <SelectValue placeholder="Select academic level" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableAcademicLevels.map((level) => (
+                  {academicLevels.map((level) => (
                     <SelectItem key={level} value={level}>
                       {level}
                     </SelectItem>
