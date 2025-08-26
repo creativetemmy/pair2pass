@@ -84,16 +84,25 @@ export function StudySessionLobby({
 
   useEffect(() => {
     if (currentUser.isReady && partner.isReady && !isStarting) {
+      console.log('Both partners ready, starting session transition...');
       setShowStartAnimation(true);
       setTimeout(async () => {
         setIsStarting(true);
         // Update session status to active in database
         if (sessionId) {
           try {
-            await supabase
+            console.log('Updating session status to active for sessionId:', sessionId);
+            const { data, error } = await supabase
               .from('study_sessions')
               .update({ status: 'active' })
-              .eq('id', sessionId);
+              .eq('id', sessionId)
+              .select();
+            
+            if (error) {
+              console.error('Error updating session status:', error);
+            } else {
+              console.log('Session status updated successfully:', data);
+            }
           } catch (error) {
             console.error('Error updating session status:', error);
           }

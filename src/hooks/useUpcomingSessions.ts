@@ -25,12 +25,15 @@ export const useUpcomingSessions = () => {
       }
 
       try {
+        console.log('Fetching upcoming sessions for address:', address);
         const { data, error } = await supabase
           .from('study_sessions')
           .select('*')
           .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
           .eq('status', 'waiting')
           .order('created_at', { ascending: true });
+
+        console.log('Upcoming sessions query result:', { data, error });
 
         if (error) throw error;
 
@@ -39,6 +42,7 @@ export const useUpcomingSessions = () => {
           partner_wallet: session.partner_1_id === address ? session.partner_2_id : session.partner_1_id
         })) || [];
 
+        console.log('Upcoming sessions with partner info:', sessionsWithPartner);
         setUpcomingSessions(sessionsWithPartner);
       } catch (error) {
         console.error('Error fetching upcoming sessions:', error);

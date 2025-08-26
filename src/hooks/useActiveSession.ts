@@ -26,6 +26,7 @@ export const useActiveSession = () => {
 
     const fetchActiveSession = async () => {
       try {
+        console.log('Fetching active session for address:', address);
         const { data, error } = await supabase
           .from('study_sessions')
           .select('*')
@@ -33,10 +34,13 @@ export const useActiveSession = () => {
           .eq('status', 'active')
           .single();
 
+        console.log('Active session query result:', { data, error });
+
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching active session:', error);
         } else {
           setActiveSession(data);
+          console.log('Active session set:', data);
         }
       } catch (error) {
         console.error('Error fetching active session:', error);
