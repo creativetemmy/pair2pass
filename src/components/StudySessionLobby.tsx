@@ -85,12 +85,23 @@ export function StudySessionLobby({
   useEffect(() => {
     if (currentUser.isReady && partner.isReady && !isStarting) {
       setShowStartAnimation(true);
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsStarting(true);
+        // Update session status to active in database
+        if (sessionId) {
+          try {
+            await supabase
+              .from('study_sessions')
+              .update({ status: 'active' })
+              .eq('id', sessionId);
+          } catch (error) {
+            console.error('Error updating session status:', error);
+          }
+        }
         onStartSession();
       }, 3000);
     }
-  }, [currentUser.isReady, partner.isReady, isStarting, onStartSession]);
+  }, [currentUser.isReady, partner.isReady, isStarting, onStartSession, sessionId]);
 
   const fetchSessionData = async () => {
     if (!sessionId) return;
