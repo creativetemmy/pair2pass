@@ -38,8 +38,41 @@ export const SessionReviewModal = ({
       return;
     }
 
+    if (!address) {
+      toast.error("Wallet not connected");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      // Check if review already exists
+      const { data: existingReview } = await supabase
+        .from('session_reviews')
+        .select('id')
+        .eq('session_id', sessionId)
+        .eq('reviewer_wallet', address)
+        .single();
+
+      if (existingReview) {
+        toast.info("Review already submitted for this session");
+        onComplete();
+        onClose();
+        return;
+      }
+
+      // Create session review record
+      const { error: reviewError } = await supabase
+        .from('session_reviews')
+        .insert({
+          session_id: sessionId,
+          reviewer_wallet: address,
+          reviewed_wallet: partnerWallet,
+          rating: rating,
+          feedback: feedback || null
+        });
+
+      if (reviewError) throw reviewError;
+
       // Update session status to completed
       const { error: sessionError } = await supabase
         .from('study_sessions')
@@ -50,9 +83,6 @@ export const SessionReviewModal = ({
         .eq('id', sessionId);
 
       if (sessionError) throw sessionError;
-
-      // Create session review record (we'd need to create this table)
-      // For now, just show success
       
       toast.success("Session completed and review submitted!");
       onComplete();

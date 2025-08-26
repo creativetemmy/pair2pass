@@ -25,6 +25,7 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const navigate = useNavigate();
   const { address } = useAccount();
 
@@ -38,7 +39,7 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
 
       if (remaining <= 0) {
         setTimeRemaining('Session Ended');
-        if (!sessionEnded) {
+        if (!sessionEnded && !reviewSubmitted) {
           setSessionEnded(true);
           setShowReviewModal(true);
         }
@@ -59,7 +60,7 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [session.created_at, session.duration]);
+  }, [session.created_at, session.duration, sessionEnded, reviewSubmitted]);
 
   const getPartnerWallet = () => {
     return session.partner_1_id === address ? session.partner_2_id : session.partner_1_id;
@@ -84,6 +85,7 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
 
   const handleReviewComplete = () => {
     // Session completed, will be updated via real-time subscription
+    setReviewSubmitted(true);
     setShowReviewModal(false);
   };
 
@@ -115,7 +117,7 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
         </div>
         
         <div className="flex justify-end gap-3">
-          {sessionEnded ? (
+          {sessionEnded && !reviewSubmitted ? (
             <Button 
               onClick={() => setShowReviewModal(true)}
               className="flex items-center space-x-2 w-full"
@@ -123,6 +125,11 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
               <CheckCircle className="h-4 w-4" />
               <span>Complete Session</span>
             </Button>
+          ) : sessionEnded && reviewSubmitted ? (
+            <div className="text-center py-4 text-muted-foreground">
+              <CheckCircle className="h-6 w-6 mx-auto mb-2 text-success" />
+              <p>Session completed and reviewed</p>
+            </div>
           ) : (
             <>
               <Button 

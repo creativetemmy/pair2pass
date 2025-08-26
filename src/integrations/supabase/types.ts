@@ -89,6 +89,39 @@ export type Database = {
         }
         Relationships: []
       }
+      session_reviews: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number
+          reviewed_wallet: string
+          reviewer_wallet: string
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating: number
+          reviewed_wallet: string
+          reviewer_wallet: string
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number
+          reviewed_wallet?: string
+          reviewer_wallet?: string
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       study_sessions: {
         Row: {
           created_at: string
