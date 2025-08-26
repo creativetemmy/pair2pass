@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XPBadge } from "@/components/gamification/XPBadge";
@@ -6,45 +5,12 @@ import { Badge } from "@/components/gamification/Badge";
 import { ActiveSessionCard } from "@/components/ActiveSessionCard";
 import { useAccount } from "wagmi";
 import { useActiveSession } from "@/hooks/useActiveSession";
+import { useUserStats } from "@/hooks/useUserStats";
+import { useUpcomingSessions } from "@/hooks/useUpcomingSessions";
+import { useRecentSessions } from "@/hooks/useRecentSessions";
 import { Calendar, Clock, Users, BookOpen, TrendingUp } from "lucide-react";
-
-const upcomingSessions = [
-  {
-    id: 1,
-    partner: "Sarah Chen",
-    course: "Computer Science 101",
-    time: "Today, 3:00 PM",
-    duration: "2 hours",
-    type: "Exam Prep",
-  },
-  {
-    id: 2,
-    partner: "Michael Johnson",
-    course: "Calculus II",
-    time: "Tomorrow, 10:00 AM",
-    duration: "1.5 hours",
-    type: "Assignment Help",
-  },
-];
-
-const recentSessions = [
-  {
-    id: 1,
-    partner: "Emma Davis",
-    course: "Physics Lab",
-    date: "Dec 20, 2024",
-    rating: 5,
-    xpEarned: 150,
-  },
-  {
-    id: 2,
-    partner: "Alex Rodriguez",
-    course: "Chemistry",
-    date: "Dec 18, 2024",
-    rating: 4,
-    xpEarned: 120,
-  },
-];
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 const badges = [
   { type: "studious" as const, title: "Study Warrior", description: "10+ study sessions", earned: true },
@@ -53,9 +19,17 @@ const badges = [
   { type: "streak" as const, title: "Study Streak", description: "7 days in a row", earned: true },
 ];
 
+const formatWalletAddress = (wallet: string) => {
+  return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
+};
+
 export default function Dashboard() {
   const { address } = useAccount();
+  const navigate = useNavigate();
   const { activeSession, loading: sessionLoading } = useActiveSession();
+  const { stats, loading: statsLoading } = useUserStats();
+  const { upcomingSessions, loading: upcomingLoading } = useUpcomingSessions();
+  const { recentSessions, loading: recentLoading } = useRecentSessions();
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 transition-colors duration-300">
@@ -65,7 +39,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-foreground transition-colors duration-300">Dashboard</h1>
           <p className="text-muted-foreground transition-colors duration-300">Track your study progress and achievements</p>
         </div>
-        <XPBadge xp={2450} level={12} />
+        <XPBadge xp={Math.floor(stats.hoursStudied * 20)} level={Math.floor(stats.hoursStudied / 10) + 1} />
       </div>
 
       {/* Stats Cards */}
@@ -77,7 +51,9 @@ export default function Dashboard() {
                 <Users className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground transition-colors duration-300">24</p>
+                <p className="text-2xl font-bold text-foreground transition-colors duration-300">
+                  {statsLoading ? '-' : stats.studyPartners}
+                </p>
                 <p className="text-sm text-muted-foreground transition-colors duration-300">Study Partners</p>
               </div>
             </div>
@@ -91,7 +67,9 @@ export default function Dashboard() {
                 <Clock className="h-6 w-6 text-secondary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">127</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {statsLoading ? '-' : stats.hoursStudied}
+                </p>
                 <p className="text-sm text-muted-foreground">Hours Studied</p>
               </div>
             </div>
@@ -105,7 +83,9 @@ export default function Dashboard() {
                 <BookOpen className="h-6 w-6 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">8</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {statsLoading ? '-' : stats.activeCourses}
+                </p>
                 <p className="text-sm text-muted-foreground">Active Courses</p>
               </div>
             </div>
@@ -119,7 +99,9 @@ export default function Dashboard() {
                 <TrendingUp className="h-6 w-6 text-orange-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">4.8</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {statsLoading ? '-' : stats.averageRating.toFixed(1)}
+                </p>
                 <p className="text-sm text-muted-foreground">Avg Rating</p>
               </div>
             </div>
@@ -144,36 +126,43 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {upcomingSessions.map((session) => (
-                <div key={session.id} className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{session.course}</h3>
-                      <p className="text-sm text-muted-foreground">with {session.partner}</p>
-                    </div>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                      {session.type}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm text-muted-foreground">
-                      <p>{session.time}</p>
-                      <p>Duration: {session.duration}</p>
-                    </div>
-                     <Button 
-                       size="sm" 
-                       variant="outline"
-                     >
-                       Join Session
-                     </Button>
-                  </div>
+              {upcomingLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Loading sessions...</p>
                 </div>
-              ))}
-              
-              {upcomingSessions.length === 0 && (
+              ) : upcomingSessions.length > 0 ? (
+                upcomingSessions.map((session) => (
+                  <div key={session.id} className="p-4 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{session.subject}</h3>
+                        <p className="text-sm text-muted-foreground">with {formatWalletAddress(session.partner_wallet)}</p>
+                      </div>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                        {session.goal}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm text-muted-foreground">
+                        <p>{format(new Date(session.created_at), "MMM dd, yyyy 'at' h:mm a")}</p>
+                        <p>Duration: {Math.floor(session.duration / 60)} hours</p>
+                      </div>
+                       <Button 
+                         size="sm" 
+                         variant="outline"
+                         onClick={() => navigate(`/session/${session.id}`)}
+                       >
+                         Join Session
+                       </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">No upcoming sessions</p>
-                  <Button variant="default" className="mt-4">Find Study Partner</Button>
+                  <Button variant="default" className="mt-4" onClick={() => navigate('/find-partner')}>
+                    Find Study Partner
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -185,28 +174,45 @@ export default function Dashboard() {
               <CardTitle>Recent Study Sessions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentSessions.map((session) => (
-                <div key={session.id} className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
-                  <div>
-                    <h4 className="font-medium text-foreground">{session.course}</h4>
-                    <p className="text-sm text-muted-foreground">with {session.partner}</p>
-                    <p className="text-xs text-muted-foreground">{session.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-1 mb-1">
-                      {[...Array(5)].map((_, i) => (
-                        <span
-                          key={i}
-                          className={`text-xs ${i < session.rating ? 'text-yellow-500' : 'text-muted-foreground'}`}
-                        >
-                          ⭐
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-sm font-medium text-success">+{session.xpEarned} XP</p>
-                  </div>
+              {recentLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Loading sessions...</p>
                 </div>
-              ))}
+              ) : recentSessions.length > 0 ? (
+                recentSessions.map((session) => (
+                  <div key={session.id} className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                    <div>
+                      <h4 className="font-medium text-foreground">{session.subject}</h4>
+                      <p className="text-sm text-muted-foreground">with {formatWalletAddress(session.partner_wallet)}</p>
+                      <p className="text-xs text-muted-foreground">{format(new Date(session.created_at), "MMM dd, yyyy")}</p>
+                    </div>
+                    <div className="text-right">
+                      {session.rating && (
+                        <>
+                          <div className="flex items-center space-x-1 mb-1">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={`text-xs ${i < session.rating! ? 'text-yellow-500' : 'text-muted-foreground'}`}
+                              >
+                                ⭐
+                              </span>
+                            ))}
+                          </div>
+                          <p className="text-sm font-medium text-success">+{session.xp_earned} XP</p>
+                        </>
+                      )}
+                      {!session.rating && (
+                        <p className="text-xs text-muted-foreground">No rating yet</p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No recent sessions</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
