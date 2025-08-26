@@ -151,14 +151,14 @@ export function StudySessionLobby({
           </div>
           
           <h2 className="text-3xl font-bold mb-2 gradient-text">
-            🎮 Multiplayer Study Lobby
+            📚 Study Session Preparation
           </h2>
-          <p className="text-muted-foreground mb-4">Waiting for both players to be ready...</p>
+          <p className="text-muted-foreground mb-4">Waiting for both partners to be ready...</p>
           
-          {/* Playful hint */}
+          {/* Study tip */}
           <div className="flex items-center justify-center gap-2 text-sm text-primary/80 bg-primary/5 rounded-full px-4 py-2 border border-primary/20">
             <Target className="h-4 w-4" />
-            <span className="font-medium">💡 Tip: Bring your notes, this is your quest together!</span>
+            <span className="font-medium">💡 Tip: Bring your notes and materials for a productive session!</span>
           </div>
         </div>
 
@@ -171,7 +171,7 @@ export function StudySessionLobby({
                 <div className="p-2 rounded-full bg-primary/10 border border-primary/20">
                   <Trophy className="h-8 w-8 text-primary animate-glow" />
                 </div>
-                <h3 className="text-2xl font-bold gradient-text">⚔️ QUEST OBJECTIVE</h3>
+                <h3 className="text-2xl font-bold gradient-text">📖 Study Goal</h3>
                 <div className="p-2 rounded-full bg-primary/10 border border-primary/20">
                   <Trophy className="h-8 w-8 text-primary animate-glow" />
                 </div>
@@ -191,7 +191,7 @@ export function StudySessionLobby({
               
               {/* Shared Subjects */}
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground font-medium">🤝 Common Battle Subjects:</p>
+                <p className="text-sm text-muted-foreground font-medium">🤝 Shared Study Subjects:</p>
                 <div className="flex justify-center gap-2 flex-wrap">
                   {sharedSubjects.map((subject) => (
                     <Badge 
@@ -228,7 +228,7 @@ export function StudySessionLobby({
                 {/* Player 1 Badge */}
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge className="gradient-primary text-primary-foreground font-bold px-3 py-1 shadow-primary">
-                    🎮 PLAYER 1
+                    👤 You
                   </Badge>
                 </div>
                 
@@ -255,7 +255,7 @@ export function StudySessionLobby({
                 </div>
                 
                 <h4 className="font-bold text-xl mb-1 gradient-text">{currentUser.name}</h4>
-                <p className="text-sm text-muted-foreground mb-4 font-medium">🛡️ You (Champion)</p>
+                <p className="text-sm text-muted-foreground mb-4 font-medium">📚 Student</p>
                 
                 <div className="mb-6">
                   <XPBadge xp={currentUser.xp} level={currentUser.level} className="justify-center" />
@@ -271,7 +271,7 @@ export function StudySessionLobby({
                       : "gradient-primary hover-scale shadow-primary hover:shadow-glow"
                   )}
                 >
-                  {currentUser.isReady ? "⚔️ BATTLE READY!" : "🚀 MARK READY"}
+                  {currentUser.isReady ? "✅ READY!" : "📚 MARK READY"}
                 </Button>
                 
                 {/* Ready status text */}
@@ -281,7 +281,7 @@ export function StudySessionLobby({
                     ? "text-success animate-glow" 
                     : "text-muted-foreground"
                 )}>
-                  {currentUser.isReady ? "Prepared for battle!" : "Preparing for quest..."}
+                  {currentUser.isReady ? "Ready to study!" : "Preparing for session..."}
                 </p>
               </CardContent>
             </Card>
@@ -305,7 +305,7 @@ export function StudySessionLobby({
                 {/* Player 2 Badge */}
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge className="gradient-primary text-primary-foreground font-bold px-3 py-1 shadow-primary">
-                    🎮 PLAYER 2
+                    👥 Study Partner
                   </Badge>
                 </div>
                 
@@ -334,7 +334,7 @@ export function StudySessionLobby({
                 </div>
                 
                 <h4 className="font-bold text-xl mb-1 gradient-text">{partner.name}</h4>
-                <p className="text-sm text-muted-foreground mb-4 font-medium">⚔️ Study Partner (Ally)</p>
+                <p className="text-sm text-muted-foreground mb-4 font-medium">🤝 Study Partner</p>
                 
                 <div className="mb-6">
                   <XPBadge xp={partner.xp} level={partner.level} className="justify-center" />
@@ -346,7 +346,7 @@ export function StudySessionLobby({
                     ? "bg-success/20 border-success text-success animate-glow shadow-success" 
                     : "bg-muted/10 border-muted/30 text-muted-foreground"
                 )}>
-                  {partner.isReady ? "⚔️ BATTLE READY!" : partner.isOnline ? "🔄 Preparing..." : "💤 Offline"}
+                  {partner.isReady ? "✅ READY!" : partner.isOnline ? "🔄 Preparing..." : "💤 Offline"}
                 </div>
                 
                 {/* Status text */}
@@ -359,9 +359,9 @@ export function StudySessionLobby({
                       : "text-muted-foreground"
                 )}>
                   {partner.isReady 
-                    ? "Ready for battle!" 
+                    ? "Ready to study!" 
                     : partner.isOnline 
-                      ? "Getting ready for quest..." 
+                      ? "Getting ready for session..." 
                       : "Waiting to connect..."}
                 </p>
               </CardContent>
@@ -369,29 +369,6 @@ export function StudySessionLobby({
           </div>
         </div>
 
-        {/* Communication & Rewards Panel */}
-        <Card className="glass-card border-primary/30 shadow-glow">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-bold text-center mb-4 gradient-text">🛠️ Quest Equipment & Rewards</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                <MessageCircle className="h-6 w-6 text-primary animate-glow" />
-                <span className="text-sm font-medium text-primary">💬 Battle Chat</span>
-                <span className="text-xs text-muted-foreground">Real-time messaging</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                <Video className="h-6 w-6 text-primary animate-glow" />
-                <span className="text-sm font-medium text-primary">📹 Video Link</span>
-                <span className="text-xs text-muted-foreground">Face-to-face study</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/30">
-                <Zap className="h-6 w-6 text-success animate-glow" />
-                <span className="text-sm font-medium text-success">⚡ +50 XP Reward</span>
-                <span className="text-xs text-muted-foreground">Quest completion bonus</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </DialogContent>
     </Dialog>
   );
