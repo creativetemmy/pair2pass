@@ -112,15 +112,26 @@ export function StudySessionLobby({
   };
 
   const handleSubmitLink = async () => {
-    if (!linkInput.trim() || !sessionId) return;
+    if (!linkInput.trim() || !sessionId) {
+      toast({
+        title: "Invalid Input",
+        description: "Please enter a valid session link.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
+      console.log('Submitting link:', linkInput.trim());
       const { error } = await supabase
         .from('study_sessions')
         .update({ video_link: linkInput.trim() })
         .eq('id', sessionId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       setVideoLink(linkInput.trim());
       setLinkInput("");
@@ -130,6 +141,8 @@ export function StudySessionLobby({
         title: "Session Link Added",
         description: "Both partners can now join the study session!",
       });
+      
+      console.log('Link submitted successfully');
     } catch (error) {
       console.error('Error updating session link:', error);
       toast({
@@ -138,6 +151,18 @@ export function StudySessionLobby({
         variant: "destructive",
       });
     }
+  };
+
+  const handleMarkReady = () => {
+    if (!videoLink) {
+      toast({
+        title: "Meeting Link Required",
+        description: "Please add a meeting link before marking ready.",
+        variant: "destructive",
+      });
+      return;
+    }
+    onReady();
   };
 
   const handleJoinSession = () => {
@@ -250,7 +275,7 @@ export function StudySessionLobby({
               <XPBadge xp={currentUser.xp} level={currentUser.level} className="justify-center mb-4" />
               
               <Button
-                onClick={onReady}
+                onClick={handleMarkReady}
                 disabled={currentUser.isReady}
                 className={cn(
                   "w-full transition-all duration-300",
