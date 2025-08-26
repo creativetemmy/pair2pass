@@ -5,8 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Trophy, Clock, MessageCircle, Video, Zap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Users, Trophy, Clock, MessageCircle, Video, Zap, Link, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface StudySessionLobbyProps {
   open: boolean;
@@ -33,6 +36,7 @@ interface StudySessionLobbyProps {
     xp: number;
     isReady: boolean;
   };
+  sessionId?: string;
   onReady: () => void;
   onStartSession: () => void;
 }
@@ -43,12 +47,17 @@ export function StudySessionLobby({
   sessionData,
   partner,
   currentUser,
+  sessionId,
   onReady,
   onStartSession,
 }: StudySessionLobbyProps) {
   const [countdown, setCountdown] = useState(300); // 5 minutes
   const [isStarting, setIsStarting] = useState(false);
   const [showStartAnimation, setShowStartAnimation] = useState(false);
+  const [videoLink, setVideoLink] = useState("");
+  const [linkInput, setLinkInput] = useState("");
+  const [showLinkForm, setShowLinkForm] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!open) return;
@@ -66,6 +75,13 @@ export function StudySessionLobby({
     return () => clearInterval(timer);
   }, [open]);
 
+  // Fetch session data including video link
+  useEffect(() => {
+    if (sessionId && open) {
+      fetchSessionData();
+    }
+  }, [sessionId, open]);
+
   useEffect(() => {
     if (currentUser.isReady && partner.isReady && !isStarting) {
       setShowStartAnimation(true);
@@ -75,6 +91,60 @@ export function StudySessionLobby({
       }, 3000);
     }
   }, [currentUser.isReady, partner.isReady, isStarting, onStartSession]);
+
+  const fetchSessionData = async () => {
+    if (!sessionId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('study_sessions')
+        .select('video_link')
+        .eq('id', sessionId)
+        .single();
+
+      if (error) throw error;
+      if (data?.video_link) {
+        setVideoLink(data.video_link);
+      }
+    } catch (error) {
+      console.error('Error fetching session data:', error);
+    }
+  };
+
+  const handleSubmitLink = async () => {
+    if (!linkInput.trim() || !sessionId) return;
+
+    try {
+      const { error } = await supabase
+        .from('study_sessions')
+        .update({ video_link: linkInput.trim() })
+        .eq('id', sessionId);
+
+      if (error) throw error;
+
+      setVideoLink(linkInput.trim());
+      setLinkInput("");
+      setShowLinkForm(false);
+      
+      toast({
+        title: "Session Link Added",
+        description: "Both partners can now join the study session!",
+      });
+    } catch (error) {
+      console.error('Error updating session link:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add session link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleJoinSession = () => {
+    if (videoLink) {
+      window.open(videoLink, '_blank');
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -123,7 +193,7 @@ export function StudySessionLobby({
             </div>
           </div>
           <h2 className="text-2xl font-bold mb-2">Study Session Lobby</h2>
-          <p className="text-muted-foreground">Waiting for both players to be ready...</p>
+          <p className="text-muted-foreground">Waiting for both partners to be ready...</p>
         </div>
 
         {/* Shared Study Goal */}
@@ -242,6 +312,74 @@ export function StudySessionLobby({
             </CardContent>
           </Card>
         </div>
+
+        {/* Video Link Section */}
+        <Card className="mb-6 border-primary/20">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Link className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Session Link</h3>
+              </div>
+              
+              {videoLink ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Ready to join your study session!</p>
+                  <Button
+                    onClick={handleJoinSession}
+                    className="gradient-primary hover-scale flex items-center gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Join Study Session
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {!showLinkForm ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-3">No session link added yet</p>
+                      <Button
+                        onClick={() => setShowLinkForm(true)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Link className="h-4 w-4" />
+                        Add Session Link
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="Paste Google Meet link here..."
+                        value={linkInput}
+                        onChange={(e) => setLinkInput(e.target.value)}
+                        className="w-full"
+                      />
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          onClick={handleSubmitLink}
+                          disabled={!linkInput.trim()}
+                          className="gradient-primary"
+                        >
+                          Submit Link
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setShowLinkForm(false);
+                            setLinkInput("");
+                          }}
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Communication Panel */}
         <Card className="border-primary/20">

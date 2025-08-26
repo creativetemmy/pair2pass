@@ -89,6 +89,51 @@ export type Database = {
         }
         Relationships: []
       }
+      study_sessions: {
+        Row: {
+          created_at: string
+          duration: number
+          goal: string
+          id: string
+          partner_1_id: string
+          partner_1_ready: boolean | null
+          partner_2_id: string
+          partner_2_ready: boolean | null
+          status: string | null
+          subject: string
+          updated_at: string
+          video_link: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration: number
+          goal: string
+          id?: string
+          partner_1_id: string
+          partner_1_ready?: boolean | null
+          partner_2_id: string
+          partner_2_ready?: boolean | null
+          status?: string | null
+          subject: string
+          updated_at?: string
+          video_link?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number
+          goal?: string
+          id?: string
+          partner_1_id?: string
+          partner_1_ready?: boolean | null
+          partner_2_id?: string
+          partner_2_ready?: boolean | null
+          status?: string | null
+          subject?: string
+          updated_at?: string
+          video_link?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
