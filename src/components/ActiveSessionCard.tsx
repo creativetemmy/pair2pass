@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Play, Users } from 'lucide-react';
+import { Clock, Play, Users, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
+import { CancelSessionModal } from './CancelSessionModal';
 
 interface ActiveSessionCardProps {
   session: {
@@ -20,6 +21,7 @@ interface ActiveSessionCardProps {
 
 export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const navigate = useNavigate();
   const { address } = useAccount();
 
@@ -61,7 +63,16 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
   };
 
   const handleJoinSession = () => {
-    navigate('/session-checkin');
+    navigate(`/session-checkin/${session.id}`);
+  };
+
+  const handleCancelSession = () => {
+    setShowCancelModal(true);
+  };
+
+  const handleSessionCancelled = () => {
+    // The session will be updated via real-time subscription
+    setShowCancelModal(false);
   };
 
   return (
@@ -91,12 +102,27 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
           </div>
         </div>
         
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button 
+            variant="outline" 
+            onClick={handleCancelSession} 
+            className="flex items-center space-x-2"
+          >
+            <X className="h-4 w-4" />
+            <span>Cancel Session</span>
+          </Button>
           <Button onClick={handleJoinSession} className="flex items-center space-x-2">
             <Play className="h-4 w-4" />
             <span>Continue Session</span>
           </Button>
         </div>
+        
+        <CancelSessionModal
+          open={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          sessionId={session.id}
+          onCancel={handleSessionCancelled}
+        />
       </CardContent>
     </Card>
   );

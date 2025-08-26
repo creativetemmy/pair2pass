@@ -4,33 +4,58 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, MapPin, CheckCircle, Star, MessageSquare, Timer } from "lucide-react";
-
-const sessionData = {
-  id: "session_123",
-  course: "Computer Science 101",
-  topic: "Binary Trees & Graph Algorithms",
-  partner: {
-    name: "Sarah Chen",
-    avatar: "SC",
-  },
-  date: "December 25, 2024",
-  time: "2:00 PM - 4:00 PM",
-  location: "Library Study Room B",
-  status: "in-progress",
-  startTime: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-  plannedDuration: 120, // 2 hours in minutes
-};
+import { Calendar, Clock, CheckCircle, Star, Timer, Users } from "lucide-react";
+import { useSessionDetails } from "@/hooks/useSessionDetails";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAccount } from "wagmi";
 
 export default function SessionCheckIn() {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [isCompleting, setIsCompleting] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
+  
+  const { session, loading, error } = useSessionDetails();
+  const { address } = useAccount();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading session details...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !session) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <h2 className="text-xl font-semibold mb-2">Session Not Found</h2>
+            <p className="text-muted-foreground mb-4">
+              {error || "The requested session could not be found or is no longer active."}
+            </p>
+            <Button onClick={() => navigate('/dashboard')}>
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const getElapsedTime = () => {
     const now = new Date();
-    const elapsed = Math.floor((now.getTime() - sessionData.startTime.getTime()) / 60000);
+    const startTime = new Date(session.created_at);
+    const elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
     const hours = Math.floor(elapsed / 60);
     const minutes = elapsed % 60;
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
@@ -38,21 +63,47 @@ export default function SessionCheckIn() {
 
   const getProgressPercentage = () => {
     const now = new Date();
-    const elapsed = Math.floor((now.getTime() - sessionData.startTime.getTime()) / 60000);
-    return Math.min((elapsed / sessionData.plannedDuration) * 100, 100);
+    const startTime = new Date(session.created_at);
+    const elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
+    return Math.min((elapsed / session.duration) * 100, 100);
+  };
+
+  const formatWalletAddress = (wallet: string) => {
+    return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
+  };
+
+  const getPartnerWallet = () => {
+    return session.partner_1_id === address ? session.partner_2_id : session.partner_1_id;
   };
 
   const handleCompleteSession = async () => {
     if (rating === 0) {
-      alert("Please rate your study partner before completing the session");
+      toast.error("Please rate your study partner before completing the session");
       return;
     }
     
     setIsCompleting(true);
-    // Simulate blockchain transaction
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsCompleting(false);
-    setSessionCompleted(true);
+    try {
+      const { error } = await supabase
+        .from('study_sessions')
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', session.id);
+
+      if (error) throw error;
+
+      // Simulate some processing time
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setSessionCompleted(true);
+      toast.success("Session completed successfully!");
+    } catch (error) {
+      console.error('Error completing session:', error);
+      toast.error("Failed to complete session. Please try again.");
+    } finally {
+      setIsCompleting(false);
+    }
   };
 
   if (sessionCompleted) {
@@ -85,7 +136,11 @@ export default function SessionCheckIn() {
                   </div>
                 </div>
               </div>
-              <Button variant="default" className="w-full">
+              <Button 
+                variant="default" 
+                className="w-full"
+                onClick={() => navigate('/dashboard')}
+              >
                 Return to Dashboard
               </Button>
             </div>
@@ -117,7 +172,7 @@ export default function SessionCheckIn() {
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-foreground">Time Elapsed: {getElapsedTime()}</span>
                 <span className="text-sm text-muted-foreground">
-                  {sessionData.plannedDuration / 60}h planned
+                  {session.duration / 60}h planned
                 </span>
               </div>
               <div className="w-full bg-muted rounded-full h-3">
@@ -134,54 +189,53 @@ export default function SessionCheckIn() {
                 <div className="flex items-center space-x-3">
                   <Calendar className="h-4 w-4 text-primary" />
                   <div>
-                    <p className="font-medium text-foreground">{sessionData.course}</p>
-                    <p className="text-sm text-muted-foreground">{sessionData.topic}</p>
+                    <p className="font-medium text-foreground">{session.subject}</p>
+                    <p className="text-sm text-muted-foreground">{session.goal}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
                   <Clock className="h-4 w-4 text-primary" />
                   <div>
-                    <p className="font-medium text-foreground">{sessionData.time}</p>
-                    <p className="text-sm text-muted-foreground">{sessionData.date}</p>
+                    <p className="font-medium text-foreground">{session.duration} minutes</p>
+                    <p className="text-sm text-muted-foreground">
+                      Started: {new Date(session.created_at).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <MapPin className="h-4 w-4 text-primary" />
+                  <Users className="h-4 w-4 text-primary" />
                   <div>
-                    <p className="font-medium text-foreground">{sessionData.location}</p>
-                    <p className="text-sm text-muted-foreground">Meeting Location</p>
+                    <p className="font-medium text-foreground">
+                      {formatWalletAddress(getPartnerWallet())}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Study Partner</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
                   <div className="h-8 w-8 rounded-full gradient-secondary flex items-center justify-center text-secondary-foreground font-bold text-sm">
-                    {sessionData.partner.avatar}
+                    {session.id.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{sessionData.partner.name}</p>
-                    <p className="text-sm text-muted-foreground">Study Partner</p>
+                    <p className="font-medium text-foreground">Session ID</p>
+                    <p className="text-sm text-muted-foreground font-mono">
+                      {session.id.slice(0, 8)}...
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex flex-wrap gap-3">
+            {/* Session Status */}
+            <div className="flex justify-center">
               <Badge variant="secondary" className="px-3 py-1">
                 <div className="h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse" />
-                In Progress
+                {session.status === 'active' ? 'In Progress' : session.status}
               </Badge>
-              <Button variant="outline" size="sm">
-                <MessageSquare className="h-4 w-4 mr-1" />
-                Chat with Partner
-              </Button>
-              <Button variant="outline" size="sm">
-                Take Notes
-              </Button>
             </div>
           </CardContent>
         </Card>
