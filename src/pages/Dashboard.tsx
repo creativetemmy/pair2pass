@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge } from "@/components/gamification/Badge";
+import { ActiveSessionCard } from "@/components/ActiveSessionCard";
 import { useAccount } from "wagmi";
+import { useActiveSession } from "@/hooks/useActiveSession";
 import { Calendar, Clock, Users, BookOpen, TrendingUp } from "lucide-react";
 
 const upcomingSessions = [
@@ -53,6 +55,7 @@ const badges = [
 
 export default function Dashboard() {
   const { address } = useAccount();
+  const { activeSession, loading: sessionLoading } = useActiveSession();
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 transition-colors duration-300">
@@ -125,8 +128,14 @@ export default function Dashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Upcoming Sessions */}
-        <div className="lg:col-span-2">
+        {/* Active and Upcoming Sessions */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Active Session */}
+          {!sessionLoading && activeSession && (
+            <ActiveSessionCard session={activeSession} />
+          )}
+
+          {/* Upcoming Sessions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
