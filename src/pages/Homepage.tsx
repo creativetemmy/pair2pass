@@ -14,6 +14,7 @@ import { StudySessionLobby } from "@/components/StudySessionLobby";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 // Mock data
 const mockCategories = [
@@ -95,6 +96,7 @@ export default function Homepage() {
   const [currentPartner, setCurrentPartner] = useState<any>(null);
   const [userReady, setUserReady] = useState(false);
   const [partnerReady, setPartnerReady] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isConnected) {
@@ -136,27 +138,55 @@ export default function Homepage() {
     setShowMatchmakingResults(true);
   };
 
-  const handleInvitePartner = (partner: any) => {
+  const handleInvitePartner = async (partner: any) => {
     console.log("Inviting partner:", partner);
     toast.success("Invitation sent! Waiting for response...");
     
-    // Simulate partner acceptance after 2 seconds
-    setTimeout(() => {
-      const partnerData = {
-        id: partner.id,
-        name: partner.name,
-        avatar: partner.avatar_url,
-        level: partner.level,
-        xp: partner.xp,
-        isReady: false,
-        isOnline: true,
-      };
+    try {
+      // Create session in database
+      const { data: newSession, error } = await supabase
+        .from('study_sessions')
+        .insert({
+          partner_1_id: address || 'current_user', // Current user
+          partner_2_id: partner.id,
+          subject: sessionData?.subject || 'General Study',
+          goal: sessionData?.goal || 'Study Together',
+          duration: sessionData?.duration || 60,
+          status: 'waiting'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating session:', error);
+        toast.error("Failed to create session. Please try again.");
+        return;
+      }
+
+      // Set the sessionId for the lobby
+      setSessionId(newSession.id);
       
-      setCurrentPartner(partnerData);
-      setShowMatchmakingResults(false);
-      setShowLobby(true);
-      toast.success("Partner accepted! Entering lobby...");
-    }, 2000);
+      // Simulate partner acceptance after 2 seconds
+      setTimeout(() => {
+        const partnerData = {
+          id: partner.id,
+          name: partner.name,
+          avatar: partner.avatar_url,
+          level: partner.level,
+          xp: partner.xp,
+          isReady: false,
+          isOnline: true,
+        };
+        
+        setCurrentPartner(partnerData);
+        setShowMatchmakingResults(false);
+        setShowLobby(true);
+        toast.success("Partner accepted! Entering lobby...");
+      }, 2000);
+    } catch (error) {
+      console.error('Error in handleInvitePartner:', error);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   const handleUserReady = () => {
@@ -529,6 +559,7 @@ export default function Homepage() {
             xp: 1247,
             isReady: userReady,
           }}
+          sessionId={sessionId}
           onReady={handleUserReady}
           onStartSession={handleStartSession}
         />
