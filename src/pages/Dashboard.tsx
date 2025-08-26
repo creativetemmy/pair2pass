@@ -173,7 +173,7 @@ export default function Dashboard() {
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => navigate(`/session/${session.id}`)}
+                          onClick={() => navigate(`/session-checkin/${session.id}`)}
                         >
                           Join Session
                         </Button>
