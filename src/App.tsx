@@ -36,7 +36,7 @@ const App = () => (
               <Route path="/session" element={<Dashboard />} />
               <Route path="/find-partner" element={<ProtectedRoute><FindPartner /></ProtectedRoute>} />
               <Route path="/match-confirmation" element={<ProtectedRoute><MatchConfirmation /></ProtectedRoute>} />
-              <Route path="/session-checkin" element={<ProtectedRoute><SessionCheckIn /></ProtectedRoute>} />
+              <Route path="/session-checkin/:sessionId" element={<ProtectedRoute><SessionCheckIn /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/profile/:id" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

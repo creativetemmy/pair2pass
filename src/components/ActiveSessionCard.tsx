@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Play, Users, X } from 'lucide-react';
+import { Clock, Play, Users, X, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { CancelSessionModal } from './CancelSessionModal';
+import { SessionReviewModal } from './SessionReviewModal';
 
 interface ActiveSessionCardProps {
   session: {
@@ -22,6 +23,8 @@ interface ActiveSessionCardProps {
 export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [sessionEnded, setSessionEnded] = useState(false);
   const navigate = useNavigate();
   const { address } = useAccount();
 
@@ -35,6 +38,10 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
 
       if (remaining <= 0) {
         setTimeRemaining('Session Ended');
+        if (!sessionEnded) {
+          setSessionEnded(true);
+          setShowReviewModal(true);
+        }
       } else {
         const hours = Math.floor(remaining / (1000 * 60 * 60));
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
@@ -75,6 +82,11 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
     setShowCancelModal(false);
   };
 
+  const handleReviewComplete = () => {
+    // Session completed, will be updated via real-time subscription
+    setShowReviewModal(false);
+  };
+
   return (
     <Card className="border-primary/20 bg-primary/5">
       <CardHeader>
@@ -103,18 +115,30 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
         </div>
         
         <div className="flex justify-end gap-3">
-          <Button 
-            variant="outline" 
-            onClick={handleCancelSession} 
-            className="flex items-center space-x-2"
-          >
-            <X className="h-4 w-4" />
-            <span>Cancel Session</span>
-          </Button>
-          <Button onClick={handleJoinSession} className="flex items-center space-x-2">
-            <Play className="h-4 w-4" />
-            <span>Continue Session</span>
-          </Button>
+          {sessionEnded ? (
+            <Button 
+              onClick={() => setShowReviewModal(true)}
+              className="flex items-center space-x-2 w-full"
+            >
+              <CheckCircle className="h-4 w-4" />
+              <span>Complete Session</span>
+            </Button>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={handleCancelSession} 
+                className="flex items-center space-x-2"
+              >
+                <X className="h-4 w-4" />
+                <span>Cancel Session</span>
+              </Button>
+              <Button onClick={handleJoinSession} className="flex items-center space-x-2">
+                <Play className="h-4 w-4" />
+                <span>Continue Session</span>
+              </Button>
+            </>
+          )}
         </div>
         
         <CancelSessionModal
@@ -122,6 +146,14 @@ export const ActiveSessionCard = ({ session }: ActiveSessionCardProps) => {
           onClose={() => setShowCancelModal(false)}
           sessionId={session.id}
           onCancel={handleSessionCancelled}
+        />
+        
+        <SessionReviewModal
+          open={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          sessionId={session.id}
+          partnerWallet={getPartnerWallet()}
+          onComplete={handleReviewComplete}
         />
       </CardContent>
     </Card>
