@@ -112,10 +112,19 @@ export function StudySessionLobby({
   };
 
   const handleSubmitLink = async () => {
-    if (!linkInput.trim() || !sessionId) {
+    if (!linkInput.trim()) {
       toast({
         title: "Invalid Input",
         description: "Please enter a valid session link.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!sessionId) {
+      toast({
+        title: "Session Error",
+        description: "No active session found. Please try refreshing the page.",
         variant: "destructive",
       });
       return;
