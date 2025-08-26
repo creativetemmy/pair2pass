@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, CheckCircle, Star, Timer, Users } from "lucide-react";
+import { Calendar, Clock, CheckCircle, Star, Timer, Users, ArrowLeft } from "lucide-react";
 import { useSessionDetails } from "@/hooks/useSessionDetails";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,6 +153,14 @@ export default function SessionCheckIn() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/dashboard')}
+          className="mb-4 flex items-center space-x-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Dashboard</span>
+        </Button>
         <h1 className="text-3xl font-bold text-foreground mb-2">Active Study Session</h1>
         <p className="text-muted-foreground">Track your progress and complete the session when done</p>
       </div>
