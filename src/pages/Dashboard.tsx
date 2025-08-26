@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge } from "@/components/gamification/Badge";
 import { ActiveSessionCard } from "@/components/ActiveSessionCard";
+import { CancelSessionModal } from "@/components/CancelSessionModal";
 import { useAccount } from "wagmi";
 import { useActiveSession } from "@/hooks/useActiveSession";
 import { useUserStats } from "@/hooks/useUserStats";
@@ -26,10 +28,23 @@ const formatWalletAddress = (wallet: string) => {
 export default function Dashboard() {
   const { address } = useAccount();
   const navigate = useNavigate();
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const { activeSession, loading: sessionLoading } = useActiveSession();
   const { stats, loading: statsLoading } = useUserStats();
   const { upcomingSessions, loading: upcomingLoading } = useUpcomingSessions();
   const { recentSessions, loading: recentLoading } = useRecentSessions();
+
+  const handleCancelClick = (sessionId: string) => {
+    setSelectedSessionId(sessionId);
+    setCancelModalOpen(true);
+  };
+
+  const handleCancelComplete = () => {
+    // The hook will automatically refresh the data via real-time subscription
+    setCancelModalOpen(false);
+    setSelectedSessionId('');
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 transition-colors duration-300">
@@ -147,13 +162,22 @@ export default function Dashboard() {
                         <p>{format(new Date(session.created_at), "MMM dd, yyyy 'at' h:mm a")}</p>
                         <p>Duration: {Math.floor(session.duration / 60)} hours</p>
                       </div>
-                       <Button 
-                         size="sm" 
-                         variant="outline"
-                         onClick={() => navigate(`/session/${session.id}`)}
-                       >
-                         Join Session
-                       </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleCancelClick(session.id)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/session/${session.id}`)}
+                        >
+                          Join Session
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -240,6 +264,13 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <CancelSessionModal
+        open={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        sessionId={selectedSessionId}
+        onCancel={handleCancelComplete}
+      />
     </div>
   );
 }
