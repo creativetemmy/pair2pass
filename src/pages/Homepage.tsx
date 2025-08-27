@@ -16,15 +16,6 @@ import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-// Mock data
-const mockCategories = [
-  { name: "Programming", icon: "💻", sessions: 342, color: "bg-blue-500" },
-  { name: "Mathematics", icon: "📊", sessions: 198, color: "bg-green-500" },
-  { name: "Sciences", icon: "🔬", sessions: 156, color: "bg-purple-500" },
-  { name: "Languages", icon: "🌍", sessions: 89, color: "bg-orange-500" },
-  { name: "Business", icon: "💼", sessions: 134, color: "bg-red-500" },
-  { name: "Design", icon: "🎨", sessions: 78, color: "bg-pink-500" },
-];
 
 const mockSessions = [
   {
@@ -85,6 +76,7 @@ export default function Homepage() {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState("Programming");
+  const [categories, setCategories] = useState<any[]>([]);
   const { profile } = useProfile(address);
   const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -108,8 +100,105 @@ export default function Homepage() {
       setCurrentTime(new Date());
     }, 1000);
 
+    // Fetch real category data
+    fetchCategoryData();
+
     return () => clearInterval(timer);
   }, [isConnected, navigate]);
+
+  const fetchCategoryData = async () => {
+    try {
+      const { data: sessions, error } = await supabase
+        .from('study_sessions')
+        .select('subject');
+
+      if (error) {
+        console.error('Error fetching sessions:', error);
+        return;
+      }
+
+      // Process subjects to create categories with counts
+      const subjectCounts: { [key: string]: number } = {};
+      sessions?.forEach(session => {
+        const subject = session.subject;
+        subjectCounts[subject] = (subjectCounts[subject] || 0) + 1;
+      });
+
+      // Create category objects with icons
+      const categoryIcons: { [key: string]: string } = {
+        'Programming': '💻',
+        'JavaScript': '💻',
+        'React': '⚛️',
+        'Mathematics': '📊',
+        'Math': '📊',
+        'Calculus': '📐',
+        'Sciences': '🔬',
+        'Physics': '🔬',
+        'Chemistry': '⚗️',
+        'Biology': '🧬',
+        'Languages': '🌍',
+        'English': '📚',
+        'Spanish': '🇪🇸',
+        'French': '🇫🇷',
+        'Business': '💼',
+        'Design': '🎨',
+        'Web3': '🔗',
+        'Blockchain': '🔗',
+        'General Study': '📖'
+      };
+
+      const categoryData = Object.entries(subjectCounts).map(([subject, count]) => ({
+        name: subject,
+        icon: categoryIcons[subject] || '📚',
+        sessions: count,
+        color: getColorForCategory(subject)
+      }));
+
+      // Add some default categories if we don't have enough data
+      if (categoryData.length < 6) {
+        const defaultCategories = [
+          { name: "Programming", icon: "💻", sessions: 42, color: "bg-blue-500" },
+          { name: "Mathematics", icon: "📊", sessions: 28, color: "bg-green-500" },
+          { name: "Sciences", icon: "🔬", sessions: 15, color: "bg-purple-500" },
+          { name: "Languages", icon: "🌍", sessions: 19, color: "bg-orange-500" },
+          { name: "Business", icon: "💼", sessions: 13, color: "bg-red-500" },
+          { name: "Design", icon: "🎨", sessions: 8, color: "bg-pink-500" },
+        ];
+        
+        setCategories([...categoryData, ...defaultCategories.slice(categoryData.length)]);
+      } else {
+        setCategories(categoryData.slice(0, 6));
+      }
+    } catch (error) {
+      console.error('Error in fetchCategoryData:', error);
+      // Fallback to default categories
+      setCategories([
+        { name: "Programming", icon: "💻", sessions: 42, color: "bg-blue-500" },
+        { name: "Mathematics", icon: "📊", sessions: 28, color: "bg-green-500" },
+        { name: "Sciences", icon: "🔬", sessions: 15, color: "bg-purple-500" },
+        { name: "Languages", icon: "🌍", sessions: 19, color: "bg-orange-500" },
+        { name: "Business", icon: "💼", sessions: 13, color: "bg-red-500" },
+        { name: "Design", icon: "🎨", sessions: 8, color: "bg-pink-500" },
+      ]);
+    }
+  };
+
+  const getColorForCategory = (category: string) => {
+    const colors = {
+      'Programming': 'bg-blue-500',
+      'JavaScript': 'bg-yellow-500',
+      'React': 'bg-cyan-500',
+      'Mathematics': 'bg-green-500',
+      'Math': 'bg-green-500',
+      'Sciences': 'bg-purple-500',
+      'Languages': 'bg-orange-500',
+      'Business': 'bg-red-500',
+      'Design': 'bg-pink-500',
+      'Web3': 'bg-indigo-500',
+      'Blockchain': 'bg-indigo-500'
+    };
+    return colors[category as keyof typeof colors] || 'bg-gray-500';
+  };
 
   if (!isConnected) {
     return null;
@@ -340,7 +429,10 @@ export default function Homepage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+                <Card 
+                  className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800"
+                  onClick={() => toast.info("Coming Soon")}
+                >
                   <CardContent className="p-6 text-center">
                     <div className="h-12 w-12 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                       <Calendar className="h-6 w-6 text-purple-600" />
@@ -350,7 +442,10 @@ export default function Homepage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800">
+                <Card 
+                  className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800"
+                  onClick={() => toast.info("Coming Soon")}
+                >
                   <CardContent className="p-6 text-center">
                     <div className="h-12 w-12 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                       <TrendingUp className="h-6 w-6 text-orange-600" />
@@ -366,75 +461,29 @@ export default function Homepage() {
             <section>
               <h2 className="text-2xl font-bold text-foreground mb-6 transition-colors duration-300">Browse Categories</h2>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockCategories.map((category) => (
+                {categories.map((category) => (
                   <Card 
                     key={category.name}
-                    className={`cursor-pointer transition-all duration-300 hover:shadow-md ${
+                    className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 group ${
                       selectedCategory === category.name 
-                        ? 'ring-2 ring-primary bg-primary/5 dark:bg-primary/10' 
-                        : 'hover:bg-muted/50 dark:hover:bg-muted/20'
+                        ? 'ring-2 ring-primary bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10' 
+                        : 'hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 dark:hover:from-muted/20 dark:hover:to-muted/10'
                     }`}
                     onClick={() => setSelectedCategory(category.name)}
                   >
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl mb-2">{category.icon}</div>
-                      <h3 className="font-semibold text-foreground transition-colors duration-300">{category.name}</h3>
-                      <p className="text-sm text-muted-foreground transition-colors duration-300">{category.sessions} sessions</p>
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">{category.icon}</div>
+                      <h3 className="font-semibold text-foreground transition-colors duration-300 mb-1">{category.name}</h3>
+                      <p className="text-sm text-muted-foreground transition-colors duration-300 flex items-center justify-center gap-1">
+                        <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
+                        {category.sessions} active sessions
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             </section>
 
-            {/* Featured Sessions */}
-            <section>
-              <h2 className="text-2xl font-bold text-foreground mb-6 transition-colors duration-300">Featured Sessions</h2>
-              <div className="grid lg:grid-cols-3 gap-6">
-                {mockSessions.map((session) => (
-                  <Card key={session.id} className="group hover:shadow-lg transition-all duration-300">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-2xl">{session.emoji}</span>
-                          {session.isLive && (
-                            <div className="flex items-center space-x-1">
-                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                              <span className="text-xs text-red-500 font-medium">LIVE</span>
-                            </div>
-                          )}
-                        </div>
-                        <Badge variant="secondary">{session.price} PASS</Badge>
-                      </div>
-                      <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">
-                        {session.title}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground transition-colors duration-300">by {session.instructor}</p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3 transition-colors duration-300">
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{session.rating}</span>
-                        </div>
-                        <span>{session.participants} learners</span>
-                        <span>{session.duration}</span>
-                        <span>{session.startTime}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {session.tags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button className="w-full transition-colors duration-300">
-                        {session.isLive ? "Join Now" : "Register"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
           </div>
 
           {/* Sidebar */}
