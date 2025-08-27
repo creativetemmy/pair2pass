@@ -101,7 +101,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
         .select()
         .single();
 
-      if (matchError) throw matchError;
+      if (matchError || !matchRequest) throw matchError || new Error('Failed to create match request');
 
       // Create notification for the target user
       const { error: notificationError } = await supabase
@@ -192,7 +192,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Subject */}
           <div>
-            <Label htmlFor="subject" className="flex items-center space-x-1">
+            <Label htmlFor="subject" className="flex items-center space-x-1 mb-2">
               <BookOpen className="h-4 w-4" />
               <span>Subject *</span>
             </Label>
@@ -207,7 +207,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
 
           {/* Study Goal */}
           <div>
-            <Label htmlFor="goal" className="flex items-center space-x-1">
+            <Label htmlFor="goal" className="flex items-center space-x-1 mb-2">
               <Target className="h-4 w-4" />
               <span>Study Goal *</span>
             </Label>
@@ -223,7 +223,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
 
           {/* Duration */}
           <div>
-            <Label htmlFor="duration" className="flex items-center space-x-1">
+            <Label htmlFor="duration" className="flex items-center space-x-1 mb-2">
               <Clock className="h-4 w-4" />
               <span>Study Duration</span>
             </Label>
