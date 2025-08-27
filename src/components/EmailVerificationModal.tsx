@@ -27,28 +27,42 @@ export function EmailVerificationModal({
   const { toast } = useToast();
 
   const sendOTP = async () => {
-    if (!email) return;
+    if (!email) {
+      console.log('❌ No email provided');
+      return;
+    }
     
+    console.log('📧 Attempting to send OTP to:', email);
     setSending(true);
+    
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
           shouldCreateUser: false,
         }
       });
 
+      console.log('📧 Supabase OTP Response:', { data, error });
+
       if (error) {
+        console.error('❌ OTP Error:', error);
         toast({
           title: "Error",
-          description: error.message,
+          description: error.message || "Failed to send verification code",
           variant: "destructive",
         });
         return;
       }
 
+      console.log('✅ OTP sent successfully');
+      toast({
+        title: "Code Sent",
+        description: "Verification code has been sent to your email. Check your spam folder if you don't see it.",
+      });
       setStep('verify');
     } catch (error) {
+      console.error('❌ Unexpected error:', error);
       toast({
         title: "Error",
         description: "Failed to send verification code. Please try again.",
