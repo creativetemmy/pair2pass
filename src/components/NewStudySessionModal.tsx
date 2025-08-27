@@ -106,7 +106,7 @@ export function NewStudySessionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden glass-card border-primary/20 shadow-2xl">
+      <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden glass-card border-primary/20 shadow-2xl" onInteractOutside={(e) => e.preventDefault()}>
         {/* Header with Quest Parchment Style */}
         <div className="relative bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 p-6 border-b border-primary/10">
           <div className="absolute inset-0 opacity-30" style={{

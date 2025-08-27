@@ -118,6 +118,7 @@ export default function Homepage() {
 
   const fetchCategoryData = async () => {
     try {
+      console.log('Fetching category data...');
       const { data: sessions, error } = await supabase
         .from('study_sessions')
         .select('subject');
@@ -127,6 +128,8 @@ export default function Homepage() {
         return;
       }
 
+      console.log('Sessions data:', sessions);
+
       // Process subjects to create categories with counts
       const subjectCounts: { [key: string]: number } = {};
       sessions?.forEach(session => {
@@ -134,11 +137,14 @@ export default function Homepage() {
         subjectCounts[subject] = (subjectCounts[subject] || 0) + 1;
       });
 
+      console.log('Subject counts:', subjectCounts);
+
       // Create category objects with icons
       const categoryIcons: { [key: string]: string } = {
         'Programming': '💻',
         'JavaScript': '💻',
         'React': '⚛️',
+        'AI': '🤖',
         'Mathematics': '📊',
         'Math': '📊',
         'Calculus': '📐',
@@ -152,6 +158,7 @@ export default function Homepage() {
         'French': '🇫🇷',
         'Business': '💼',
         'Design': '🎨',
+        'Web Development': '🌐',
         'Web3': '🔗',
         'Blockchain': '🔗',
         'General Study': '📖'
@@ -164,21 +171,30 @@ export default function Homepage() {
         color: getColorForCategory(subject)
       }));
 
-      // Add some default categories if we don't have enough data
-      if (categoryData.length < 6) {
-        const defaultCategories = [
-          { name: "Programming", icon: "💻", sessions: 42, color: "bg-blue-500" },
-          { name: "Mathematics", icon: "📊", sessions: 28, color: "bg-green-500" },
-          { name: "Sciences", icon: "🔬", sessions: 15, color: "bg-purple-500" },
-          { name: "Languages", icon: "🌍", sessions: 19, color: "bg-orange-500" },
-          { name: "Business", icon: "💼", sessions: 13, color: "bg-red-500" },
-          { name: "Design", icon: "🎨", sessions: 8, color: "bg-pink-500" },
-        ];
-        
-        setCategories([...categoryData, ...defaultCategories.slice(categoryData.length)]);
-      } else {
-        setCategories(categoryData.slice(0, 6));
-      }
+      console.log('Category data:', categoryData);
+
+      // Add some popular categories if we don't have enough real data
+      const popularCategories = [
+        { name: "Programming", icon: "💻", sessions: 42, color: "bg-blue-500" },
+        { name: "Mathematics", icon: "📊", sessions: 28, color: "bg-green-500" },
+        { name: "Sciences", icon: "🔬", sessions: 15, color: "bg-purple-500" },
+        { name: "Languages", icon: "🌍", sessions: 19, color: "bg-orange-500" },
+        { name: "Business", icon: "💼", sessions: 13, color: "bg-red-500" },
+        { name: "Design", icon: "🎨", sessions: 8, color: "bg-pink-500" },
+      ];
+
+      // Combine real data with popular categories, prioritizing real data
+      const combinedCategories = [...categoryData];
+      popularCategories.forEach(popularCat => {
+        if (!categoryData.find(cat => cat.name === popularCat.name)) {
+          combinedCategories.push(popularCat);
+        }
+      });
+
+      const finalCategories = combinedCategories.slice(0, 6);
+      console.log('Final categories:', finalCategories);
+      
+      setCategories(finalCategories);
     } catch (error) {
       console.error('Error in fetchCategoryData:', error);
       // Fallback to default categories
@@ -198,12 +214,14 @@ export default function Homepage() {
       'Programming': 'bg-blue-500',
       'JavaScript': 'bg-yellow-500',
       'React': 'bg-cyan-500',
+      'AI': 'bg-violet-500',
       'Mathematics': 'bg-green-500',
       'Math': 'bg-green-500',
       'Sciences': 'bg-purple-500',
       'Languages': 'bg-orange-500',
       'Business': 'bg-red-500',
       'Design': 'bg-pink-500',
+      'Web Development': 'bg-teal-500',
       'Web3': 'bg-indigo-500',
       'Blockchain': 'bg-indigo-500'
     };
