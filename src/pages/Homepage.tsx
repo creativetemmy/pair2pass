@@ -327,7 +327,10 @@ export default function Homepage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
+                <Card 
+                  className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800"
+                  onClick={() => navigate("/find-partner")}
+                >
                   <CardContent className="p-6 text-center">
                     <div className="h-12 w-12 rounded-lg bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                       <BookOpen className="h-6 w-6 text-green-600" />
