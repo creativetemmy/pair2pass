@@ -647,9 +647,38 @@ export default function Profile() {
                          Group Project
                        </ToggleGroupItem>
                      </ToggleGroup>
-                   </div>
+                    </div>
 
-            <div>
+                    <div>
+                      <Label className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Preferred Study Times
+                      </Label>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Select when you prefer to study. You can choose multiple time slots.
+                      </p>
+                      <ToggleGroup 
+                        type="multiple" 
+                        value={editedProfile.preferred_study_times || []}
+                        onValueChange={(value) => setEditedProfile(prev => ({ ...prev, preferred_study_times: value }))}
+                        className="justify-start flex-wrap gap-2"
+                      >
+                        <ToggleGroupItem value="Morning" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                          🌅 Morning
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="Afternoon" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                          🌞 Afternoon
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="Evening" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                          🌙 Evening
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="Night" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                          🌌 Night
+                        </ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
+
+             <div>
               <Label>Subjects of Interest</Label>
               <div className="flex gap-2 mb-2">
                 <Input
@@ -750,9 +779,27 @@ export default function Profile() {
                          <p className="text-muted-foreground text-sm">No study goals selected yet</p>
                        )}
                      </div>
-                   </div>
-                   
-            <div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Preferred Study Times
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {profile?.preferred_study_times?.length ? (
+                          profile.preferred_study_times.map((time) => (
+                            <Badge key={time} variant="outline" className="border-primary text-primary">
+                              {time === 'Morning' && '🌅 '}{time === 'Afternoon' && '🌞 '}{time === 'Evening' && '🌙 '}{time === 'Night' && '🌌 '}{time}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-muted-foreground text-sm">No preferred study times selected yet</p>
+                        )}
+                      </div>
+                    </div>
+                    
+             <div>
               <h3 className="font-semibold text-foreground mb-3">Subjects of Interest</h3>
               <div className="flex flex-wrap gap-2">
                 {profile?.interests?.length ? (
