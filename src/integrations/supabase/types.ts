@@ -100,6 +100,7 @@ export type Database = {
           id: string
           institution: string | null
           interests: string[] | null
+          is_email_verified: boolean | null
           level: number | null
           name: string | null
           partners_helped: number | null
@@ -125,6 +126,7 @@ export type Database = {
           id?: string
           institution?: string | null
           interests?: string[] | null
+          is_email_verified?: boolean | null
           level?: number | null
           name?: string | null
           partners_helped?: number | null
@@ -150,6 +152,7 @@ export type Database = {
           id?: string
           institution?: string | null
           interests?: string[] | null
+          is_email_verified?: boolean | null
           level?: number | null
           name?: string | null
           partners_helped?: number | null

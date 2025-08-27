@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
-import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target } from "lucide-react";
+import { EmailVerificationModal } from "@/components/EmailVerificationModal";
+import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
@@ -55,6 +56,7 @@ export default function Profile() {
   const [interestInput, setInterestInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -209,6 +211,37 @@ export default function Profile() {
     }
   };
 
+  const handleEmailVerification = () => {
+    if (!editedProfile.email) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsVerificationModalOpen(true);
+  };
+
+  const handleVerificationSuccess = async () => {
+    // Update local state to reflect verification
+    setEditedProfile(prev => ({ ...prev, is_email_verified: true }));
+    
+    // Award XP points
+    const updatedProfile = { 
+      ...editedProfile, 
+      is_email_verified: true,
+      xp: (editedProfile.xp || 0) + 50,
+    };
+    
+    await saveProfile(updatedProfile);
+    
+    toast({
+      title: "Success",
+      description: "Email verified successfully! You've earned 50 XP points.",
+    });
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -242,13 +275,48 @@ export default function Profile() {
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editedProfile.email || ""}
-                  onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="your.email@university.edu"
-                />
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      id="email"
+                      type="email"
+                      value={editedProfile.email || ""}
+                      onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="your.email@university.edu"
+                      className="flex-1"
+                    />
+                    {editedProfile.email && !editedProfile.is_email_verified && (
+                      <Button 
+                        type="button"
+                        onClick={handleEmailVerification}
+                        size="sm"
+                        className="shrink-0"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Verify Email
+                      </Button>
+                    )}
+                  </div>
+                  {editedProfile.email && (
+                    <>
+                      {editedProfile.is_email_verified ? (
+                        <div className="flex items-center gap-2 text-sm text-green-600">
+                          <CheckCircle className="h-4 w-4" />
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            Verified
+                          </Badge>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-800">
+                          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                          <p className="text-sm text-amber-700 dark:text-amber-300">
+                            ⚠️ Please verify your email to unlock session invites, notifications, and rewards.
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -563,13 +631,49 @@ export default function Profile() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={editedProfile.email || ""}
-                        onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
-                      />
+                      <Label htmlFor="email">Email Address</Label>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            id="email"
+                            type="email"
+                            value={editedProfile.email || ""}
+                            onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
+                            placeholder="your.email@university.edu"
+                            className="flex-1"
+                          />
+                          {editedProfile.email && !editedProfile.is_email_verified && (
+                            <Button 
+                              type="button"
+                              onClick={handleEmailVerification}
+                              size="sm"
+                              className="shrink-0"
+                            >
+                              <Mail className="h-4 w-4 mr-2" />
+                              Verify Email
+                            </Button>
+                          )}
+                        </div>
+                        {editedProfile.email && (
+                          <>
+                            {editedProfile.is_email_verified ? (
+                              <div className="flex items-center gap-2 text-sm text-green-600">
+                                <CheckCircle className="h-4 w-4" />
+                                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                  Verified
+                                </Badge>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-800">
+                                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                <p className="text-sm text-amber-700 dark:text-amber-300">
+                                  ⚠️ Please verify your email to unlock session invites, notifications, and rewards.
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -743,7 +847,26 @@ export default function Profile() {
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Contact</h3>
                       <div className="space-y-2 text-sm">
-                        <p><span className="text-muted-foreground">Email:</span> {profile?.email || "Not provided"}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Email:</span>
+                          <div className="flex items-center gap-2">
+                            <span>{profile?.email || "Not provided"}</span>
+                            {profile?.email && profile?.is_email_verified && (
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Verified
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        {profile?.email && !profile?.is_email_verified && (
+                          <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-800">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <p className="text-xs text-amber-700 dark:text-amber-300">
+                              ⚠️ Please verify your email to unlock session invites, notifications, and rewards.
+                            </p>
+                          </div>
+                        )}
                         <p><span className="text-muted-foreground">ENS:</span> {profile?.ens_name || ensName || "Not set"}</p>
                       </div>
                     </div>
@@ -862,6 +985,13 @@ export default function Profile() {
           </Card>
         </div>
       </div>
+
+      <EmailVerificationModal
+        isOpen={isVerificationModalOpen}
+        onClose={() => setIsVerificationModalOpen(false)}
+        email={editedProfile.email || ""}
+        onVerificationSuccess={handleVerificationSuccess}
+      />
     </div>
   );
 }
