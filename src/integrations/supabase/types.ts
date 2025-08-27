@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      match_requests: {
+        Row: {
+          created_at: string
+          duration: number
+          expires_at: string
+          goal: string
+          id: string
+          requester_wallet: string
+          status: string
+          subject: string
+          target_wallet: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: number
+          expires_at?: string
+          goal: string
+          id?: string
+          requester_wallet: string
+          status?: string
+          subject: string
+          target_wallet: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration?: number
+          expires_at?: string
+          goal?: string
+          id?: string
+          requester_wallet?: string
+          status?: string
+          subject?: string
+          target_wallet?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_wallet: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type: string
+          user_wallet: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_wallet?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           academic_level: string | null

@@ -4,6 +4,7 @@ import { Home, Users, Calendar, User, Wallet, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
@@ -70,9 +71,7 @@ export function Navigation() {
 
           {/* Theme Toggle & Wallet Button */}
           <div className="hidden md:flex items-center space-x-2">
-
-
-
+            {isConnected && <NotificationBell />}
             <ThemeToggle />
             
             {/* Open App Button */}

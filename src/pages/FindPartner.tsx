@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { ConnectModal } from "@/components/ConnectModal";
 
 const timeSlots = [
   { label: "Morning (8:00 AM - 12:00 PM)", value: "Morning" },
@@ -59,6 +60,10 @@ export default function FindPartner() {
   const [availableInterests, setAvailableInterests] = useState<string[]>([]);
   const [availableAcademicLevels, setAvailableAcademicLevels] = useState<string[]>([]);
   const [availableInstitutions, setAvailableInstitutions] = useState<string[]>([]);
+  
+  // Connect modal state
+  const [selectedPartner, setSelectedPartner] = useState<Profile | null>(null);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
 
   const handleTimeToggle = (time: string) => {
     setSelectedTimes(prev => 
@@ -188,6 +193,11 @@ export default function FindPartner() {
   const getInitials = (name: string | null) => {
     if (!name) return "??";
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const handleConnect = (partner: Profile) => {
+    setSelectedPartner(partner);
+    setConnectModalOpen(true);
   };
 
   return (
@@ -383,7 +393,11 @@ export default function FindPartner() {
                         </div>
                       </div>
                       <div className="flex flex-col space-y-2 min-w-[120px]">
-                        <Button variant="default" size="sm">
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => handleConnect(profile)}
+                        >
                           <Users className="h-4 w-4 mr-1" />
                           Connect
                         </Button>
@@ -420,6 +434,18 @@ export default function FindPartner() {
           )}
         </div>
       </div>
+
+      {/* Connect Modal */}
+      {selectedPartner && (
+        <ConnectModal
+          partner={selectedPartner}
+          isOpen={connectModalOpen}
+          onClose={() => {
+            setConnectModalOpen(false);
+            setSelectedPartner(null);
+          }}
+        />
+      )}
     </div>
   );
 }
