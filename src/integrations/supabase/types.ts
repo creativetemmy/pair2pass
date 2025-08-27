@@ -31,6 +31,7 @@ export type Database = {
           level: number | null
           name: string | null
           partners_helped: number | null
+          preferred_study_times: string[] | null
           reliability_score: number | null
           sessions_completed: number | null
           skills: string[] | null
@@ -55,6 +56,7 @@ export type Database = {
           level?: number | null
           name?: string | null
           partners_helped?: number | null
+          preferred_study_times?: string[] | null
           reliability_score?: number | null
           sessions_completed?: number | null
           skills?: string[] | null
@@ -79,6 +81,7 @@ export type Database = {
           level?: number | null
           name?: string | null
           partners_helped?: number | null
+          preferred_study_times?: string[] | null
           reliability_score?: number | null
           sessions_completed?: number | null
           skills?: string[] | null

@@ -15,6 +15,7 @@ export interface Profile {
   skills: string[];
   interests: string[];
   study_goals: string[];
+  preferred_study_times: string[];
   avatar_url?: string;
   level: number;
   xp: number;
@@ -57,7 +58,8 @@ export function useProfile(walletAddress?: string) {
 
       setProfile(data ? {
         ...data,
-        study_goals: (data as any)?.study_goals || []
+        study_goals: (data as any)?.study_goals || [],
+        preferred_study_times: (data as any)?.preferred_study_times || []
       } : null);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -83,6 +85,7 @@ export function useProfile(walletAddress?: string) {
           skills: profileData.skills || [],
           interests: profileData.interests || [],
           study_goals: profileData.study_goals || [],
+          preferred_study_times: profileData.preferred_study_times || [],
         })
         .select()
         .single();
@@ -101,7 +104,8 @@ export function useProfile(walletAddress?: string) {
 
       setProfile({
         ...data,
-        study_goals: (data as any)?.study_goals || []
+        study_goals: (data as any)?.study_goals || [],
+        preferred_study_times: (data as any)?.preferred_study_times || []
       });
       toast({
         title: "Success",
@@ -151,7 +155,8 @@ export function useProfile(walletAddress?: string) {
 
       setProfile({
         ...data,
-        study_goals: (data as any)?.study_goals || []
+        study_goals: (data as any)?.study_goals || [],
+        preferred_study_times: (data as any)?.preferred_study_times || []
       });
       toast({
         title: "Success",

@@ -35,6 +35,7 @@ const initialProfileData: Partial<Profile> = {
   skills: [],
   interests: [],
   study_goals: [],
+  preferred_study_times: [],
   level: 1,
   xp: 0,
   sessions_completed: 0,
@@ -353,6 +354,35 @@ export default function Profile() {
                 </ToggleGroupItem>
                 <ToggleGroupItem value="Group Project" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
                   Group Project
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            <div>
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Preferred Study Times
+              </Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                Select when you prefer to study. You can choose multiple time slots.
+              </p>
+              <ToggleGroup 
+                type="multiple" 
+                value={editedProfile.preferred_study_times || []}
+                onValueChange={(value) => setEditedProfile(prev => ({ ...prev, preferred_study_times: value }))}
+                className="justify-start flex-wrap gap-2"
+              >
+                <ToggleGroupItem value="Morning" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  🌅 Morning
+                </ToggleGroupItem>
+                <ToggleGroupItem value="Afternoon" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  🌞 Afternoon
+                </ToggleGroupItem>
+                <ToggleGroupItem value="Evening" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  🌙 Evening
+                </ToggleGroupItem>
+                <ToggleGroupItem value="Night" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  🌌 Night
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
