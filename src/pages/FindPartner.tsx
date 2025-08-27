@@ -12,10 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const timeSlots = [
-  "Morning (8:00 AM - 12:00 PM)",
-  "Afternoon (12:00 PM - 5:00 PM)", 
-  "Evening (5:00 PM - 9:00 PM)",
-  "Night (9:00 PM - 12:00 AM)",
+  { label: "Morning (8:00 AM - 12:00 PM)", value: "Morning" },
+  { label: "Afternoon (12:00 PM - 5:00 PM)", value: "Afternoon" }, 
+  { label: "Evening (5:00 PM - 9:00 PM)", value: "Evening" },
+  { label: "Night (9:00 PM - 12:00 AM)", value: "Night" },
 ];
 
 const academicLevels = [
@@ -40,6 +40,7 @@ interface Profile {
   institution: string | null;
   academic_level: string | null;
   bio: string | null;
+  preferred_study_times: string[];
 }
 
 export default function FindPartner() {
@@ -88,6 +89,18 @@ export default function FindPartner() {
 
       if (location && location !== "any") {
         query = query.eq('institution', location);
+      }
+
+      // Filter by preferred study times if selected
+      if (selectedTimes.length > 0) {
+        // Convert selected time labels to values (e.g., "Morning (8:00 AM - 12:00 PM)" -> "Morning")
+        const timeValues = selectedTimes.map(time => {
+          const timeSlot = timeSlots.find(slot => slot.label === time);
+          return timeSlot ? timeSlot.value : time;
+        });
+        
+        // Filter profiles that have at least one matching preferred study time
+        query = query.overlaps('preferred_study_times', timeValues);
       }
 
       // Apply sorting
@@ -250,15 +263,15 @@ export default function FindPartner() {
             <div>
               <Label>Availability</Label>
               <div className="space-y-2 mt-2">
-                {timeSlots.map((time) => (
-                  <div key={time} className="flex items-center space-x-2">
+                {timeSlots.map((timeSlot) => (
+                  <div key={timeSlot.label} className="flex items-center space-x-2">
                     <Checkbox 
-                      id={time}
-                      checked={selectedTimes.includes(time)}
-                      onCheckedChange={() => handleTimeToggle(time)}
+                      id={timeSlot.label}
+                      checked={selectedTimes.includes(timeSlot.label)}
+                      onCheckedChange={() => handleTimeToggle(timeSlot.label)}
                     />
-                    <Label htmlFor={time} className="text-sm">
-                      {time}
+                    <Label htmlFor={timeSlot.label} className="text-sm">
+                      {timeSlot.label}
                     </Label>
                   </div>
                 ))}
