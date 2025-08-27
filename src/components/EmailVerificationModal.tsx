@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { awardXP } from "@/lib/xpSystem";
+import { useAccount } from "wagmi";
 
 interface EmailVerificationModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ export function EmailVerificationModal({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
+  const { address } = useAccount();
 
   const sendOTP = async () => {
     if (!email) {
@@ -102,6 +105,11 @@ export function EmailVerificationModal({
 
       if (updateError) {
         console.error('Error updating profile:', updateError);
+      }
+
+      // Award XP for email verification
+      if (address) {
+        await awardXP(address, 'EMAIL_VERIFIED');
       }
 
       setStep('success');

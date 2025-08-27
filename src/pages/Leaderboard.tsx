@@ -1,73 +1,10 @@
 import React from "react";
-import { Trophy, Medal, Star, TrendingUp, Users, Zap } from "lucide-react";
+import { Trophy, Medal, Star, TrendingUp, Users, Zap, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-
-// Mock data for leaderboard
-const mockLeaderboard = [
-  {
-    id: 1,
-    rank: 1,
-    name: "Alex Chen",
-    avatar: "/placeholder.svg",
-    points: 15420,
-    sessionsCompleted: 87,
-    studyHours: 142,
-    achievements: ["Top Performer", "Study Streak"],
-    trend: "+23%",
-    level: 12
-  },
-  {
-    id: 2,
-    rank: 2,
-    name: "Sarah Johnson",
-    avatar: "/placeholder.svg",
-    points: 14850,
-    sessionsCompleted: 82,
-    studyHours: 138,
-    achievements: ["Quick Learner", "Team Player"],
-    trend: "+18%",
-    level: 11
-  },
-  {
-    id: 3,
-    rank: 3,
-    name: "Mike Rodriguez",
-    avatar: "/placeholder.svg",
-    points: 14200,
-    sessionsCompleted: 79,
-    studyHours: 135,
-    achievements: ["Consistent", "Helper"],
-    trend: "+15%",
-    level: 11
-  },
-  {
-    id: 4,
-    rank: 4,
-    name: "Emily Davis",
-    avatar: "/placeholder.svg",
-    points: 13800,
-    sessionsCompleted: 75,
-    studyHours: 128,
-    achievements: ["Fast Track"],
-    trend: "+12%",
-    level: 10
-  },
-  {
-    id: 5,
-    rank: 5,
-    name: "David Kim",
-    avatar: "/placeholder.svg",
-    points: 13200,
-    sessionsCompleted: 71,
-    studyHours: 122,
-    achievements: ["Rising Star"],
-    trend: "+10%",
-    level: 10
-  }
-];
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 const achievements = [
   { name: "Top Performer", icon: Trophy, color: "text-yellow-500" },
@@ -94,6 +31,19 @@ const getRankIcon = (rank: number) => {
 };
 
 const Leaderboard = () => {
+  const { leaderboard, weeklyStats, popularSubjects, loading } = useLeaderboard();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading leaderboard...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -122,55 +72,67 @@ const Leaderboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockLeaderboard.map((user) => (
-                  <div
-                    key={user.id}
-                    className={`flex items-center gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50 ${
-                      user.rank <= 3 ? 'bg-muted/30' : ''
-                    }`}
-                  >
-                    {/* Rank */}
-                    <div className="flex-shrink-0 w-12 flex justify-center">
-                      {getRankIcon(user.rank)}
-                    </div>
+                {leaderboard.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No users found. Be the first to earn PASS Points!</p>
+                  </div>
+                ) : (
+                  leaderboard.map((user) => (
+                    <div
+                      key={user.id}
+                      className={`flex items-center gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50 ${
+                        user.rank <= 3 ? 'bg-muted/30' : ''
+                      }`}
+                    >
+                      {/* Rank */}
+                      <div className="flex-shrink-0 w-12 flex justify-center">
+                        {getRankIcon(user.rank)}
+                      </div>
 
-                    {/* Avatar and Info */}
-                    <div className="flex items-center gap-3 flex-1">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">{user.name}</h3>
-                          <Badge variant="secondary">Level {user.level}</Badge>
-                          <span className="text-sm text-green-600 font-medium">{user.trend}</span>
-                        </div>
+                      {/* Avatar and Info */}
+                      <div className="flex items-center gap-3 flex-1">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={user.avatar_url || "/placeholder.svg"} alt={user.name || "User"} />
+                          <AvatarFallback>
+                            {user.name 
+                              ? user.name.split(' ').map(n => n[0]).join('').toUpperCase()
+                              : user.wallet_address.slice(-2).toUpperCase()
+                            }
+                          </AvatarFallback>
+                        </Avatar>
                         
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {user.achievements.map((achievement) => {
-                            const achievementData = achievements.find(a => a.name === achievement);
-                            if (!achievementData) return null;
-                            const IconComponent = achievementData.icon;
-                            return (
-                              <Badge key={achievement} variant="outline" className="text-xs">
-                                <IconComponent className={`h-3 w-3 mr-1 ${achievementData.color}`} />
-                                {achievement}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
-                          <span>{user.sessionsCompleted} sessions</span>
-                          <span>{user.studyHours}h studied</span>
-                          <span className="text-primary font-semibold">{user.points.toLocaleString()} PASS</span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{user.name || `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`}</h3>
+                            <Badge variant="secondary">Level {user.level}</Badge>
+                            <span className="text-sm text-green-600 font-medium">{user.trend}</span>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {user.achievements.map((achievement) => {
+                              const achievementData = achievements.find(a => a.name === achievement);
+                              if (!achievementData) return null;
+                              const IconComponent = achievementData.icon;
+                              return (
+                                <Badge key={achievement} variant="outline" className="text-xs">
+                                  <IconComponent className={`h-3 w-3 mr-1 ${achievementData.color}`} />
+                                  {achievement}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
+                            <span>{user.sessions_completed} sessions</span>
+                            <span>{user.hours_studied}h studied</span>
+                            <span className="text-primary font-semibold">{user.xp.toLocaleString()} PASS</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
           </div>
@@ -186,25 +148,25 @@ const Leaderboard = () => {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Total Sessions</span>
-                    <span className="text-sm font-bold">1,247</span>
+                    <span className="text-sm font-bold">{weeklyStats.totalSessions.toLocaleString()}</span>
                   </div>
-                  <Progress value={82} className="h-2" />
+                  <Progress value={Math.min((weeklyStats.totalSessions / 100) * 10, 100)} className="h-2" />
                 </div>
                 
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Active Learners</span>
-                    <span className="text-sm font-bold">2,847</span>
+                    <span className="text-sm font-bold">{weeklyStats.activeLearners.toLocaleString()}</span>
                   </div>
-                  <Progress value={94} className="h-2" />
+                  <Progress value={Math.min((weeklyStats.activeLearners / 50) * 10, 100)} className="h-2" />
                 </div>
                 
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">PASS Distributed</span>
-                    <span className="text-sm font-bold">124,850</span>
+                    <span className="text-sm font-bold">{weeklyStats.passDistributed.toLocaleString()}</span>
                   </div>
-                  <Progress value={76} className="h-2" />
+                  <Progress value={Math.min((weeklyStats.passDistributed / 1000) * 10, 100)} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -233,22 +195,18 @@ const Leaderboard = () => {
                 <CardTitle className="text-lg">Popular Study Areas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Programming</span>
-                  <Badge variant="secondary">342 sessions</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Mathematics</span>
-                  <Badge variant="secondary">198 sessions</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Sciences</span>
-                  <Badge variant="secondary">156 sessions</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Languages</span>
-                  <Badge variant="secondary">89 sessions</Badge>
-                </div>
+                {popularSubjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground text-sm">
+                    No study sessions yet
+                  </div>
+                ) : (
+                  popularSubjects.map((subject) => (
+                    <div key={subject.subject} className="flex justify-between items-center">
+                      <span className="text-sm capitalize">{subject.subject}</span>
+                      <Badge variant="secondary">{subject.sessionCount} sessions</Badge>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
           </div>

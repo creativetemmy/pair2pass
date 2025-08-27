@@ -7,6 +7,7 @@ import { Star, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
+import { awardXP, updateSessionStats } from "@/lib/xpSystem";
 
 interface SessionReviewModalProps {
   open: boolean;
@@ -60,6 +61,15 @@ export const SessionReviewModal = ({
         return;
       }
 
+      // Get session data to calculate duration
+      const { data: sessionData } = await supabase
+        .from('study_sessions')
+        .select('duration, created_at')
+        .eq('id', sessionId)
+        .single();
+
+      const sessionDuration = sessionData?.duration || 60; // Default to 60 minutes
+
       // Create session review record
       const { error: reviewError } = await supabase
         .from('session_reviews')
@@ -83,6 +93,14 @@ export const SessionReviewModal = ({
         .eq('id', sessionId);
 
       if (sessionError) throw sessionError;
+
+      // Award XP and update stats for session completion
+      await Promise.all([
+        awardXP(address, 'SESSION_COMPLETED'),
+        updateSessionStats(address, sessionDuration, rating),
+        // Award XP to partner for being helped
+        awardXP(partnerWallet, 'PARTNER_HELPED', false)
+      ]);
       
       toast.success("Session completed and review submitted!");
       onComplete();

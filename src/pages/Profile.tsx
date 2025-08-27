@@ -227,19 +227,14 @@ export default function Profile() {
     // Update local state to reflect verification
     setEditedProfile(prev => ({ ...prev, is_email_verified: true }));
     
-    // Award XP points
+    // The XP is already awarded in the EmailVerificationModal
+    // Just update the profile verification status
     const updatedProfile = { 
       ...editedProfile, 
-      is_email_verified: true,
-      xp: (editedProfile.xp || 0) + 50,
+      is_email_verified: true
     };
     
     await saveProfile(updatedProfile);
-    
-    toast({
-      title: "Success",
-      description: "Email verified successfully! You've earned 50 XP points.",
-    });
   };
 
   if (loading) {
