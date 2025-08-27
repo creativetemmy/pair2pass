@@ -96,6 +96,7 @@ export type Database = {
           department: string | null
           email: string | null
           ens_name: string | null
+          has_passport: boolean | null
           hours_studied: number | null
           id: string
           institution: string | null
@@ -122,6 +123,7 @@ export type Database = {
           department?: string | null
           email?: string | null
           ens_name?: string | null
+          has_passport?: boolean | null
           hours_studied?: number | null
           id?: string
           institution?: string | null
@@ -148,6 +150,7 @@ export type Database = {
           department?: string | null
           email?: string | null
           ens_name?: string | null
+          has_passport?: boolean | null
           hours_studied?: number | null
           id?: string
           institution?: string | null

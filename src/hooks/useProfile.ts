@@ -8,6 +8,7 @@ export interface Profile {
   name?: string;
   email?: string;
   is_email_verified?: boolean;
+  has_passport?: boolean;
   ens_name?: string;
   institution?: string;
   department?: string;

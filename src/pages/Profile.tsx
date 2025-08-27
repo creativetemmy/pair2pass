@@ -10,10 +10,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel, AlertDialogFooter } from "@/components/ui/alert-dialog";
+import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award } from "lucide-react";
 import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEnsName } from "wagmi";
@@ -44,12 +47,15 @@ const initialProfileData: Partial<Profile> = {
   partners_helped: 0,
   average_rating: 0,
   reliability_score: 0,
+  is_email_verified: false,
+  has_passport: false,
 };
 
 export default function Profile() {
   const { address, isConnected } = useAccount();
   const { data: ensName } = useEnsName({ address });
   const { profile, loading, saving, saveProfile } = useProfile(address);
+  const profileCompletion = useProfileCompletion(profile);
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
   const [skillInput, setSkillInput] = useState("");
@@ -57,6 +63,8 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
+  const [isClaimingPassport, setIsClaimingPassport] = useState(false);
+  const [showPassportModal, setShowPassportModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -235,6 +243,46 @@ export default function Profile() {
     };
     
     await saveProfile(updatedProfile);
+  };
+
+  const handleClaimPassport = async () => {
+    if (!profile?.wallet_address) return;
+    
+    try {
+      setIsClaimingPassport(true);
+      
+      // Update the has_passport field in the database
+      const { error } = await supabase
+        .from('profiles')
+        .update({ has_passport: true })
+        .eq('wallet_address', profile.wallet_address);
+
+      if (error) {
+        console.error('Error claiming passport:', error);
+        toast({
+          title: "Error",
+          description: "Failed to claim Student Passport. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Update local state
+      setEditedProfile(prev => ({ ...prev, has_passport: true }));
+      
+      // Show success modal
+      setShowPassportModal(true);
+      
+    } catch (error) {
+      console.error('Error in handleClaimPassport:', error);
+      toast({
+        title: "Error",
+        description: "Failed to claim Student Passport. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClaimingPassport(false);
+    }
   };
 
   if (loading) {
@@ -951,6 +999,73 @@ export default function Profile() {
             </CardContent>
           </Card>
 
+          {/* Profile Completion Progress */}
+          {profile && profileCompletion.completionPercentage > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Award className="h-5 w-5" />
+                  <span>Profile Completion</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Progress</span>
+                  <span className="text-sm font-bold text-primary">
+                    {profileCompletion.completionPercentage}% {profileCompletion.isComplete && "✅"}
+                  </span>
+                </div>
+                <Progress value={profileCompletion.completionPercentage} className="w-full" />
+                
+                {profileCompletion.isComplete && profile.is_email_verified && (
+                  <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
+                          <Trophy className="h-12 w-12 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-primary mb-2">
+                            🎓 Congratulations! Your profile is complete.
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            You are now eligible to claim your <strong>Student Passport NFT</strong>.
+                          </p>
+                          {!profile.has_passport ? (
+                            <Button 
+                              onClick={handleClaimPassport}
+                              disabled={isClaimingPassport}
+                              className="w-full"
+                            >
+                              {isClaimingPassport ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Claiming Passport...
+                                </>
+                              ) : (
+                                <>
+                                  <Award className="h-4 w-4 mr-2" />
+                                  Claim Passport
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <div className="flex items-center justify-center p-3 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-700">
+                              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-sm font-semibold">
+                                ✅ Student Passport Claimed
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Achievements */}
           <Card>
             <CardHeader>
@@ -987,6 +1102,34 @@ export default function Profile() {
         email={editedProfile.email || ""}
         onVerificationSuccess={handleVerificationSuccess}
       />
+
+      {/* Success Modal for Passport Claim */}
+      <AlertDialog open={showPassportModal} onOpenChange={setShowPassportModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trophy className="h-6 w-6 text-primary" />
+              Success!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center py-4">
+              <div className="space-y-3">
+                <div className="text-6xl">🎉</div>
+                <p className="text-lg font-medium">
+                  ✅ Your Student Passport has been reserved.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  NFT minting will be available soon. You'll be notified when it's ready!
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowPassportModal(false)}>
+              Awesome!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
