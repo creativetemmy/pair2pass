@@ -43,7 +43,7 @@ export default function SessionCheckIn() {
             <p className="text-muted-foreground mb-4">
               {error || "The requested session could not be found or is no longer active."}
             </p>
-            <Button onClick={() => navigate('/dashboard')}>
+            <Button onClick={() => navigate('/session')}>
               Return to Dashboard
             </Button>
           </CardContent>
@@ -139,7 +139,7 @@ export default function SessionCheckIn() {
               <Button 
                 variant="default" 
                 className="w-full"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/session')}
               >
                 Return to Dashboard
               </Button>
@@ -155,7 +155,7 @@ export default function SessionCheckIn() {
       <div className="mb-8">
         <Button 
           variant="outline" 
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/session')}
           className="mb-4 flex items-center space-x-2"
         >
           <ArrowLeft className="h-4 w-4" />
