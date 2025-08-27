@@ -31,10 +31,9 @@ interface ConnectModalProps {
 
 const durationOptions = [
   { label: "30 minutes", value: 30 },
-  { label: "1 hour", value: 60 },
-  { label: "1.5 hours", value: 90 },
+  { label: "45 minutes", value: 45 },
+  { label: "60 minutes", value: 60 },
   { label: "2 hours", value: 120 },
-  { label: "3 hours", value: 180 },
 ];
 
 export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
