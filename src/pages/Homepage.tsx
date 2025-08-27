@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, Clock, Play, Users, BookOpen, Trophy, Star, TrendingUp, Calendar } from "lucide-react";
+import { Search, Clock, Play, Users, BookOpen, Trophy, Star, TrendingUp, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { ProfileCheckModal } from "@/components/ProfileCheckModal";
 import { NewStudySessionModal } from "@/components/NewStudySessionModal";
 import { MatchmakingResults } from "@/components/MatchmakingResults";
 import { StudySessionLobby } from "@/components/StudySessionLobby";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { toast } from "sonner";
@@ -103,6 +104,7 @@ export default function Homepage() {
   const [userReady, setUserReady] = useState(false);
   const [partnerReady, setPartnerReady] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [userPassPoints, setUserPassPoints] = useState(0);
 
   useEffect(() => {
     if (!isConnected) {
@@ -120,6 +122,7 @@ export default function Homepage() {
     fetchCommunityActivities();
     fetchWeeklyProgress();
     fetchHeroStats();
+    fetchUserPassPoints();
 
     return () => clearInterval(timer);
   }, [isConnected, navigate, address]);
@@ -421,6 +424,28 @@ export default function Homepage() {
     }
   };
 
+  const fetchUserPassPoints = async () => {
+    try {
+      if (!address) return;
+
+      const { data: userProfile, error } = await supabase
+        .from('profiles')
+        .select('xp')
+        .eq('wallet_address', address)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching user pass points:', error);
+        return;
+      }
+
+      setUserPassPoints(userProfile?.xp || 0);
+    } catch (error) {
+      console.error('Error in fetchUserPassPoints:', error);
+      setUserPassPoints(0);
+    }
+  };
+
   if (!isConnected) {
     return null;
   }
@@ -550,12 +575,11 @@ export default function Homepage() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></div>
-              </Button>
+              <NotificationBell />
               <Card className="px-3 py-1 bg-primary/10 border-primary/20">
-                <span className="text-sm font-medium text-primary">1,247 PASS</span>
+                <span className="text-sm font-medium text-primary">
+                  {userPassPoints.toLocaleString()} PASS
+                </span>
               </Card>
               <Avatar>
                 <AvatarImage src="/api/placeholder/32/32" />
