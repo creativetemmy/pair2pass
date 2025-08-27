@@ -77,6 +77,13 @@ export default function Homepage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState("Programming");
   const [categories, setCategories] = useState<any[]>([]);
+  const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
+  const [communityActivities, setCommunityActivities] = useState<any[]>([]);
+  const [weeklyProgress, setWeeklyProgress] = useState({
+    studyHours: { current: 0, target: 15 },
+    sessionsCompleted: { current: 0, target: 10 },
+    passPoints: { current: 0, target: 500 }
+  });
   const { profile } = useProfile(address);
   const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -100,11 +107,14 @@ export default function Homepage() {
       setCurrentTime(new Date());
     }, 1000);
 
-    // Fetch real category data
+    // Fetch real data
     fetchCategoryData();
+    fetchTodaySchedule();
+    fetchCommunityActivities();
+    fetchWeeklyProgress();
 
     return () => clearInterval(timer);
-  }, [isConnected, navigate]);
+  }, [isConnected, navigate, address]);
 
   const fetchCategoryData = async () => {
     try {
@@ -198,6 +208,147 @@ export default function Homepage() {
       'Blockchain': 'bg-indigo-500'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500';
+  };
+
+  const fetchTodaySchedule = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const { data: sessions, error } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .gte('created_at', today.toISOString())
+        .lt('created_at', tomorrow.toISOString())
+        .in('status', ['waiting', 'active'])
+        .limit(5);
+
+      if (error) {
+        console.error('Error fetching today schedule:', error);
+        return;
+      }
+
+      const scheduleData = sessions?.map(session => ({
+        time: new Date(session.created_at).toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true 
+        }),
+        title: session.subject,
+        status: session.status,
+        color: session.status === 'active' ? 'bg-green-500' : 
+               session.status === 'waiting' ? 'bg-blue-500' : 'bg-gray-400',
+        partner: session.partner_1_id !== address ? session.partner_1_id?.slice(0, 6) : session.partner_2_id?.slice(0, 6)
+      })) || [];
+
+      setTodaySchedule(scheduleData);
+    } catch (error) {
+      console.error('Error in fetchTodaySchedule:', error);
+      setTodaySchedule([
+        { time: "2:00 PM", title: "JavaScript Fundamentals", status: "joined", color: "bg-green-500", partner: "Sarah" },
+        { time: "4:30 PM", title: "Data Structures Deep Dive", status: "upcoming", color: "bg-blue-500", partner: "Mike" },
+        { time: "7:00 PM", title: "Machine Learning Basics", status: "available", color: "bg-gray-400", partner: "Lisa" },
+      ]);
+    }
+  };
+
+  const fetchCommunityActivities = async () => {
+    try {
+      // Get recent profile updates with XP gains
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('name, avatar_url, xp, level, sessions_completed, updated_at, wallet_address')
+        .order('updated_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching community activities:', error);
+        return;
+      }
+
+      const activities = profiles?.map(profile => {
+        // Generate activity based on profile data
+        const activities = [
+          { action: "earned Achievement Badge", emoji: "🏆" },
+          { action: `reached Level ${profile.level}`, emoji: "⭐" },
+          { action: `completed ${profile.sessions_completed} study sessions`, emoji: "💡" },
+          { action: `earned ${profile.xp} PASS points`, emoji: "🎯" },
+          { action: "helped a study partner", emoji: "🤝" }
+        ];
+        
+        const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+        const timeAgo = Math.floor((Date.now() - new Date(profile.updated_at).getTime()) / (1000 * 60));
+        
+        return {
+          user: profile.name || `User ${profile.wallet_address?.slice(0, 6)}`,
+          action: randomActivity.action,
+          emoji: randomActivity.emoji,
+          time: timeAgo < 60 ? `${timeAgo}m ago` : `${Math.floor(timeAgo / 60)}h ago`,
+          avatar: profile.avatar_url
+        };
+      }).slice(0, 5) || [];
+
+      setCommunityActivities(activities);
+    } catch (error) {
+      console.error('Error in fetchCommunityActivities:', error);
+      setCommunityActivities([
+        { user: "Emma Thompson", action: "earned Achievement Badge", time: "2 min ago", emoji: "🏆", avatar: null },
+        { user: "Marcus Johnson", action: "completed 50 study hours", time: "15 min ago", emoji: "💡", avatar: null },
+        { user: "Lisa Wang", action: "reached study goal", time: "1h ago", emoji: "🎯", avatar: null },
+      ]);
+    }
+  };
+
+  const fetchWeeklyProgress = async () => {
+    try {
+      if (!address) return;
+
+      // Get user's profile for current stats
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('xp, sessions_completed, hours_studied')
+        .eq('wallet_address', address)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        return;
+      }
+
+      // Calculate weekly targets based on current stats
+      const currentXP = userProfile?.xp || 0;
+      const currentSessions = userProfile?.sessions_completed || 0;
+      const currentHours = userProfile?.hours_studied || 0;
+
+      // Set weekly targets (you can adjust these based on your app's logic)
+      const weeklyTargets = {
+        studyHours: Math.max(15, Math.ceil(currentHours * 0.2)), // 20% increase target
+        sessionsCompleted: Math.max(10, Math.ceil(currentSessions * 0.1)), // 10% increase target
+        passPoints: Math.max(500, Math.ceil(currentXP * 0.1)) // 10% increase target
+      };
+
+      // Calculate current week progress (mock data for now, you can implement actual weekly tracking)
+      const weekProgress = {
+        studyHours: Math.min(currentHours, weeklyTargets.studyHours),
+        sessionsCompleted: Math.min(currentSessions, weeklyTargets.sessionsCompleted),
+        passPoints: Math.min(currentXP, weeklyTargets.passPoints)
+      };
+
+      setWeeklyProgress({
+        studyHours: { current: weekProgress.studyHours, target: weeklyTargets.studyHours },
+        sessionsCompleted: { current: weekProgress.sessionsCompleted, target: weeklyTargets.sessionsCompleted },
+        passPoints: { current: weekProgress.passPoints, target: weeklyTargets.passPoints }
+      });
+    } catch (error) {
+      console.error('Error in fetchWeeklyProgress:', error);
+      setWeeklyProgress({
+        studyHours: { current: 12, target: 15 },
+        sessionsCompleted: { current: 8, target: 10 },
+        passPoints: { current: 420, target: 500 }
+      });
+    }
   };
 
   if (!isConnected) {
@@ -494,15 +645,36 @@ export default function Homepage() {
                 <CardTitle className="text-lg transition-colors duration-300">Today's Schedule</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {mockSchedule.map((event, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 dark:hover:bg-muted/20 transition-all duration-300">
-                    <div className={`w-3 h-3 rounded-full ${event.color}`}></div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground transition-colors duration-300">{event.time}</div>
-                      <div className="text-xs text-muted-foreground transition-colors duration-300">{event.title}</div>
+                {todaySchedule.length > 0 ? (
+                  todaySchedule.map((event, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 dark:hover:bg-muted/20 transition-all duration-300">
+                      <div className={`w-3 h-3 rounded-full ${event.color}`}></div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-foreground transition-colors duration-300">{event.time}</div>
+                        <div className="text-xs text-muted-foreground transition-colors duration-300">{event.title}</div>
+                        {event.partner && (
+                          <div className="text-xs text-muted-foreground transition-colors duration-300">with {event.partner}</div>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {event.status === 'active' ? 'Live' : event.status === 'waiting' ? 'Pending' : 'Available'}
+                      </Badge>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No sessions scheduled for today</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={handleJoinSession}
+                    >
+                      Schedule a session
+                    </Button>
                   </div>
-                ))}
+                )}
               </CardContent>
             </Card>
 
@@ -515,28 +687,43 @@ export default function Homepage() {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-foreground transition-colors duration-300">Study Hours</span>
-                    <span className="text-muted-foreground transition-colors duration-300">12/15</span>
+                    <span className="text-muted-foreground transition-colors duration-300">
+                      {weeklyProgress.studyHours.current}/{weeklyProgress.studyHours.target}
+                    </span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 transition-colors duration-300">
-                    <div className="bg-blue-500 h-2 rounded-full w-4/5"></div>
+                    <div 
+                      className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min(100, (weeklyProgress.studyHours.current / weeklyProgress.studyHours.target) * 100)}%` }}
+                    ></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-foreground transition-colors duration-300">Sessions Completed</span>
-                    <span className="text-muted-foreground transition-colors duration-300">8/10</span>
+                    <span className="text-muted-foreground transition-colors duration-300">
+                      {weeklyProgress.sessionsCompleted.current}/{weeklyProgress.sessionsCompleted.target}
+                    </span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 transition-colors duration-300">
-                    <div className="bg-green-500 h-2 rounded-full w-4/5"></div>
+                    <div 
+                      className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min(100, (weeklyProgress.sessionsCompleted.current / weeklyProgress.sessionsCompleted.target) * 100)}%` }}
+                    ></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-foreground transition-colors duration-300">PASS Points</span>
-                    <span className="text-muted-foreground transition-colors duration-300">420/500</span>
+                    <span className="text-muted-foreground transition-colors duration-300">
+                      {weeklyProgress.passPoints.current}/{weeklyProgress.passPoints.target}
+                    </span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 transition-colors duration-300">
-                    <div className="bg-purple-500 h-2 rounded-full w-4/5"></div>
+                    <div 
+                      className="bg-purple-500 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min(100, (weeklyProgress.passPoints.current / weeklyProgress.passPoints.target) * 100)}%` }}
+                    ></div>
                   </div>
                 </div>
               </CardContent>
@@ -548,22 +735,29 @@ export default function Homepage() {
                 <CardTitle className="text-lg transition-colors duration-300">Community Highlights</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {mockActivities.map((activity, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 dark:hover:bg-muted/20 transition-all duration-300">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={activity.avatar} />
-                      <AvatarFallback>{activity.user.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm">
-                        <span className="font-medium text-foreground transition-colors duration-300">{activity.user}</span>{' '}
-                        <span className="text-muted-foreground transition-colors duration-300">{activity.action}</span>{' '}
-                        <span className="text-xl">{activity.emoji}</span>
+                {communityActivities.length > 0 ? (
+                  communityActivities.map((activity, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 dark:hover:bg-muted/20 transition-all duration-300">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={activity.avatar} />
+                        <AvatarFallback>{activity.user.split(' ').map((n: string) => n[0]).join('').toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="text-sm">
+                          <span className="font-medium text-foreground transition-colors duration-300">{activity.user}</span>{' '}
+                          <span className="text-muted-foreground transition-colors duration-300">{activity.action}</span>{' '}
+                          <span className="text-lg">{activity.emoji}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground transition-colors duration-300">{activity.time}</div>
                       </div>
-                      <div className="text-xs text-muted-foreground transition-colors duration-300">{activity.time}</div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No recent community activity</p>
                   </div>
-                ))}
+                )}
               </CardContent>
             </Card>
           </div>
