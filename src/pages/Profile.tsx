@@ -1045,7 +1045,7 @@ export default function Profile() {
                               ) : (
                                 <>
                                   <Award className="h-4 w-4 mr-2" />
-                                  Claim Passport
+                                  Mint Student Passport NFT
                                 </>
                               )}
                             </Button>
