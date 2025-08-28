@@ -10,7 +10,6 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 
 const allNavItems = [
-  { icon: Home, label: "Home", path: "/", protected:false},
   { icon: Home, label: "Dashboard", path: "/homepage" ,protected:true},
   { icon: Users, label: "Find Partner", path: "/find-partner", protected:true},
   { icon: Calendar, label: "Sessions", path: "/session", protected:true},
@@ -28,7 +27,6 @@ export function Navigation() {
  
 
  const navItems = allNavItems.filter((item) => {
-  if (item.path === "/" && isConnected) return false; // hide Home when connected
   if (item.protected && !isConnected) return false;   // hide protected if not connected
   return true; // otherwise keep it
 });
