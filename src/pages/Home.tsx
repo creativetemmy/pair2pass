@@ -5,6 +5,7 @@ import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle } from "lucide-reac
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import heroImage from "@/assets/hero-image.jpg";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import FAQ from "@/components/FAQ";
 
 const features = [
   {
@@ -135,6 +136,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <FAQ />
+
       {/* CTA Section */}
       <section className="py-20 bg-primary dark:bg-primary/80 transition-colors duration-300">
         <div className="container mx-auto px-4 text-center">
@@ -144,20 +148,6 @@ export default function Home() {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join thousands of students already building their academic reputation on Pair2Pass
           </p>
-          {/* <Button 
-            variant="secondary" 
-            size="lg" 
-            className="text-lg px-8 py-4 transition-all duration-300"
-            onClick={() => setShowWalletDialog(true)}
-          >
-            Open App
-            <CheckCircle className="h-5 w-5" />
-          </Button> */}
-
-          <div className="text-lg px-8 py-4 transition-all duration-300" >
-
-          <ConnectButton  label="Open App"/>
-          </div>
         </div>
       </section>
       
