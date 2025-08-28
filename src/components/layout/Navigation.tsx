@@ -91,9 +91,6 @@ export function Navigation() {
           {/* Mobile Theme Toggle */}
           <div className="flex md:hidden items-center space-x-2">
             <ThemeToggle />
-            <Button variant="ghost" size="icon">
-              <Users className="h-5 w-5" />
-            </Button>
           </div>
         </div>
 

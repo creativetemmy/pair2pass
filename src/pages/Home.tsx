@@ -55,7 +55,7 @@ export default function Home() {
               The Web3 platform connecting students for verified study partnerships. 
               Build your academic reputation while earning XP and NFT badges.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               {/* <Button 
                 variant="secondary" 
                 size="lg" 
