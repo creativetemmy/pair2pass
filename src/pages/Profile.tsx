@@ -1017,47 +1017,91 @@ export default function Profile() {
                 </div>
                 <Progress value={profileCompletion.completionPercentage} className="w-full" />
                 
+                {/* Profile Incomplete State */}
+                {!profileCompletion.isComplete && (
+                  <div className="text-center p-6 bg-gradient-to-r from-muted/50 to-muted/30 border border-border rounded-lg">
+                    <div className="mb-4">
+                      <div className="w-16 h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center mb-3">
+                        <Award className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                        Complete your profile to unlock your Student Passport NFT.
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Fill out all required information to mint your exclusive student passport.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Profile Complete State */}
                 {profileCompletion.isComplete && profile.is_email_verified && (
-                  <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+                  <Card className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border-primary/30 shadow-glow animate-fade-in">
                     <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <div className="flex-shrink-0">
-                          <Trophy className="h-12 w-12 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-primary mb-2">
-                            🎓 Congratulations! Your profile is complete.
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            You are now eligible to claim your <strong>Student Passport NFT</strong>.
-                          </p>
-                          {!profile.has_passport ? (
+                      <div className="text-center space-y-4">
+                        {!profile.has_passport ? (
+                          <>
+                            <div className="w-20 h-20 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mb-4 animate-glow">
+                              <Trophy className="h-10 w-10 text-primary-foreground" />
+                            </div>
+                            <div className="space-y-2">
+                              <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                🎉 Congratulations!
+                              </h3>
+                              <p className="text-base font-medium text-foreground">
+                                Your profile is complete! Ready to mint your passport?
+                              </p>
+                            </div>
                             <Button 
                               onClick={handleClaimPassport}
                               disabled={isClaimingPassport}
-                              className="w-full"
+                              className="w-full max-w-xs mx-auto gradient-primary hover:opacity-90 shadow-primary transition-all duration-300 hover:scale-105 hover:shadow-glow rounded-xl text-primary-foreground font-semibold"
                             >
                               {isClaimingPassport ? (
                                 <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Claiming Passport...
+                                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                  Minting your NFT…
                                 </>
                               ) : (
                                 <>
-                                  <Award className="h-4 w-4 mr-2" />
-                                  Mint Student Passport NFT
+                                  <Award className="h-5 w-5 mr-2" />
+                                  Mint Passport NFT
                                 </>
                               )}
                             </Button>
-                          ) : (
-                            <div className="flex items-center justify-center p-3 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-700">
-                              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-                              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-sm font-semibold">
-                                ✅ Student Passport Claimed
-                              </Badge>
+                          </>
+                        ) : (
+                          <>
+                            {/* Success State with NFT Card Preview */}
+                            <div className="space-y-4">
+                              <div className="text-center space-y-3">
+                                <div className="text-6xl animate-bounce">🎉</div>
+                                <h3 className="text-xl font-bold text-green-600 dark:text-green-400">
+                                  ✅ Passport Minted!
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                  Your Student Passport NFT has been successfully minted!
+                                </p>
+                              </div>
+                              
+                              {/* NFT Card Preview */}
+                              <div className="max-w-sm mx-auto">
+                                <Card className="bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 shadow-glow">
+                                  <CardContent className="p-6 text-center">
+                                    <div className="w-16 h-16 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mb-3">
+                                      <Trophy className="h-8 w-8 text-primary-foreground" />
+                                    </div>
+                                    <h4 className="font-bold text-foreground mb-1">Student Passport NFT</h4>
+                                    <p className="text-xs text-muted-foreground mb-2">#{profile.wallet_address?.slice(-6)}</p>
+                                    <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs">
+                                      Verified Student
+                                    </Badge>
+                                  </CardContent>
+                                </Card>
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
