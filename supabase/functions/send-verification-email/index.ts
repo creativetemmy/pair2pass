@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0';
-import { Resend } from "npm:resend@4.0.0";
+import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with OTP
     const emailResponse = await resend.emails.send({
-      from: "StudySync <noreply@yourdomain.com>",
+      from: "StudySync <onboarding@resend.dev>",
       to: [email],
       subject: "Verify Your Email - StudySync",
       html: `
