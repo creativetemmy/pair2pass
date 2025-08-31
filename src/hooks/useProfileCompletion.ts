@@ -21,7 +21,7 @@ export function useProfileCompletion(profile: Profile | null): ProfileCompletion
           { label: "Name", completed: false, key: "name" },
           { label: "Academic Level", completed: false, key: "academic_level" },
           { label: "Subjects of Interest", completed: false, key: "interests" },
-          { label: "Study Goals", completed: false, key: "bio" },
+          { label: "Study Goals", completed: false, key: "study_goals" },
         ],
         completionPercentage: 0,
         isComplete: false,
@@ -46,8 +46,8 @@ export function useProfileCompletion(profile: Profile | null): ProfileCompletion
       },
       {
         label: "Study Goals",
-        completed: Boolean(profile.bio?.trim()),
-        key: "bio",
+        completed: Boolean(profile.study_goals && profile.study_goals.length > 0),
+        key: "study_goals",
       },
     ];
 
