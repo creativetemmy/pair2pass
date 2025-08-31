@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -29,6 +29,32 @@ export function EmailVerificationModal({
   const { toast } = useToast();
   const { address } = useAccount();
 
+  // Listen for auth state changes to detect email verification
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at && step === 'verify') {
+          console.log('✅ Email verified via Supabase auth');
+          
+          // Award XP for email verification
+          if (address) {
+            setTimeout(() => {
+              awardXP(address, 'EMAIL_VERIFIED');
+            }, 0);
+          }
+
+          setStep('success');
+          setTimeout(() => {
+            onVerificationSuccess();
+            onClose();
+          }, 2000);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [step, address, onVerificationSuccess, onClose]);
+
   const sendOTP = async () => {
     if (!email) {
       console.log('❌ No email provided');
@@ -39,15 +65,13 @@ export function EmailVerificationModal({
     setSending(true);
     
     try {
-      // Call our custom edge function instead of Supabase auth
-      const { data, error } = await supabase.functions.invoke('send-verification-email', {
-        body: {
-          email: email,
-          walletAddress: address
+      // Use Supabase's built-in OTP system
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
         }
       });
-
-      console.log('📧 Custom Email Response:', { data, error });
 
       if (error) {
         console.error('❌ Email Error:', error);
@@ -59,7 +83,7 @@ export function EmailVerificationModal({
         return;
       }
 
-      console.log('✅ OTP sent successfully');
+      console.log('✅ OTP sent successfully via Supabase');
       toast({
         title: "Code Sent",
         description: "Verification code has been sent to your email. Check your spam folder if you don't see it.",
@@ -82,36 +106,26 @@ export function EmailVerificationModal({
 
     setLoading(true);
     try {
-      // Call our custom verification edge function
-      const { data, error } = await supabase.functions.invoke('verify-email-code', {
-        body: {
-          email: email,
-          walletAddress: address,
-          otp: otp
-        }
+      // Use Supabase's built-in OTP verification
+      const { error } = await supabase.auth.verifyOtp({
+        email: email,
+        token: otp,
+        type: 'email'
       });
 
-      if (error || !data?.success) {
+      if (error) {
+        console.error('❌ Verification error:', error);
         toast({
           title: "Invalid Code",
-          description: error?.message || "Invalid or expired code. Please try again.",
+          description: error.message || "Invalid or expired code. Please try again.",
           variant: "destructive",
         });
         setOtp("");
         return;
       }
 
-      // Award XP for email verification
-      if (address) {
-        await awardXP(address, 'EMAIL_VERIFIED');
-      }
-
-      setStep('success');
-      setTimeout(() => {
-        onVerificationSuccess();
-        onClose();
-      }, 2000);
-
+      console.log('✅ OTP verified successfully');
+      // Success state will be handled by the auth state change listener
     } catch (error) {
       console.error('❌ Verification error:', error);
       toast({
@@ -119,6 +133,7 @@ export function EmailVerificationModal({
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+      setOtp("");
     } finally {
       setLoading(false);
     }
