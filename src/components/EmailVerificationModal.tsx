@@ -39,17 +39,18 @@ export function EmailVerificationModal({
     setSending(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: false,
+      // Call our custom edge function instead of Supabase auth
+      const { data, error } = await supabase.functions.invoke('send-verification-email', {
+        body: {
+          email: email,
+          walletAddress: address
         }
       });
 
-      console.log('📧 Supabase OTP Response:', { data, error });
+      console.log('📧 Custom Email Response:', { data, error });
 
       if (error) {
-        console.error('❌ OTP Error:', error);
+        console.error('❌ Email Error:', error);
         toast({
           title: "Error",
           description: error.message || "Failed to send verification code",
@@ -81,30 +82,23 @@ export function EmailVerificationModal({
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: email,
-        token: otp,
-        type: 'email'
+      // Call our custom verification edge function
+      const { data, error } = await supabase.functions.invoke('verify-email-code', {
+        body: {
+          email: email,
+          walletAddress: address,
+          otp: otp
+        }
       });
 
-      if (error) {
+      if (error || !data?.success) {
         toast({
           title: "Invalid Code",
-          description: "Invalid or expired code. Please try again.",
+          description: error?.message || "Invalid or expired code. Please try again.",
           variant: "destructive",
         });
         setOtp("");
         return;
-      }
-
-      // Update profile to mark email as verified
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ is_email_verified: true })
-        .eq('email', email);
-
-      if (updateError) {
-        console.error('Error updating profile:', updateError);
       }
 
       // Award XP for email verification
@@ -119,6 +113,7 @@ export function EmailVerificationModal({
       }, 2000);
 
     } catch (error) {
+      console.error('❌ Verification error:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",

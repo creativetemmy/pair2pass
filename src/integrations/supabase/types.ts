@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_verifications: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          otp_code: string
+          updated_at: string
+          verified: boolean
+          verified_at: string | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          otp_code: string
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       match_requests: {
         Row: {
           created_at: string

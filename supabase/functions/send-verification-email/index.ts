@@ -45,9 +45,9 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Store OTP in database with expiration (5 minutes)
+    // Store OTP in database with expiration (3 minutes)
     const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+    expiresAt.setMinutes(expiresAt.getMinutes() + 3);
 
     const { error: insertError } = await supabase
       .from('email_verifications')
@@ -93,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
               <span style="font-size: 32px; font-weight: bold; color: #2563eb; letter-spacing: 4px;">${otp}</span>
             </div>
             <p style="color: #6b7280; font-size: 14px; margin-top: 15px;">
-              This code will expire in 5 minutes.
+              This code will expire in 3 minutes.
             </p>
           </div>
           
