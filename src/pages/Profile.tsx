@@ -1035,7 +1035,7 @@ export default function Profile() {
                 )}
                 
                 {/* Profile Complete State */}
-                {profileCompletion.isComplete && profile.is_email_verified && (
+                {profileCompletion.isComplete && (
                   <Card className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border-primary/30 shadow-glow animate-fade-in">
                     <CardContent className="p-6">
                       <div className="text-center space-y-4">
