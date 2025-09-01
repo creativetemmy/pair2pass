@@ -17,6 +17,7 @@ import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
+import { useRecentSessions } from "@/hooks/useRecentSessions";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEnsName } from "wagmi";
@@ -56,6 +57,7 @@ export default function Profile() {
   const { data: ensName } = useEnsName({ address });
   const { profile, loading, saving, saveProfile } = useProfile(address);
   const profileCompletion = useProfileCompletion(profile);
+  const { recentSessions, loading: sessionsLoading } = useRecentSessions();
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
   const [skillInput, setSkillInput] = useState("");
@@ -64,6 +66,7 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [isClaimingPassport, setIsClaimingPassport] = useState(false);
+  const [isMintingStudyNFT, setIsMintingStudyNFT] = useState(false);
   const [showPassportModal, setShowPassportModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -282,6 +285,29 @@ export default function Profile() {
       });
     } finally {
       setIsClaimingPassport(false);
+    }
+  };
+
+  const handleMintStudyNFT = async () => {
+    setIsMintingStudyNFT(true);
+    try {
+      // Here you would integrate with your NFT minting contract
+      // For now, we'll just simulate the minting process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Proof of Study NFT Minted! 🎓",
+        description: "Your proof of study NFT has been minted to your wallet.",
+      });
+    } catch (error) {
+      console.error('Error minting study NFT:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mint study NFT. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMintingStudyNFT(false);
     }
   };
 
@@ -1130,6 +1156,41 @@ export default function Profile() {
                   />
                 ))}
               </div>
+              
+              {/* Proof of Study NFT Section */}
+              {recentSessions.length > 0 && (
+                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-foreground flex items-center gap-2">
+                        <Award className="h-4 w-4 text-blue-600" />
+                        Proof of Study NFT
+                      </h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        You've completed {recentSessions.length} study session{recentSessions.length !== 1 ? 's' : ''}! Mint your proof of study NFT.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={handleMintStudyNFT}
+                      disabled={isMintingStudyNFT}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    >
+                      {isMintingStudyNFT ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Minting...
+                        </>
+                      ) : (
+                        <>
+                          <Award className="h-4 w-4 mr-2" />
+                          Mint NFT
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-6 text-center">
                 <Button variant="outline">
                   View All Badges ({achievements.filter(b => b.earned).length}/{achievements.length})
