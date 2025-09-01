@@ -19,10 +19,12 @@ export const useRecentSessions = () => {
   useEffect(() => {
     const fetchRecentSessions = async () => {
       if (!address) {
+        console.log('useRecentSessions: No wallet address');
         setLoading(false);
         return;
       }
 
+      console.log('useRecentSessions: Fetching for address:', address);
       try {
         // Fetch completed sessions
         const { data: sessions, error } = await supabase
@@ -34,6 +36,8 @@ export const useRecentSessions = () => {
           .limit(5);
 
         if (error) throw error;
+
+        console.log('useRecentSessions: Found sessions:', sessions?.length || 0);
 
         // Get reviews for these sessions
         const sessionsWithDetails = await Promise.all(
@@ -59,6 +63,7 @@ export const useRecentSessions = () => {
           })
         );
 
+        console.log('useRecentSessions: Final sessions with details:', sessionsWithDetails.length);
         setRecentSessions(sessionsWithDetails);
       } catch (error) {
         console.error('Error fetching recent sessions:', error);

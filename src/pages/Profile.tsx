@@ -58,6 +58,13 @@ export default function Profile() {
   const { profile, loading, saving, saveProfile } = useProfile(address);
   const profileCompletion = useProfileCompletion(profile);
   const { recentSessions, loading: sessionsLoading } = useRecentSessions();
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Profile: Current wallet address:', address);
+    console.log('Profile: Recent sessions count:', recentSessions.length);
+    console.log('Profile: Recent sessions:', recentSessions);
+  }, [address, recentSessions]);
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
   const [skillInput, setSkillInput] = useState("");
@@ -1157,6 +1164,7 @@ export default function Profile() {
                 ))}
               </div>
               
+              
               {/* Proof of Study NFT Section */}
               {recentSessions.length > 0 && (
                 <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -1194,6 +1202,35 @@ export default function Profile() {
               <div className="mt-6 text-center">
                 <Button variant="outline">
                   View All Badges ({achievements.filter(b => b.earned).length}/{achievements.length})
+                </Button>
+                
+                {/* Temporary test button - for development only */}
+                <Button 
+                  variant="secondary" 
+                  onClick={async () => {
+                    if (!address) return;
+                    // Create a test completed session
+                    const { error } = await supabase
+                      .from('study_sessions')
+                      .insert({
+                        partner_1_id: address,
+                        partner_2_id: 'test_partner',
+                        subject: 'Test Subject',
+                        goal: 'Test study session',
+                        duration: 60,
+                        status: 'completed'
+                      });
+                    
+                    if (!error) {
+                      toast({
+                        title: "Test session created",
+                        description: "Refresh the page to see the NFT mint button",
+                      });
+                    }
+                  }}
+                  className="ml-2"
+                >
+                  Create Test Session (Dev Only)
                 </Button>
               </div>
             </CardContent>
