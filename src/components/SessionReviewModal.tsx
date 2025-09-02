@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Star, CheckCircle } from "lucide-react";
+import { Star, CheckCircle, Award, Loader2, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useAccount } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { awardXP, updateSessionStats } from "@/lib/xpSystem";
+import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
+import { baseSepolia } from 'wagmi/chains';
 
 interface SessionReviewModalProps {
   open: boolean;
@@ -27,7 +29,14 @@ export const SessionReviewModal = ({
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessView, setShowSuccessView] = useState(false);
+  const [isMintingNFT, setIsMintingNFT] = useState(false);
   const { address } = useAccount();
+  
+  const { writeContract, data: hash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const formatWalletAddress = (wallet: string) => {
     return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
@@ -102,9 +111,9 @@ export const SessionReviewModal = ({
         awardXP(partnerWallet, 'PARTNER_HELPED', false)
       ]);
       
-      toast.success("Session completed and review submitted!");
+      // Show success view instead of closing
+      setShowSuccessView(true);
       onComplete();
-      onClose();
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error("Failed to submit review. Please try again.");
@@ -113,11 +122,129 @@ export const SessionReviewModal = ({
     }
   };
 
+  const handleMintNFT = async () => {
+    if (!address) {
+      toast.error("Wallet not connected");
+      return;
+    }
+
+    setIsMintingNFT(true);
+    
+    try {
+      writeContract({
+        ...pair2PassContractConfig,
+        functionName: 'mintBadgeNft',
+        args: ["Study Badge"],
+        chain: baseSepolia,
+        account: address
+      });
+    } catch (error) {
+      console.error('Error minting NFT:', error);
+      toast.error("Failed to mint NFT. Please try again.");
+      setIsMintingNFT(false);
+    }
+  };
+
+  const handleSkipNFT = () => {
+    toast.success("Session review completed!");
+    onClose();
+  };
+
   const handleClose = () => {
-    if (!isSubmitting) {
+    if (!isSubmitting && !isMintingNFT) {
+      // Reset state when closing
+      setShowSuccessView(false);
+      setRating(0);
+      setFeedback("");
       onClose();
     }
   };
+
+  // Handle NFT minting success
+  useEffect(() => {
+    if (isConfirmed && isMintingNFT) {
+      setIsMintingNFT(false);
+      toast.success("Proof of Study NFT minted successfully! 🎓");
+      onClose();
+    }
+  }, [isConfirmed, isMintingNFT, onClose]);
+
+  // Show success view after review submission
+  if (showSuccessView) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-center space-x-2">
+              <Trophy className="h-6 w-6 text-yellow-500" />
+              <span>Congratulations! 🎉</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <Award className="h-8 w-8 text-white" />
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Study Session Completed!
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  You've successfully completed your study session and earned XP. 
+                  Want to commemorate this achievement?
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <Award className="h-5 w-5 text-blue-600" />
+                  <h4 className="font-semibold text-foreground">Mint Your Proof of Study NFT</h4>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Mint an NFT badge to permanently record this study session on the blockchain!
+                </p>
+                
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleSkipNFT}
+                    disabled={isMintingNFT || isConfirming}
+                    className="flex-1"
+                  >
+                    Maybe Later
+                  </Button>
+                  <Button
+                    onClick={handleMintNFT}
+                    disabled={isMintingNFT || isConfirming}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isConfirming ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Minting...
+                      </>
+                    ) : isMintingNFT ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Confirming...
+                      </>
+                    ) : (
+                      <>
+                        <Award className="h-4 w-4 mr-2" />
+                        Mint NFT
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
