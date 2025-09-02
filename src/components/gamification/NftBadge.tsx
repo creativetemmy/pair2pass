@@ -1,4 +1,4 @@
-import { Award, Shield, Crown, Flame } from "lucide-react";
+import { Award, Shield, Crown, Flame, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAccount, useReadContract } from "wagmi";
 import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
@@ -34,12 +34,26 @@ export function NftBadge({ tokenId}: NftBadgeProps) {
     
       const nftData = nftMetaData[nftUri] 
 
+  const handleClick = () => {
+    const contractAddress = pair2PassContractConfig.address;
+    const explorerUrl = `https://sepolia.basescan.org/token/${contractAddress}?a=${tokenId}`;
+    window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
-    <div className={cn("group cursor-pointer")}>
+    <div 
+      className={cn("group cursor-pointer")}
+      onClick={handleClick}
+    >
       <div className={cn(
         "relative rounded-xl p-4 transition-all duration-300 group-hover:scale-105",
          "gradient-card shadow-card"
       )}>
+        {/* External link indicator */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+        </div>
+
         <div className={cn(
           "h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3 transition-all duration-300",
         )}>
@@ -62,6 +76,10 @@ export function NftBadge({ tokenId}: NftBadgeProps) {
                   </h3>
           <p className="text-xs text-muted-foreground text-center">
             {nftData?.description || "Awarded NFT Badge from Pair2Pass."}
+          </p>
+          
+          <p className="text-xs text-blue-600 dark:text-blue-400 text-center mt-2 opacity-75 group-hover:opacity-100 transition-opacity">
+            View on BaseScan →
           </p>
       </div>
     </div>
