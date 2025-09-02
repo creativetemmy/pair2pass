@@ -351,6 +351,7 @@ export default function Profile() {
     if  (isConfirmed){
       setIsMintingStudyNFT(false);
       setAchievementsRefreshKey(prev => prev + 1);
+      window.location.reload();
 
     }
     // try {

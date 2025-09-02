@@ -5,7 +5,7 @@ import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge } from "@/components/gamification/Badge";
 import { ActiveSessionCard } from "@/components/ActiveSessionCard";
 import { CancelSessionModal } from "@/components/CancelSessionModal";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useActiveSession } from "@/hooks/useActiveSession";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useUpcomingSessions } from "@/hooks/useUpcomingSessions";
@@ -13,13 +13,10 @@ import { useRecentSessions } from "@/hooks/useRecentSessions";
 import { Calendar, Clock, Users, BookOpen, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
+import { NftBadge } from "@/components/gamification/NftBadge";
 
-const badges = [
-  { type: "studious" as const, title: "Study Warrior", description: "10+ study sessions", earned: true },
-  { type: "reliable" as const, title: "Reliable Partner", description: "95% attendance rate", earned: true },
-  { type: "expert" as const, title: "Subject Expert", description: "Top 10% in course", earned: false },
-  { type: "streak" as const, title: "Study Streak", description: "7 days in a row", earned: true },
-];
+
 
 const formatWalletAddress = (wallet: string) => {
   return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
@@ -34,6 +31,12 @@ export default function Dashboard() {
   const { stats, loading: statsLoading } = useUserStats();
   const { upcomingSessions, loading: upcomingLoading } = useUpcomingSessions();
   const { recentSessions, loading: recentLoading } = useRecentSessions();
+  
+  const { data: badges } = useReadContract({
+      ...pair2PassContractConfig,
+      functionName: 'getBadgeTokens',
+      args: [address],
+    })
 
   const handleCancelClick = (sessionId: string) => {
     setSelectedSessionId(sessionId);
@@ -247,17 +250,15 @@ export default function Dashboard() {
             <CardTitle>Achievements</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {badges.map((badge, index) => (
-                <Badge
-                  key={index}
-                  type={badge.type}
-                  title={badge.title}
-                  description={badge.description}
-                  earned={badge.earned}
-                />
-              ))}
-            </div>
+            {badges && badges.length > 0 ? (
+                            <div  className="grid grid-cols-2 gap-4">
+                              {badges.map((badge, index) => (
+                                <NftBadge key={index} tokenId={Number(badge)} />
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500">No achievements found.</p>
+                          )}
             <Button variant="outline" className="w-full mt-6">
               View All Badges
             </Button>
