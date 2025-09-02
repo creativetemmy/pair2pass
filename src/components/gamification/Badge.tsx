@@ -1,6 +1,7 @@
 import { Award, Shield, Crown, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
 const badgeIcons = {
   studious: Award,
   reliable: Shield,

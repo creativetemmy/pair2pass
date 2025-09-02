@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { XPBadge } from "@/components/gamification/XPBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
+import { NftBadge } from "@/components/gamification/NftBadge";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award } from "lucide-react";
-import { useAccount } from "wagmi";
+import { useAccount, useContractRead, useReadContract, useReadContracts, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
@@ -21,13 +22,16 @@ import { useRecentSessions } from "@/hooks/useRecentSessions";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEnsName } from "wagmi";
+import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
 
-const achievements = [
-  { type: "studious" as const, title: "Study Warrior", description: "100+ study sessions", earned: true },
-  { type: "reliable" as const, title: "Reliable Partner", description: "95% attendance rate", earned: true },
-  { type: "expert" as const, title: "Subject Expert", description: "Top 5% in CS courses", earned: true },
-  { type: "streak" as const, title: "Study Streak", description: "30 days in a row", earned: true },
-];
+import { baseSepolia } from 'wagmi/chains'
+
+// const achievements = [
+//   { type: "studious" as const, title: "Study Warrior", description: "100+ study sessions", earned: true },
+//   { type: "reliable" as const, title: "Reliable Partner", description: "95% attendance rate", earned: true },
+//   { type: "expert" as const, title: "Subject Expert", description: "Top 5% in CS courses", earned: true },
+//   { type: "streak" as const, title: "Study Streak", description: "30 days in a row", earned: true },
+// ];
 
 const initialProfileData: Partial<Profile> = {
   name: "",
@@ -53,14 +57,40 @@ const initialProfileData: Partial<Profile> = {
 };
 
 export default function Profile() {
-  const { address, isConnected } = useAccount();
+  const { address, chainId, isConnected } = useAccount();
   const { data: ensName } = useEnsName({ address });
   const { profile, loading, saving, saveProfile } = useProfile(address);
   const profileCompletion = useProfileCompletion(profile);
   const { recentSessions, loading: sessionsLoading } = useRecentSessions();
+  const [achievementsRefreshKey, setAchievementsRefreshKey] = useState(0);
+
+  const { data: hash, error, isPending, writeContract } = useWriteContract()
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+      useWaitForTransactionReceipt({
+        hash,
+      })
+
+   const { data: profileBadge } = useReadContract({
+    ...pair2PassContractConfig,
+    functionName: 'getUserProfileBadge',
+    args: [address],
+  })
+
+    const { data: achievements } = useReadContract({
+    ...pair2PassContractConfig,
+    functionName: 'getBadgeTokens',
+    args: [address],
+  })
+
+
+ 
 
   // Debug logging
   useEffect(() => {
+    
+
+    
     console.log('Profile: Current wallet address:', address);
     console.log('Profile: Recent sessions count:', recentSessions.length);
     console.log('Profile: Recent sessions:', recentSessions);
@@ -81,6 +111,7 @@ export default function Profile() {
   if (!isConnected) {
     return <Navigate to="/" replace />;
   }
+
 
   // Update editedProfile when profile loads
   useEffect(() => {
@@ -256,6 +287,15 @@ export default function Profile() {
   };
 
   const handleClaimPassport = async () => {
+
+     writeContract({
+       ...pair2PassContractConfig,
+       functionName: 'mintProfileNft',
+       args: ["Profile Badge"],
+       chain: baseSepolia,
+       account:address
+     })
+
     if (!profile?.wallet_address) return;
     
     try {
@@ -296,26 +336,42 @@ export default function Profile() {
   };
 
   const handleMintStudyNFT = async () => {
+
+     writeContract({
+       ...pair2PassContractConfig,
+       functionName: 'mintBadgeNft',
+       args: ["Study Badge"],
+       chain: baseSepolia,
+       account:address
+     })
+
+
     setIsMintingStudyNFT(true);
-    try {
-      // Here you would integrate with your NFT minting contract
-      // For now, we'll just simulate the minting process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Proof of Study NFT Minted! 🎓",
-        description: "Your proof of study NFT has been minted to your wallet.",
-      });
-    } catch (error) {
-      console.error('Error minting study NFT:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mint study NFT. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+
+    if  (isConfirmed){
       setIsMintingStudyNFT(false);
+      setAchievementsRefreshKey(prev => prev + 1);
+
     }
+    // try {
+    //   // Here you would integrate with your NFT minting contract
+    //   // For now, we'll just simulate the minting process
+    //   await new Promise(resolve => setTimeout(resolve, 2000));
+      
+    //   toast({
+    //     title: "Proof of Study NFT Minted! 🎓",
+    //     description: "Your proof of study NFT has been minted to your wallet.",
+    //   });
+    // } catch (error) {
+    //   console.error('Error minting study NFT:', error);
+    //   toast({
+    //     title: "Error",
+    //     description: "Failed to mint study NFT. Please try again.",
+    //     variant: "destructive",
+    //   });
+    // } finally {
+    //   setIsMintingStudyNFT(false);
+    // }
   };
 
   if (loading) {
@@ -1072,7 +1128,7 @@ export default function Profile() {
                   <Card className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border-primary/30 shadow-glow animate-fade-in">
                     <CardContent className="p-6">
                       <div className="text-center space-y-4">
-                        {!profile.has_passport ? (
+                        {!Number(profileBadge) ? (
                           <>
                             <div className="w-20 h-20 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mb-4 animate-glow">
                               <Trophy className="h-10 w-10 text-primary-foreground" />
@@ -1087,13 +1143,14 @@ export default function Profile() {
                             </div>
                             <Button 
                               onClick={handleClaimPassport}
-                              disabled={isClaimingPassport}
+                              disabled={isConfirming}
                               className="w-full max-w-xs mx-auto gradient-primary hover:opacity-90 shadow-primary transition-all duration-300 hover:scale-105 hover:shadow-glow rounded-xl text-primary-foreground font-semibold"
                             >
-                              {isClaimingPassport ? (
+                              {isConfirming ? (
                                 <>
                                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                                   Minting your NFT…
+                               
                                 </>
                               ) : (
                                 <>
@@ -1125,7 +1182,8 @@ export default function Profile() {
                                       <Trophy className="h-8 w-8 text-primary-foreground" />
                                     </div>
                                     <h4 className="font-bold text-foreground mb-1">Student Passport NFT</h4>
-                                    <p className="text-xs text-muted-foreground mb-2">#{profile.wallet_address?.slice(-6)}</p>
+                                    <p className="text-xs text-muted-foreground mb-2">#{Number(profileBadge)}</p>
+            
                                     <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs">
                                       Verified Student
                                     </Badge>
@@ -1151,19 +1209,17 @@ export default function Profile() {
                 <span>Achievements & Badges</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {achievements.map((badge, index) => (
-                  <AchievementBadge
-                    key={index}
-                    type={badge.type}
-                    title={badge.title}
-                    description={badge.description}
-                    earned={badge.earned}
-                  />
-                ))}
-              </div>
-              
+            <CardContent key={achievementsRefreshKey }>
+            {achievements && achievements.length > 0 ? (
+                <div  className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {achievements.map((badge, index) => (
+                    <NftBadge key={index} tokenId={Number(badge)} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No achievements found.</p>
+              )}
+                            
               
               {/* Proof of Study NFT Section */}
               {recentSessions.length > 0 && (
@@ -1183,7 +1239,7 @@ export default function Profile() {
                       disabled={isMintingStudyNFT}
                       className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
                     >
-                      {isMintingStudyNFT ? (
+                      {isConfirming ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Minting...
@@ -1201,7 +1257,7 @@ export default function Profile() {
 
               <div className="mt-6 text-center">
                 <Button variant="outline">
-                  View All Badges ({achievements.filter(b => b.earned).length}/{achievements.length})
+                  View All Badges ({achievements && achievements.length})
                 </Button>
                 
                 {/* Temporary test button - for development only */}
