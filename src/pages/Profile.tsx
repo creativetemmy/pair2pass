@@ -75,13 +75,31 @@ export default function Profile() {
     ...pair2PassContractConfig,
     functionName: 'getUserProfileBadge',
     args: [address],
+    query: {
+      enabled: !!address,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    }
   })
 
     const { data: achievements, refetch: refetchAchievements } = useReadContract({
     ...pair2PassContractConfig,
     functionName: 'getBadgeTokens',
     args: [address],
+    query: {
+      enabled: !!address,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    }
   })
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Profile Badge Data:', profileBadge);
+    console.log('Profile Badge Number:', Number(profileBadge));
+    console.log('Achievements Data:', achievements);
+    console.log('Address:', address);
+  }, [profileBadge, achievements, address]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
@@ -99,15 +117,22 @@ export default function Profile() {
   // Refetch contract data when transaction is confirmed
   useEffect(() => {
     if (isConfirmed) {
-      // Wait a moment for blockchain to update, then refetch
-      setTimeout(() => {
-        refetchProfileBadge();
-        refetchAchievements();
+      console.log('Transaction confirmed, refetching NFT data...');
+      // Wait a moment for blockchain to update, then refetch multiple times
+      const refetchWithRetry = async () => {
+        for (let i = 0; i < 5; i++) {
+          console.log(`Refetch attempt ${i + 1}`);
+          await refetchProfileBadge();
+          await refetchAchievements();
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between attempts
+        }
         toast({
           title: "Success!",
-          description: "Your NFT has been minted successfully!",
+          description: "Your NFT has been minted successfully! Refresh the page if it doesn't show up.",
         });
-      }, 2000); // 2 second delay to ensure blockchain state is updated
+      };
+      
+      setTimeout(refetchWithRetry, 2000); // Start after 2 seconds
     }
   }, [isConfirmed, refetchProfileBadge, refetchAchievements, toast]);
 
@@ -1262,6 +1287,21 @@ export default function Profile() {
               <div className="mt-6 text-center">
                 <Button variant="outline">
                   View All Badges ({achievements && achievements.length})
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  onClick={async () => {
+                    console.log('Manual refresh clicked');
+                    await refetchProfileBadge();
+                    await refetchAchievements();
+                    toast({
+                      title: "Refreshed",
+                      description: "NFT data has been refreshed",
+                    });
+                  }}
+                  className="ml-2"
+                >
+                  Refresh NFTs
                 </Button>
               </div>
             </CardContent>
