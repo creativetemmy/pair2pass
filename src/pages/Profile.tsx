@@ -71,20 +71,17 @@ export default function Profile() {
         hash,
       })
 
-   const { data: profileBadge } = useReadContract({
+   const { data: profileBadge, refetch: refetchProfileBadge } = useReadContract({
     ...pair2PassContractConfig,
     functionName: 'getUserProfileBadge',
     args: [address],
   })
 
-    const { data: achievements } = useReadContract({
+    const { data: achievements, refetch: refetchAchievements } = useReadContract({
     ...pair2PassContractConfig,
     functionName: 'getBadgeTokens',
     args: [address],
   })
-
-
- 
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
@@ -98,6 +95,21 @@ export default function Profile() {
   const [showPassportModal, setShowPassportModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Refetch contract data when transaction is confirmed
+  useEffect(() => {
+    if (isConfirmed) {
+      // Wait a moment for blockchain to update, then refetch
+      setTimeout(() => {
+        refetchProfileBadge();
+        refetchAchievements();
+        toast({
+          title: "Success!",
+          description: "Your NFT has been minted successfully!",
+        });
+      }, 2000); // 2 second delay to ensure blockchain state is updated
+    }
+  }, [isConfirmed, refetchProfileBadge, refetchAchievements, toast]);
 
   if (!isConnected) {
     return <Navigate to="/" replace />;
