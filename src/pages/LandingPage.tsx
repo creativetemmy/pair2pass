@@ -9,9 +9,13 @@ const LandingPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold text-white mb-6">
-            Pair<span className="text-blue-400">2</span>Pass
-          </h1>
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/lovable-uploads/76e9836e-a9f4-45fd-85a0-4b10e74a1f49.png" 
+              alt="Pair2Pass Logo" 
+              className="h-16 w-auto md:h-20 object-contain filter drop-shadow-2xl"
+            />
+          </div>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Connect your wallet to access the decentralized future. Secure,
             fast, and built on Base chain.

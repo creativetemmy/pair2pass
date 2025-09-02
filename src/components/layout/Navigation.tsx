@@ -37,13 +37,12 @@ export function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <NavLink to="/" className="flex items-center space-x-2 hover-lift">
-            <div className="h-8 w-8 rounded-lg gradient-mesh flex items-center justify-center shadow-glow animate-pulse-slow">
-              <span className="text-primary-foreground font-bold text-lg">P2</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Pair2Pass
-            </span>
+          <NavLink to="/" className="flex items-center space-x-3 hover-lift">
+            <img 
+              src="/lovable-uploads/76e9836e-a9f4-45fd-85a0-4b10e74a1f49.png" 
+              alt="Pair2Pass Logo" 
+              className="h-8 w-auto md:h-10 object-contain filter drop-shadow-lg hover:scale-105 transition-transform duration-300"
+            />
           </NavLink>
 
           {/* Desktop Navigation */}
