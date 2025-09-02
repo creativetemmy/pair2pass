@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -100,6 +101,19 @@ export default function Profile() {
     console.log('Achievements Data:', achievements);
     console.log('Address:', address);
   }, [profileBadge, achievements, address]);
+
+  // Combine achievements with profile badge
+  const allBadges = React.useMemo(() => {
+    const badgeList = achievements ? [...achievements] : [];
+    // Add profile badge if it exists and isn't already in the list
+    if (profileBadge && Number(profileBadge) > 0) {
+      const profileBadgeBigInt = BigInt(Number(profileBadge));
+      if (!badgeList.includes(profileBadgeBigInt)) {
+        badgeList.unshift(profileBadgeBigInt); // Add at the beginning
+      }
+    }
+    return badgeList;
+  }, [achievements, profileBadge]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(initialProfileData);
@@ -1239,9 +1253,9 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent key={achievementsRefreshKey }>
-            {achievements && achievements.length > 0 ? (
+            {allBadges && allBadges.length > 0 ? (
                 <div  className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {achievements.map((badge, index) => (
+                  {allBadges.map((badge, index) => (
                     <NftBadge key={index} tokenId={Number(badge)} />
                   ))}
                 </div>
@@ -1286,7 +1300,7 @@ export default function Profile() {
 
               <div className="mt-6 text-center">
                 <Button variant="outline">
-                  View All Badges ({achievements && achievements.length})
+                  View All Badges ({allBadges && allBadges.length})
                 </Button>
                 <Button 
                   variant="secondary" 
