@@ -41,7 +41,7 @@ export function Navigation() {
             <img 
               src="/lovable-uploads/76e9836e-a9f4-45fd-85a0-4b10e74a1f49.png" 
               alt="Pair2Pass Logo" 
-              className="h-8 w-auto md:h-10 object-contain filter drop-shadow-lg hover:scale-105 transition-transform duration-300"
+              className="h-12 w-auto md:h-16 object-contain filter drop-shadow-lg hover:scale-105 transition-transform duration-300"
             />
           </NavLink>
 
