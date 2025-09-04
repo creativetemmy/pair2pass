@@ -13,7 +13,7 @@ const LandingPage = () => {
             <img 
               src="/lovable-uploads/76e9836e-a9f4-45fd-85a0-4b10e74a1f49.png" 
               alt="Pair2Pass Logo" 
-              className="h-24 w-auto md:h-32 lg:h-40 object-contain filter drop-shadow-2xl"
+              className="w-[100px] md:w-[140px] lg:w-[200px] h-auto object-contain filter drop-shadow-2xl"
             />
           </div>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
