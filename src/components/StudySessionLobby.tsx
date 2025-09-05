@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -237,223 +238,227 @@ export function StudySessionLobby({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl border-primary/20 bg-gradient-subtle">
-        {/* Header with countdown */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Clock className="h-6 w-6 text-primary" />
-            <div className="text-5xl font-bold gradient-text tabular-nums animate-glow">
-              {formatTime(countdown)}
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Study Session Lobby</h2>
-          <p className="text-muted-foreground">Waiting for both partners to be ready...</p>
-        </div>
-
-        {/* Shared Study Goal */}
-        <Card className="mb-8 border-primary/20 shadow-glow">
-          <CardContent className="p-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Trophy className="h-6 w-6 text-primary" />
-              <h3 className="text-xl font-semibold">Session Goal</h3>
-            </div>
-            <p className="text-2xl font-bold gradient-text mb-2">{sessionData.goal}</p>
-            <p className="text-muted-foreground">{sessionData.subject} • {sessionData.duration} minutes</p>
-            
-            {/* Shared Subjects */}
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Common Subjects:</p>
-              <div className="flex justify-center gap-2 flex-wrap">
-                {sharedSubjects.map((subject) => (
-                  <Badge key={subject} variant="default" className="animate-glow">
-                    {subject}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Players Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Current User */}
-          <Card className={cn(
-            "border-2 transition-all duration-300",
-            currentUser.isReady 
-              ? "border-success bg-success/5 shadow-success animate-glow" 
-              : "border-muted-foreground/20"
-          )}>
-            <CardContent className="p-6 text-center">
-              <div className="relative mb-4">
-                <Avatar className="h-20 w-20 mx-auto border-4 border-primary/20">
-                  <AvatarImage src={currentUser.avatar} />
-                  <AvatarFallback className="text-lg font-bold bg-primary text-primary-foreground">
-                    {getInitials(currentUser.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-1 -right-1">
-                  <div className="h-6 w-6 rounded-full bg-success border-2 border-background flex items-center justify-center animate-pulse">
-                    <div className="h-2 w-2 rounded-full bg-success-foreground" />
-                  </div>
-                </div>
-              </div>
-              
-              <h4 className="font-semibold text-lg mb-2">{currentUser.name}</h4>
-              <p className="text-sm text-muted-foreground mb-3">You</p>
-              
-              <XPBadge xp={currentUser.xp} level={currentUser.level} className="justify-center mb-4" />
-              
-              <Button
-                onClick={handleMarkReady}
-                disabled={currentUser.isReady}
-                className={cn(
-                  "w-full transition-all duration-300",
-                  currentUser.isReady 
-                    ? "bg-success hover:bg-success/90 animate-glow" 
-                    : "gradient-primary hover-scale"
-                )}
-              >
-                {currentUser.isReady ? "Ready!" : "Mark Ready"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Study Partner */}
-          <Card className={cn(
-            "border-2 transition-all duration-300",
-            partner.isReady 
-              ? "border-success bg-success/5 shadow-success animate-glow" 
-              : "border-muted-foreground/20"
-          )}>
-            <CardContent className="p-6 text-center">
-              <div className="relative mb-4">
-                <Avatar className="h-20 w-20 mx-auto border-4 border-primary/20">
-                  <AvatarImage src={partner.avatar} />
-                  <AvatarFallback className="text-lg font-bold bg-primary text-primary-foreground">
-                    {getInitials(partner.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-1 -right-1">
-                  <div className={cn(
-                    "h-6 w-6 rounded-full border-2 border-background flex items-center justify-center",
-                    partner.isOnline 
-                      ? "bg-success animate-pulse" 
-                      : "bg-muted-foreground/50"
-                  )}>
-                    <div className={cn(
-                      "h-2 w-2 rounded-full",
-                      partner.isOnline 
-                        ? "bg-success-foreground" 
-                        : "bg-background"
-                    )} />
-                  </div>
-                </div>
-              </div>
-              
-              <h4 className="font-semibold text-lg mb-2">{partner.name}</h4>
-              <p className="text-sm text-muted-foreground mb-3">Study Partner</p>
-              
-              <XPBadge xp={partner.xp} level={partner.level} className="justify-center mb-4" />
-              
-              <div className={cn(
-                "w-full py-2 px-4 rounded-md border-2 transition-all duration-300 font-medium",
-                partner.isReady 
-                  ? "bg-success/20 border-success text-success animate-glow" 
-                  : "bg-muted/20 border-muted text-muted-foreground"
-              )}>
-                {partner.isReady ? "Ready!" : "Waiting..."}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Video Link Section */}
-        <Card className="mb-6 border-primary/20">
-          <CardContent className="p-6">
-            <div className="text-center">
+      <DialogContent className="max-w-4xl border-primary/20 bg-gradient-subtle max-h-[95vh] p-0">
+        <ScrollArea className="max-h-[90vh] w-full">
+          <div className="p-6">
+            {/* Header with countdown */}
+            <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Link className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Session Link</h3>
-              </div>
-              
-              {videoLink ? (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Ready to join your study session!</p>
-                  <Button
-                    onClick={handleJoinSession}
-                    className="gradient-primary hover-scale flex items-center gap-2"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Join Study Session
-                  </Button>
+                <Clock className="h-6 w-6 text-primary" />
+                <div className="text-5xl font-bold gradient-text tabular-nums animate-glow">
+                  {formatTime(countdown)}
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {!showLinkForm ? (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-3">No session link added yet</p>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Study Session Lobby</h2>
+              <p className="text-muted-foreground">Waiting for both partners to be ready...</p>
+            </div>
+
+            {/* Shared Study Goal */}
+            <Card className="mb-8 border-primary/20 shadow-glow">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Trophy className="h-6 w-6 text-primary" />
+                  <h3 className="text-xl font-semibold">Session Goal</h3>
+                </div>
+                <p className="text-2xl font-bold gradient-text mb-2">{sessionData.goal}</p>
+                <p className="text-muted-foreground">{sessionData.subject} • {sessionData.duration} minutes</p>
+                
+                {/* Shared Subjects */}
+                <div className="mt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Common Subjects:</p>
+                  <div className="flex justify-center gap-2 flex-wrap">
+                    {sharedSubjects.map((subject) => (
+                      <Badge key={subject} variant="default" className="animate-glow">
+                        {subject}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Players Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Current User */}
+              <Card className={cn(
+                "border-2 transition-all duration-300",
+                currentUser.isReady 
+                  ? "border-success bg-success/5 shadow-success animate-glow" 
+                  : "border-muted-foreground/20"
+              )}>
+                <CardContent className="p-6 text-center">
+                  <div className="relative mb-4">
+                    <Avatar className="h-20 w-20 mx-auto border-4 border-primary/20">
+                      <AvatarImage src={currentUser.avatar} />
+                      <AvatarFallback className="text-lg font-bold bg-primary text-primary-foreground">
+                        {getInitials(currentUser.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1">
+                      <div className="h-6 w-6 rounded-full bg-success border-2 border-background flex items-center justify-center animate-pulse">
+                        <div className="h-2 w-2 rounded-full bg-success-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h4 className="font-semibold text-lg mb-2">{currentUser.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">You</p>
+                  
+                  <XPBadge xp={currentUser.xp} level={currentUser.level} className="justify-center mb-4" />
+                  
+                  <Button
+                    onClick={handleMarkReady}
+                    disabled={currentUser.isReady}
+                    className={cn(
+                      "w-full transition-all duration-300",
+                      currentUser.isReady 
+                        ? "bg-success hover:bg-success/90 animate-glow" 
+                        : "gradient-primary hover-scale"
+                    )}
+                  >
+                    {currentUser.isReady ? "Ready!" : "Mark Ready"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Study Partner */}
+              <Card className={cn(
+                "border-2 transition-all duration-300",
+                partner.isReady 
+                  ? "border-success bg-success/5 shadow-success animate-glow" 
+                  : "border-muted-foreground/20"
+              )}>
+                <CardContent className="p-6 text-center">
+                  <div className="relative mb-4">
+                    <Avatar className="h-20 w-20 mx-auto border-4 border-primary/20">
+                      <AvatarImage src={partner.avatar} />
+                      <AvatarFallback className="text-lg font-bold bg-primary text-primary-foreground">
+                        {getInitials(partner.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1">
+                      <div className={cn(
+                        "h-6 w-6 rounded-full border-2 border-background flex items-center justify-center",
+                        partner.isOnline 
+                          ? "bg-success animate-pulse" 
+                          : "bg-muted-foreground/50"
+                      )}>
+                        <div className={cn(
+                          "h-2 w-2 rounded-full",
+                          partner.isOnline 
+                            ? "bg-success-foreground" 
+                            : "bg-background"
+                        )} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h4 className="font-semibold text-lg mb-2">{partner.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">Study Partner</p>
+                  
+                  <XPBadge xp={partner.xp} level={partner.level} className="justify-center mb-4" />
+                  
+                  <div className={cn(
+                    "w-full py-2 px-4 rounded-md border-2 transition-all duration-300 font-medium",
+                    partner.isReady 
+                      ? "bg-success/20 border-success text-success animate-glow" 
+                      : "bg-muted/20 border-muted text-muted-foreground"
+                  )}>
+                    {partner.isReady ? "Ready!" : "Waiting..."}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Video Link Section */}
+            <Card className="mb-6 border-primary/20">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <Link className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold">Session Link</h3>
+                  </div>
+                  
+                  {videoLink ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">Ready to join your study session!</p>
                       <Button
-                        onClick={() => setShowLinkForm(true)}
-                        variant="outline"
-                        className="flex items-center gap-2"
+                        onClick={handleJoinSession}
+                        className="gradient-primary hover-scale flex items-center gap-2"
                       >
-                        <Link className="h-4 w-4" />
-                        Add Session Link
+                        <ExternalLink className="h-4 w-4" />
+                        Join Study Session
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      <Input
-                        placeholder="Paste Google Meet link here..."
-                        value={linkInput}
-                        onChange={(e) => setLinkInput(e.target.value)}
-                        className="w-full"
-                      />
-                      <div className="flex gap-2 justify-center">
-                        <Button
-                          onClick={handleSubmitLink}
-                          disabled={!linkInput.trim()}
-                          className="gradient-primary"
-                        >
-                          Submit Link
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setShowLinkForm(false);
-                            setLinkInput("");
-                          }}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
+                    <div className="space-y-4">
+                      {!showLinkForm ? (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-3">No session link added yet</p>
+                          <Button
+                            onClick={() => setShowLinkForm(true)}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                          >
+                            <Link className="h-4 w-4" />
+                            Add Session Link
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Input
+                            placeholder="Paste Google Meet link here..."
+                            value={linkInput}
+                            onChange={(e) => setLinkInput(e.target.value)}
+                            className="w-full"
+                          />
+                          <div className="flex gap-2 justify-center">
+                            <Button
+                              onClick={handleSubmitLink}
+                              disabled={!linkInput.trim()}
+                              className="gradient-primary"
+                            >
+                              Submit Link
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setShowLinkForm(false);
+                                setLinkInput("");
+                              }}
+                              variant="outline"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Communication Panel */}
-        <Card className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-center gap-4 text-center">
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                <span className="text-sm text-muted-foreground">Chat Available</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Video className="h-5 w-5 text-primary" />
-                <span className="text-sm text-muted-foreground">Video Ready</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium text-primary">+50 XP on completion</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Communication Panel */}
+            <Card className="border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-center gap-4 text-center">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                    <span className="text-sm text-muted-foreground">Chat Available</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Video className="h-5 w-5 text-primary" />
+                    <span className="text-sm text-muted-foreground">Video Ready</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium text-primary">+50 XP on completion</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
