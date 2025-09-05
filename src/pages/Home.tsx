@@ -140,28 +140,30 @@ export default function Home() {
       <FAQ />
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary dark:bg-primary/80 transition-colors duration-300 relative">
+      <section className="py-20 bg-primary dark:bg-primary/80 transition-colors duration-300">
         <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Ready to Transform Your Study Experience?
+          </h2>
+          
           {/* X Button */}
           <a 
             href="https://x.com/pair2pass"
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 group"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 group mb-6"
             aria-label="Follow us on X (Twitter)"
           >
             <svg 
-              className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" 
+              className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" 
               fill="currentColor" 
               viewBox="0 0 24 24"
             >
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
             </svg>
+            <span className="text-white font-medium text-sm sm:text-base">Follow on X</span>
           </a>
           
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Transform Your Study Experience?
-          </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join thousands of students already building their academic reputation on Pair2Pass
           </p>
