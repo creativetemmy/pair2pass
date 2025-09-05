@@ -209,7 +209,7 @@ export default function FindPartner() {
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Filters */}
-        <Card className="lg:col-span-1 transition-colors duration-300">
+        <Card className="lg:col-span-1 transition-colors duration-300 h-fit">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 transition-colors duration-300">
               <Filter className="h-5 w-5" />
