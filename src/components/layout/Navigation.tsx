@@ -39,9 +39,9 @@ export function Navigation() {
           {/* Logo */}
           <NavLink to="/" className="flex items-center space-x-3 hover-lift">
             <img 
-              src="/lovable-uploads/76e9836e-a9f4-45fd-85a0-4b10e74a1f49.png" 
+              src="/pair2pass.png" 
               alt="Pair2Pass Logo" 
-              className="h-12 w-auto md:h-16 object-contain filter drop-shadow-lg hover:scale-105 transition-transform duration-300"
+              className="h-20 sm:h-24 md:h-32 lg:h-40 xl:h-48 w-auto object-contain filter drop-shadow-lg hover:scale-105 transition-transform duration-300"
             />
           </NavLink>
 
