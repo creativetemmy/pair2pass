@@ -29,35 +29,11 @@ export function EmailVerificationModal({
   const { toast } = useToast();
   const { address } = useAccount();
 
-  // Listen for auth state changes to detect email verification
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at && step === 'verify') {
-          console.log('✅ Email verified via Supabase auth');
-          
-          // Award XP for email verification
-          if (address) {
-            setTimeout(() => {
-              awardXP(address, 'EMAIL_VERIFIED');
-            }, 0);
-          }
-
-          setStep('success');
-          setTimeout(() => {
-            onVerificationSuccess();
-            onClose();
-          }, 2000);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [step, address, onVerificationSuccess, onClose]);
+  // No need for auth state listener since we're using custom verification
 
   const sendOTP = async () => {
-    if (!email) {
-      console.log('❌ No email provided');
+    if (!email || !address) {
+      console.log('❌ No email or wallet address provided');
       return;
     }
     
@@ -65,11 +41,11 @@ export function EmailVerificationModal({
     setSending(true);
     
     try {
-      // Use Supabase's built-in OTP system
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
+      // Use custom edge function for sending verification email
+      const { error } = await supabase.functions.invoke('send-verification-email', {
+        body: {
+          email: email,
+          walletAddress: address
         }
       });
 
@@ -83,7 +59,7 @@ export function EmailVerificationModal({
         return;
       }
 
-      console.log('✅ OTP sent successfully via Supabase');
+      console.log('✅ OTP sent successfully via custom function');
       toast({
         title: "Code Sent",
         description: "Verification code has been sent to your email. Check your spam folder if you don't see it.",
@@ -102,15 +78,17 @@ export function EmailVerificationModal({
   };
 
   const verifyOTP = async () => {
-    if (!otp || otp.length !== 6) return;
+    if (!otp || otp.length !== 6 || !address) return;
 
     setLoading(true);
     try {
-      // Use Supabase's built-in OTP verification
-      const { error } = await supabase.auth.verifyOtp({
-        email: email,
-        token: otp,
-        type: 'email'
+      // Use custom edge function for verification
+      const { data, error } = await supabase.functions.invoke('verify-email-code', {
+        body: {
+          email: email,
+          walletAddress: address,
+          otp: otp
+        }
       });
 
       if (error) {
@@ -124,8 +102,28 @@ export function EmailVerificationModal({
         return;
       }
 
+      if (!data?.success) {
+        toast({
+          title: "Invalid Code",
+          description: "Invalid or expired code. Please try again.",
+          variant: "destructive",
+        });
+        setOtp("");
+        return;
+      }
+
       console.log('✅ OTP verified successfully');
-      // Success state will be handled by the auth state change listener
+      
+      // Award XP for email verification
+      setTimeout(() => {
+        awardXP(address, 'EMAIL_VERIFIED');
+      }, 0);
+
+      setStep('success');
+      setTimeout(() => {
+        onVerificationSuccess();
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error('❌ Verification error:', error);
       toast({
