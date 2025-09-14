@@ -1,9 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface VerifyRequest {
@@ -14,124 +14,132 @@ interface VerifyRequest {
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { email, walletAddress, otp }: VerifyRequest = await req.json();
     
-    console.log('🔍 Processing verification for:', { email, walletAddress, otp });
+    console.log('🔍 Verifying OTP for:', email, 'wallet:', walletAddress);
 
     if (!email || !walletAddress || !otp) {
-      console.error('❌ Missing required fields');
       return new Response(
-        JSON.stringify({ error: "Email, wallet address, and OTP are required" }),
+        JSON.stringify({ error: 'Email, wallet address, and OTP are required' }),
         { 
           status: 400, 
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
 
-    // Create Supabase client using service role key for admin operations
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Initialize Supabase client with service role key
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-    // Check if OTP exists and is valid
+    // Find the most recent, unverified, non-expired OTP for this email and wallet
     const { data: verification, error: fetchError } = await supabase
       .from('email_verifications')
       .select('*')
       .eq('email', email)
       .eq('wallet_address', walletAddress)
-      .eq('otp_code', otp)
       .eq('verified', false)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !verification) {
-      console.error('❌ Invalid or expired OTP:', fetchError);
+    if (fetchError) {
+      console.error('❌ Database fetch error:', fetchError);
       return new Response(
-        JSON.stringify({ 
-          error: "Invalid or expired verification code",
-          success: false 
-        }),
+        JSON.stringify({ error: 'Database error occurred' }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (!verification) {
+      console.log('❌ No valid verification found');
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired verification code' }),
         { 
           status: 400, 
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
 
-    console.log('✅ OTP validated successfully');
+    if (verification.otp !== otp) {
+      console.log('❌ OTP mismatch');
+      return new Response(
+        JSON.stringify({ error: 'Invalid verification code' }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
 
-    // Mark verification as completed
-    const { error: updateVerificationError } = await supabase
+    // Mark verification as complete
+    const { error: updateError } = await supabase
       .from('email_verifications')
-      .update({ verified: true, verified_at: new Date().toISOString() })
+      .update({ verified: true })
       .eq('id', verification.id);
 
-    if (updateVerificationError) {
-      console.error('❌ Failed to mark verification as completed:', updateVerificationError);
+    if (updateError) {
+      console.error('❌ Failed to mark verification as complete:', updateError);
       return new Response(
-        JSON.stringify({ error: "Failed to complete verification" }),
+        JSON.stringify({ error: 'Failed to complete verification' }),
         { 
           status: 500, 
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
 
-    // Update user profile to mark email as verified
-    const { error: updateProfileError } = await supabase
+    // Update profile to mark email as verified
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ is_email_verified: true })
-      .eq('email', email)
       .eq('wallet_address', walletAddress);
 
-    if (updateProfileError) {
-      console.error('❌ Failed to update profile:', updateProfileError);
-      return new Response(
-        JSON.stringify({ error: "Failed to update profile verification status" }),
-        { 
-          status: 500, 
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        }
-      );
+    if (profileError) {
+      console.error('❌ Failed to update profile:', profileError);
+      // Don't return error here as verification was successful, just log it
     }
 
-    console.log('✅ Email verification completed successfully');
-
-    // Clean up old verification codes for this email
+    // Clean up old verification records for this email (optional)
     await supabase
       .from('email_verifications')
       .delete()
       .eq('email', email)
       .neq('id', verification.id);
 
+    console.log('✅ Email verification successful');
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Email verified successfully" 
+        message: 'Email verified successfully!',
+        verified: true 
       }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
+      { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
       }
     );
-  } catch (error: any) {
-    console.error("❌ Error in verify-email-code function:", error);
+
+  } catch (error) {
+    console.error('❌ Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+      JSON.stringify({ error: 'Internal server error' }),
+      { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
       }
     );
   }

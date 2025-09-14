@@ -1,138 +1,178 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0';
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface VerificationRequest {
+interface SendVerificationRequest {
   email: string;
   walletAddress: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, walletAddress }: VerificationRequest = await req.json();
+    const { email, walletAddress }: SendVerificationRequest = await req.json();
     
-    console.log('📧 Processing verification request for:', { email, walletAddress });
+    console.log('📧 Sending verification email to:', email, 'for wallet:', walletAddress);
 
     if (!email || !walletAddress) {
-      console.error('❌ Missing required fields:', { email: !!email, walletAddress: !!walletAddress });
       return new Response(
-        JSON.stringify({ error: "Email and wallet address are required" }),
+        JSON.stringify({ error: 'Email and wallet address are required' }),
         { 
           status: 400, 
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
 
+    // Initialize Supabase client with service role key for database operations
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('🔢 Generated OTP:', otp);
     
-    // Create Supabase client using service role key for admin operations
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Store OTP in database with expiration (3 minutes)
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 3);
-
+    // Store OTP in database
     const { error: insertError } = await supabase
       .from('email_verifications')
-      .upsert({
-        email: email,
+      .insert({
+        email,
         wallet_address: walletAddress,
-        otp_code: otp,
-        expires_at: expiresAt.toISOString(),
+        otp,
         verified: false,
-        created_at: new Date().toISOString()
+        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes from now
       });
 
     if (insertError) {
       console.error('❌ Database error:', insertError);
       return new Response(
-        JSON.stringify({ error: "Failed to store verification code" }),
+        JSON.stringify({ error: 'Failed to store verification code' }),
         { 
           status: 500, 
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
 
-    console.log('✅ OTP stored in database, sending email...');
+    // Send email via Mailtrap
+    const mailtrapToken = Deno.env.get('MAILTRAP_API_TOKEN');
+    if (!mailtrapToken) {
+      console.error('❌ Missing Mailtrap API token');
+      return new Response(
+        JSON.stringify({ error: 'Email service configuration error' }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
 
-    // Send email with OTP
-    const emailResponse = await resend.emails.send({
-      from: "StudySync <onboarding@resend.dev>",
-      to: [email],
-      subject: "Verify Your Email - StudySync",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #2563eb; margin-bottom: 10px;">📚 StudySync</h1>
-            <h2 style="color: #1f2937; margin-top: 0;">Email Verification</h2>
-          </div>
-          
-          <div style="background: linear-gradient(135deg, #f3f4f6, #e5e7eb); padding: 30px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-            <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
-              Your verification code is:
-            </p>
-            <div style="background: white; padding: 20px; border-radius: 8px; display: inline-block; border: 2px solid #2563eb; margin: 20px 0;">
-              <span style="font-size: 32px; font-weight: bold; color: #2563eb; letter-spacing: 4px;">${otp}</span>
+    const emailResponse = await fetch('https://send.api.mailtrap.io/api/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${mailtrapToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: {
+          email: 'noreply@pair2pass.com',
+          name: 'Pair2Pass'
+        },
+        to: [{
+          email: email
+        }],
+        subject: 'Verify Your Email - Pair2Pass',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+            <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
+                📚 Pair2Pass Email Verification
+              </h1>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                <h2 style="color: #495057; margin: 0 0 15px 0; font-size: 18px;">
+                  Your verification code is:
+                </h2>
+                <div style="text-align: center; font-size: 32px; font-weight: bold; color: #007bff; background-color: white; padding: 15px; border-radius: 4px; letter-spacing: 3px; border: 2px dashed #007bff;">
+                  ${otp}
+                </div>
+              </div>
+              
+              <div style="margin-bottom: 25px; padding: 15px; background-color: #e7f3ff; border-left: 4px solid #007bff; border-radius: 4px;">
+                <p style="margin: 0; color: #495057; font-size: 14px;">
+                  <strong>📱 Enter this code in the Pair2Pass app to verify your email address.</strong><br>
+                  This code will expire in 10 minutes for security.
+                </p>
+              </div>
+              
+              <div style="background-color: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404; font-size: 13px;">
+                  🛡️ <strong>Security Notice:</strong> If you didn't request this verification, please ignore this email. 
+                  Never share your verification code with anyone.
+                </p>
+              </div>
+              
+              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                <p style="color: #6c757d; font-size: 12px; margin: 0;">
+                  This email was sent from Pair2Pass for wallet address: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}
+                </p>
+              </div>
             </div>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 15px;">
-              This code will expire in 3 minutes.
-            </p>
           </div>
+        `,
+        text: `
+          Pair2Pass Email Verification
           
-          <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
-            <p style="color: #92400e; margin: 0; font-size: 14px;">
-              <strong>🔒 Security tip:</strong> Never share this code with anyone. StudySync will never ask for your verification code.
-            </p>
-          </div>
+          Your verification code is: ${otp}
           
-          <div style="text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
-            <p>If you didn't request this verification, you can safely ignore this email.</p>
-            <p>© 2025 StudySync - Empowering students through collaborative learning</p>
-          </div>
-        </div>
-      `,
+          Enter this code in the Pair2Pass app to verify your email address.
+          This code will expire in 10 minutes for security.
+          
+          If you didn't request this verification, please ignore this email.
+          
+          Wallet: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}
+        `
+      })
     });
 
-    console.log("📧 Email sent successfully:", emailResponse);
+    if (!emailResponse.ok) {
+      const errorText = await emailResponse.text();
+      console.error('❌ Mailtrap API error:', errorText);
+      return new Response(
+        JSON.stringify({ error: 'Failed to send verification email' }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
 
+    console.log('✅ Verification email sent successfully');
+    
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Verification code sent successfully" 
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
+      JSON.stringify({ success: true, message: 'Verification code sent to your email' }),
+      { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
       }
     );
-  } catch (error: any) {
-    console.error("❌ Error in send-verification-email function:", error);
+
+  } catch (error) {
+    console.error('❌ Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+      JSON.stringify({ error: 'Internal server error' }),
+      { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
       }
     );
   }
