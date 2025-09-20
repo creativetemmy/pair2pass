@@ -502,14 +502,14 @@ export default function Homepage() {
         .from('notifications')
         .insert({
           user_wallet: partner.wallet_address || partner.id,
-          title: 'Study Session Invitation',
-          message: `${profile?.name || 'Someone'} invited you to study ${sessionData?.subject || 'together'}`,
+          title: 'New Study Partner Request',
+          message: `${profile?.name || 'Someone'} wants to study ${sessionData?.subject || ''} with you for ${sessionData?.goal || ''}. Accept?`,
           type: 'match_request',
           data: {
-            match_request_id: matchRequest.id,
-            requester_name: profile?.name || 'Anonymous',
-            subject: sessionData?.subject || 'General Study',
-            goal: sessionData?.goal || 'Study Together',
+            matchRequestId: matchRequest.id,
+            requesterName: profile?.name || 'Someone',
+            subject: sessionData?.subject || '',
+            goal: sessionData?.goal || '',
             duration: sessionData?.duration || 60
           }
         });
