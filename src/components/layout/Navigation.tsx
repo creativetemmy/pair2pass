@@ -46,7 +46,7 @@ export function Navigation() {
           </NavLink>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-1 flex-1 justify-center">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}

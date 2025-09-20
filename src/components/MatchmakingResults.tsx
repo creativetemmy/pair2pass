@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface MatchingPartner {
   id: string;
+  wallet_address?: string; // Add wallet_address property
   name: string;
   avatar_url?: string;
   academic_level: string;
@@ -132,7 +133,8 @@ export function MatchmakingResults({
         .from('profiles')
         .select('*')
         .neq('wallet_address', address || '') // Exclude current user
-        .not('name', 'is', null); // Only show profiles with names
+        .not('name', 'is', null) // Only show profiles with names
+        .not('wallet_address', 'is', null); // Ensure wallet_address is not null
 
       const { data, error } = await query.limit(10);
 
@@ -151,6 +153,7 @@ export function MatchmakingResults({
       // Transform database profiles to MatchingPartner format
       const transformedPartners = data?.map(profile => ({
         id: profile.id,
+        wallet_address: profile.wallet_address, // Add wallet_address to the transformed data
         name: profile.name || "Anonymous",
         avatar_url: profile.avatar_url,
         academic_level: profile.academic_level || "Not specified",
@@ -405,7 +408,7 @@ export function MatchmakingResults({
                           {partner.academic_level} at {partner.institution}
                         </p>
                         
-                        <Badge variant="outline" className="bg-secondary/10 text-secondary-foreground border-secondary/20">
+                        <Badge variant="secondary" className="bg-secondary/20 text-secondary-foreground border-secondary/30">
                           {partner.study_goal_compatibility}
                         </Badge>
                       </div>

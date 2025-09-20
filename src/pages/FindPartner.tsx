@@ -81,7 +81,8 @@ export default function FindPartner() {
         .from('profiles')
         .select('*')
         .neq('wallet_address', address || '') // Exclude current user
-        .not('name', 'is', null); // Only show profiles with names
+        .not('name', 'is', null) // Only show profiles with names
+        .not('wallet_address', 'is', null); // Ensure wallet_address is not null
 
       // Apply filters
       if (skillLevel && skillLevel !== "Any Level") {

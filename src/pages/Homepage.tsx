@@ -475,49 +475,53 @@ export default function Homepage() {
 
   const handleInvitePartner = async (partner: any) => {
     console.log("Inviting partner:", partner);
-    toast.success("Invitation sent! Waiting for response...");
     
     try {
-      // Create session in database
-      const { data: newSession, error } = await supabase
-        .from('study_sessions')
+      // Create match request in database
+      const { data: matchRequest, error: matchError } = await supabase
+        .from('match_requests')
         .insert({
-          partner_1_id: address || 'current_user', // Current user
-          partner_2_id: partner.id,
+          requester_wallet: address || 'current_user',
+          target_wallet: partner.wallet_address || partner.id,
           subject: sessionData?.subject || 'General Study',
           goal: sessionData?.goal || 'Study Together',
           duration: sessionData?.duration || 60,
-          status: 'waiting'
+          status: 'pending'
         })
         .select()
         .single();
 
-      if (error) {
-        console.error('Error creating session:', error);
-        toast.error("Failed to create session. Please try again.");
+      if (matchError) {
+        console.error('Error creating match request:', matchError);
+        toast.error("Failed to send invitation. Please try again.");
         return;
       }
 
-      // Set the sessionId for the lobby
-      setSessionId(newSession.id);
+      // Create notification for the target partner
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_wallet: partner.wallet_address || partner.id,
+          title: 'Study Session Invitation',
+          message: `${profile?.name || 'Someone'} invited you to study ${sessionData?.subject || 'together'}`,
+          type: 'match_request',
+          data: {
+            match_request_id: matchRequest.id,
+            requester_name: profile?.name || 'Anonymous',
+            subject: sessionData?.subject || 'General Study',
+            goal: sessionData?.goal || 'Study Together',
+            duration: sessionData?.duration || 60
+          }
+        });
+
+      if (notificationError) {
+        console.error('Error creating notification:', notificationError);
+        // Continue anyway - the match request was created
+      }
+
+      toast.success("Invitation sent! You'll be notified when they respond.");
+      setShowMatchmakingResults(false);
       
-      // Simulate partner acceptance after 2 seconds
-      setTimeout(() => {
-        const partnerData = {
-          id: partner.id,
-          name: partner.name,
-          avatar: partner.avatar_url,
-          level: partner.level,
-          xp: partner.xp,
-          isReady: false,
-          isOnline: true,
-        };
-        
-        setCurrentPartner(partnerData);
-        setShowMatchmakingResults(false);
-        setShowLobby(true);
-        toast.success("Partner accepted! Entering lobby...");
-      }, 2000);
     } catch (error) {
       console.error('Error in handleInvitePartner:', error);
       toast.error("Something went wrong. Please try again.");
