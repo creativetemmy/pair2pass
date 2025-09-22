@@ -132,7 +132,6 @@ export function MatchmakingResults({
       let query = supabase
         .from('profiles')
         .select('*')
-        .neq('wallet_address', address || '') // Exclude current user
         .not('name', 'is', null) // Only show profiles with names
         .not('wallet_address', 'is', null); // Ensure wallet_address is not null
 
@@ -150,8 +149,18 @@ export function MatchmakingResults({
 
       console.log("Raw database profiles:", data);
 
+      // Filter out current user first, then transform
+      const filteredData = data?.filter(profile => 
+        profile.wallet_address !== address && 
+        profile.wallet_address !== null &&
+        profile.wallet_address !== undefined &&
+        profile.wallet_address.toLowerCase() !== address?.toLowerCase()
+      ) || [];
+
+      console.log("Filtered profiles (excluding current user):", filteredData);
+
       // Transform database profiles to MatchingPartner format
-      const transformedPartners = data?.map(profile => ({
+      const transformedPartners = filteredData?.map(profile => ({
         id: profile.id,
         wallet_address: profile.wallet_address, // Add wallet_address to the transformed data
         name: profile.name || "Anonymous",

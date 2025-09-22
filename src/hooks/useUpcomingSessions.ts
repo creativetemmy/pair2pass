@@ -53,7 +53,7 @@ export const useUpcomingSessions = () => {
 
     fetchUpcomingSessions();
 
-    // Set up real-time subscription
+    // Set up real-time subscription with broader filter
     const channel = supabase
       .channel('upcoming-sessions')
       .on(
@@ -62,19 +62,12 @@ export const useUpcomingSessions = () => {
           event: '*',
           schema: 'public',
           table: 'study_sessions',
-          filter: `partner_1_id=eq.${address}`,
         },
-        fetchUpcomingSessions
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'study_sessions',
-          filter: `partner_2_id=eq.${address}`,
-        },
-        fetchUpcomingSessions
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          // Refetch data whenever any session changes
+          fetchUpcomingSessions();
+        }
       )
       .subscribe();
 
@@ -83,5 +76,30 @@ export const useUpcomingSessions = () => {
     };
   }, [address]);
 
-  return { upcomingSessions, loading };
+  // Add a manual refresh function that can be called from components
+  const refreshUpcomingSessions = async () => {
+    if (!address) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
+        .eq('status', 'waiting')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      const sessionsWithPartner = data?.map(session => ({
+        ...session,
+        partner_wallet: session.partner_1_id === address ? session.partner_2_id : session.partner_1_id
+      })) || [];
+
+      setUpcomingSessions(sessionsWithPartner);
+    } catch (error) {
+      console.error('Error refreshing upcoming sessions:', error);
+    }
+  };
+
+  return { upcomingSessions, loading, refreshUpcomingSessions };
 };

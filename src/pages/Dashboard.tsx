@@ -29,7 +29,7 @@ export default function Dashboard() {
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const { activeSession, loading: sessionLoading } = useActiveSession();
   const { stats, loading: statsLoading } = useUserStats();
-  const { upcomingSessions, loading: upcomingLoading } = useUpcomingSessions();
+  const { upcomingSessions, loading: upcomingLoading, refreshUpcomingSessions } = useUpcomingSessions();
   const { recentSessions, loading: recentLoading } = useRecentSessions();
   
   const { data: badges } = useReadContract({
@@ -44,7 +44,8 @@ export default function Dashboard() {
   };
 
   const handleCancelComplete = () => {
-    // The hook will automatically refresh the data via real-time subscription
+    // Manually refresh the upcoming sessions to ensure immediate update
+    refreshUpcomingSessions();
     setCancelModalOpen(false);
     setSelectedSessionId('');
   };
