@@ -53,15 +53,15 @@ export function Navigation() {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover-lift",
+                    "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover-lift whitespace-nowrap",
                     isActive
                       ? "gradient-primary text-primary-foreground shadow-primary"
                       : "text-muted-foreground hover:text-foreground hover:glass-card"
                   )
                 }
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                <span className="flex-shrink-0">{item.label}</span>
               </NavLink>
             ))}
           </div>

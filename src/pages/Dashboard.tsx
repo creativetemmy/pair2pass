@@ -260,7 +260,14 @@ export default function Dashboard() {
                           ) : (
                             <p className="text-gray-500">No achievements found.</p>
                           )}
-            <Button variant="outline" className="w-full mt-6">
+            <Button 
+              variant="outline" 
+              className="w-full mt-6"
+              onClick={() => {
+                // Navigate to profile page where all badges are displayed
+                window.location.href = '/profile';
+              }}
+            >
               View All Badges
             </Button>
           </CardContent>

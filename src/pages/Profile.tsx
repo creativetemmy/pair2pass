@@ -1252,9 +1252,9 @@ export default function Profile() {
                 <span>Achievements & Badges</span>
               </CardTitle>
             </CardHeader>
-            <CardContent key={achievementsRefreshKey }>
+            <CardContent key={achievementsRefreshKey} data-badges-section>
             {allBadges && allBadges.length > 0 ? (
-                <div  className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {allBadges.map((badge, index) => (
                     <NftBadge key={index} tokenId={Number(badge)} />
                   ))}
@@ -1299,8 +1299,19 @@ export default function Profile() {
               )}
 
               <div className="mt-6 text-center">
-                <Button variant="outline">
-                  View All Badges ({allBadges && allBadges.length})
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    // Create a simple modal or expand the view to show all badges
+                    toast({
+                      title: "All Badges",
+                      description: `You have ${allBadges?.length || 0} badges. Scroll up to see them all!`,
+                    });
+                    // Scroll to the badges section
+                    document.querySelector('[data-badges-section]')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  View All Badges ({allBadges?.length || 0})
                 </Button>
                 <Button 
                   variant="secondary" 
