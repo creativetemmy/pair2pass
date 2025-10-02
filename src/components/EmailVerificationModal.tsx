@@ -41,11 +41,34 @@ export function EmailVerificationModal({
     setSending(true);
     
     try {
-      // Use custom edge function for sending verification email
-      const { error } = await supabase.functions.invoke('send-verification-email', {
+      // Use custom edge function for sending verification email\
+
+      // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store OTP in database
+    const { error: insertError } = await supabase
+      .from('email_verifications')
+      .insert({
+        email,
+        wallet_address: address,
+        otp,
+        verified: false,
+        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes from now
+      });
+
+    if (insertError) {
+      console.error('❌ Database error:', insertError);
+     
+    }
+
+  
+
+      const { error } = await supabase.functions.invoke('send-email', {
         body: {
           email: email,
-          walletAddress: address
+          walletAddress: address,
+          otp
         }
       });
 
@@ -83,34 +106,87 @@ export function EmailVerificationModal({
     setLoading(true);
     try {
       // Use custom edge function for verification
-      const { data, error } = await supabase.functions.invoke('verify-email-code', {
-        body: {
-          email: email,
-          walletAddress: address,
-          otp: otp
-        }
-      });
+      
+      const { data: verification, error: fetchError } = await supabase
+      .from('email_verifications')
+      .select('*')
+      .eq('email', email)
+      .eq('wallet_address', address)
+      .eq('verified', false)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-      if (error) {
-        console.error('❌ Verification error:', error);
+
+    if (!verification) {
+      console.log('❌ No valid verification found');
+
         toast({
-          title: "Invalid Code",
-          description: error.message || "Invalid or expired code. Please try again.",
+          title: "No valid verification found",
+          description: "No valid verification found",
           variant: "destructive",
         });
         setOtp("");
         return;
-      }
+      
+    }
 
-      if (!data?.success) {
+    if (verification.otp !== otp) {
+      console.log('❌ OTP mismatch');
         toast({
-          title: "Invalid Code",
-          description: "Invalid or expired code. Please try again.",
+          title: "OTP mismatch",
+          description: "OTP mismatch",
           variant: "destructive",
         });
         setOtp("");
         return;
-      }
+      
+    }
+
+    // Mark verification as complete
+    const { error: updateError } = await supabase
+      .from('email_verifications')
+      .update({ verified: true })
+      .eq('id', verification.id);
+
+    if (updateError) {
+      console.error('❌ Failed to mark verification as complete:', updateError);
+        toast({
+          title: "Failed to mark verification as complete",
+          description: "Failed to mark verification as complete",
+          variant: "destructive",
+        });
+        setOtp("");
+        return;
+    }
+
+    // Update profile to mark email as verified
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ is_email_verified: true })
+      .eq('wallet_address', address);
+
+    if (profileError) {
+      console.error('❌ Failed to update profile:', profileError);
+       toast({
+          title: "Failed to update profile",
+          description: "Failed to update profile",
+          variant: "destructive",
+        });
+        setOtp("");
+        return;
+      // Don't return error here as verification was successful, just log it
+    }
+
+    // Clean up old verification records for this email (optional)
+    await supabase
+      .from('email_verifications')
+      .delete()
+      .eq('email', email)
+      .neq('id', verification.id);
+
+    console.log('✅ Email verification successful');
 
       console.log('✅ OTP verified successfully');
       
