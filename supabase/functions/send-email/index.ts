@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 serve(async (req) => {
   try {
-    const { to, walletAddress, otp } = await req.json();
+    const { email, walletAddress, otp } = await req.json();
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -13,7 +13,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "onboarding@resend.dev",
-        to,
+        to: email,
         subject: "Verify Your Email - Pair2Pass",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
@@ -78,7 +78,8 @@ serve(async (req) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
