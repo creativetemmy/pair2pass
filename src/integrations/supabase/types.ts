@@ -286,7 +286,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_profile_fields: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          academic_level: string
+          avatar_url: string
+          average_rating: number
+          bio: string
+          created_at: string
+          department: string
+          ens_name: string
+          has_passport: boolean
+          hours_studied: number
+          id: string
+          institution: string
+          interests: string[]
+          is_email_verified: boolean
+          level: number
+          name: string
+          partners_helped: number
+          preferred_study_times: string[]
+          reliability_score: number
+          sessions_completed: number
+          skills: string[]
+          study_goals: string[]
+          updated_at: string
+          wallet_address: string
+          xp: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
