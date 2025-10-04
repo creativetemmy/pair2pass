@@ -283,7 +283,84 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          academic_level: string | null
+          avatar_url: string | null
+          average_rating: number | null
+          bio: string | null
+          created_at: string | null
+          ens_name: string | null
+          has_passport: boolean | null
+          hours_studied: number | null
+          id: string | null
+          institution: string | null
+          interests: string[] | null
+          is_email_verified: boolean | null
+          level: number | null
+          name: string | null
+          partners_helped: number | null
+          preferred_study_times: string[] | null
+          reliability_score: number | null
+          sessions_completed: number | null
+          skills: string[] | null
+          study_goals: string[] | null
+          updated_at: string | null
+          wallet_address: string | null
+          xp: number | null
+        }
+        Insert: {
+          academic_level?: string | null
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          created_at?: string | null
+          ens_name?: string | null
+          has_passport?: boolean | null
+          hours_studied?: number | null
+          id?: string | null
+          institution?: string | null
+          interests?: string[] | null
+          is_email_verified?: boolean | null
+          level?: number | null
+          name?: string | null
+          partners_helped?: number | null
+          preferred_study_times?: string[] | null
+          reliability_score?: number | null
+          sessions_completed?: number | null
+          skills?: string[] | null
+          study_goals?: string[] | null
+          updated_at?: string | null
+          wallet_address?: string | null
+          xp?: number | null
+        }
+        Update: {
+          academic_level?: string | null
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          created_at?: string | null
+          ens_name?: string | null
+          has_passport?: boolean | null
+          hours_studied?: number | null
+          id?: string | null
+          institution?: string | null
+          interests?: string[] | null
+          is_email_verified?: boolean | null
+          level?: number | null
+          name?: string | null
+          partners_helped?: number | null
+          preferred_study_times?: string[] | null
+          reliability_score?: number | null
+          sessions_completed?: number | null
+          skills?: string[] | null
+          study_goals?: string[] | null
+          updated_at?: string | null
+          wallet_address?: string | null
+          xp?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_public_profile_fields: {
