@@ -64,9 +64,9 @@ export const useLeaderboard = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      // Fetch top users by XP
+      // Fetch top users by XP using secure public_profiles view
       const { data: profiles, error } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select(`
           id,
           wallet_address,
@@ -122,13 +122,13 @@ export const useLeaderboard = () => {
 
       // Get active learners (users with activity this week)
       const { data: activeLearners, error: learnersError } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id')
         .gt('xp', 0);
 
       // Calculate total XP distributed this week (approximate)
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('xp');
 
       if (!sessionsError && !learnersError && !profilesError) {

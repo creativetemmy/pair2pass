@@ -130,8 +130,9 @@ export default function SessionLobby() {
         : sessionData.partner_1_id;
 
       // Fetch partner profile
+      // Use public_profiles view to fetch partner data (excludes sensitive info)
       const { data: partnerData, error: partnerError } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('*')
         .eq('wallet_address', partnerWallet)
         .single();

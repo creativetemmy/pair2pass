@@ -285,9 +285,9 @@ export default function Homepage() {
 
   const fetchCommunityActivities = async () => {
     try {
-      // Get recent profile updates with XP gains
+      // Get recent profile updates - use public_profiles view
       const { data: profiles, error } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('name, avatar_url, xp, level, sessions_completed, updated_at, wallet_address')
         .order('updated_at', { ascending: false })
         .limit(10);
@@ -334,7 +334,7 @@ export default function Homepage() {
     try {
       if (!address) return;
 
-      // Get user's profile for current stats
+      // Get user's own profile for current stats (use profiles table directly for own data)
       const { data: userProfile, error: profileError } = await supabase
         .from('profiles')
         .select('xp, sessions_completed, hours_studied')
@@ -388,9 +388,9 @@ export default function Homepage() {
         .select('id')
         .in('status', ['waiting', 'active']);
 
-      // Fetch total profiles (online learners)
+      // Fetch total profiles using public_profiles view
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, xp, sessions_completed');
 
       if (activeError || profilesError) {
@@ -428,6 +428,7 @@ export default function Homepage() {
     try {
       if (!address) return;
 
+      // Get user's own profile (use profiles table for own data)
       const { data: userProfile, error } = await supabase
         .from('profiles')
         .select('xp')

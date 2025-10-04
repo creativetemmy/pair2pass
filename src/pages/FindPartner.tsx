@@ -77,8 +77,9 @@ export default function FindPartner() {
     try {
       setLoading(true);
       
+      // Use public_profiles view to exclude sensitive data like email
       let query = supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('*')
         .neq('wallet_address', address || '') // Exclude current user
         .not('name', 'is', null) // Only show profiles with names
@@ -145,8 +146,9 @@ export default function FindPartner() {
 
   const fetchFilterOptions = async () => {
     try {
+      // Use public_profiles view for fetching filter options
       const { data, error } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('interests, academic_level, institution')
         .not('name', 'is', null); // Only get data from profiles with names
 

@@ -130,7 +130,7 @@ export function MatchmakingResults({
       console.log("Session data:", sessionData);
       
       let query = supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('*')
         .not('name', 'is', null) // Only show profiles with names
         .not('wallet_address', 'is', null); // Ensure wallet_address is not null
