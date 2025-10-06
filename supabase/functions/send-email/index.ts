@@ -23,20 +23,17 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: [
-          {
-            email: "support@pair2pass.com",
-            name: "Pair2Pass"
-          }
-        ],
+        from: {
+          email: "support@pair2pass.com",
+          name: "Pair2Pass",
+        },
         to: [
           {
-            email
-          }
-        ]
-        ,
+            email,
+          },
+        ],
         subject: "Verify Your Email - Pair2Pass",
-       html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;"> 
+        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;"> 
                 <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"> 
                     <h1 style="color: #333; text-align: center; margin-bottom: 30px;"> 📚 Pair2Pass Email Verification </h1> 
                     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 25px;"> 
@@ -58,9 +55,14 @@ serve(async (req) => {
                      </div> 
                      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #dee2e6;"> 
                        <p style="color: #6c757d; font-size: 12px; margin: 0;"> 
-                         This email was sent from Pair2Pass for wallet address: ${walletAddress.substring( 0, 6 )}...${walletAddress.substring(walletAddress.length - 4)} </p>
-                          </div> </div> </div>` , 
-      text: `Pair2Pass Email Verification Your verification code is: ${otp} Enter this code in the Pair2Pass app to verify your email address. This code will expire in 10 minutes for security. If you didn't request this verification, please ignore this email.`
+                         This email was sent from Pair2Pass for wallet address: ${walletAddress.substring(
+                           0,
+                           6
+                         )}...${walletAddress.substring(
+          walletAddress.length - 4
+        )} </p>
+                          </div> </div> </div>`,
+        text: `Pair2Pass Email Verification Your verification code is: ${otp} Enter this code in the Pair2Pass app to verify your email address. This code will expire in 10 minutes for security. If you didn't request this verification, please ignore this email.`,
       }),
     });
 
