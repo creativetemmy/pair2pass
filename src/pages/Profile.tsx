@@ -303,6 +303,9 @@ export default function Profile() {
   };
 
   const handleEmailVerification = () => {
+    console.log("🔍 Email verification button clicked");
+    console.log("📧 Email:", editedProfile.email);
+    
     if (!editedProfile.email) {
       toast({
         title: "Error",
@@ -311,6 +314,8 @@ export default function Profile() {
       });
       return;
     }
+    
+    console.log("✅ Opening verification modal");
     setIsVerificationModalOpen(true);
   };
 

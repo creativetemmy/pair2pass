@@ -41,17 +41,24 @@ export function EmailVerificationModal({
   const { address } = useAccount();
 
   useEffect(() => {
+    console.log("📬 EmailVerificationModal effect:", { isOpen, step });
     if (isOpen && step === "sending") {
+      console.log("🚀 Calling sendOTP");
       sendOTP();
     }
   }, [isOpen, step]);
 
   const sendOTP = async () => {
-    if (!email || !address) return;
+    console.log("📨 sendOTP called", { email, address });
+    if (!email || !address) {
+      console.error("❌ Missing email or address:", { email, address });
+      return;
+    }
     setSending(true);
 
     try {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log("🔢 Generated OTP");
 
       // Store OTP
       const { error: insertError } = await supabase
