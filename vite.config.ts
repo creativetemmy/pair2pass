@@ -6,17 +6,23 @@ import { componentTagger } from "lovable-tagger";
 // Simple SPA fallback plugin for Vite
 const spaFallback = () => {
   return {
-    name: 'spa-fallback',
+    name: "spa-fallback",
     configureServer(server: any) {
       server.middlewares.use((req: any, res: any, next: any) => {
-        if (req.url && !req.url.includes('.') && !req.url.startsWith('/api')) {
-          req.url = '/';
+        if (
+          req.url &&
+          !req.url.includes(".") &&
+          !req.url.startsWith("/api") &&
+          !req.url.startsWith("/@")
+        ) {
+          req.url = "/";
         }
         next();
       });
-    }
+    },
   };
 };
+
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -28,15 +34,14 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
+        main: path.resolve(__dirname, "index.html"),
       },
     },
   },
   plugins: [
     react(),
     spaFallback(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
