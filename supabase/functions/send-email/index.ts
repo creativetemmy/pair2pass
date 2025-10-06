@@ -16,15 +16,25 @@ serve(async (req) => {
   try {
     const { email, walletAddress, otp } = await req.json();
 
-    const response = await fetch("https://api.resend.com/emails", {
+    const response = await fetch("https://send.api.mailtrap.io/api/send", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+        "Api-Token": `${Deno.env.get("MAILTRAP_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev",
-        to: email,
+        from: [
+          {
+            email: "support@pair2pass.com",
+            name: "Pair2Pass"
+          }
+        ],
+        to: [
+          {
+            email
+          }
+        ]
+        ,
         subject: "Verify Your Email - Pair2Pass",
        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;"> 
                 <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"> 
