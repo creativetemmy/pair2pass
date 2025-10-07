@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
+import { VerificationBanner } from "@/components/VerificationBanner";
 import { useAccount } from "wagmi";
 
 import Home from "./pages/Home";
@@ -42,18 +43,19 @@ const AppRouter = () => {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 flex flex-col">
       <Navigation />
+      {isConnected && !isHomepage && <VerificationBanner />}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/homepage" element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
-          <Route path="/session" element={<Dashboard />} />
-          <Route path="/find-partner" element={<ProtectedRoute><FindPartner /></ProtectedRoute>} />
-          <Route path="/match-confirmation" element={<ProtectedRoute><MatchConfirmation /></ProtectedRoute>} />
-          <Route path="/session-checkin/:sessionId" element={<ProtectedRoute><SessionCheckIn /></ProtectedRoute>} />
-          <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-          <Route path="/session/:sessionId" element={<ProtectedRoute><SessionLobby /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/profile/:id" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/homepage" element={<ProtectedRoute requireVerification={false}><Homepage /></ProtectedRoute>} />
+          <Route path="/session" element={<ProtectedRoute requireVerification={false}><Dashboard /></ProtectedRoute>} />
+          <Route path="/find-partner" element={<ProtectedRoute requireVerification={true}><FindPartner /></ProtectedRoute>} />
+          <Route path="/match-confirmation" element={<ProtectedRoute requireVerification={true}><MatchConfirmation /></ProtectedRoute>} />
+          <Route path="/session-checkin/:sessionId" element={<ProtectedRoute requireVerification={true}><SessionCheckIn /></ProtectedRoute>} />
+          <Route path="/leaderboard" element={<ProtectedRoute requireVerification={false}><Leaderboard /></ProtectedRoute>} />
+          <Route path="/session/:sessionId" element={<ProtectedRoute requireVerification={true}><SessionLobby /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute requireVerification={false}><Profile /></ProtectedRoute>} />
+          <Route path="/profile/:id" element={<ProtectedRoute requireVerification={true}><ProfilePage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
