@@ -14,7 +14,7 @@ import { NftBadge } from "@/components/gamification/NftBadge";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel, AlertDialogFooter } from "@/components/ui/alert-dialog";
-import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award } from "lucide-react";
+import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award, RefreshCw } from "lucide-react";
 import { useAccount, useContractRead, useReadContract, useReadContracts, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useProfile, type Profile } from "@/hooks/useProfile";
@@ -1303,37 +1303,27 @@ export default function Profile() {
                 </div>
               )}
 
-              <div className="mt-6 text-center">
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    // Create a simple modal or expand the view to show all badges
-                    toast({
-                      title: "All Badges",
-                      description: `You have ${allBadges?.length || 0} badges. Scroll up to see them all!`,
-                    });
-                    // Scroll to the badges section
-                    document.querySelector('[data-badges-section]')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  View All Badges ({allBadges?.length || 0})
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  onClick={async () => {
-                    console.log('Manual refresh clicked');
-                    await refetchProfileBadge();
-                    await refetchAchievements();
-                    toast({
-                      title: "Refreshed",
-                      description: "NFT data has been refreshed",
-                    });
-                  }}
-                  className="ml-2"
-                >
-                  Refresh NFTs
-                </Button>
-              </div>
+              {(allBadges?.length || 0) > 0 && (
+                <div className="mt-6 text-center">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={async () => {
+                      console.log('Manual refresh clicked');
+                      await refetchProfileBadge();
+                      await refetchAchievements();
+                      toast({
+                        title: "Refreshed",
+                        description: "NFT data has been refreshed",
+                      });
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Refresh NFTs
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
