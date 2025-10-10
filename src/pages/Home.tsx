@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle } from "lucide-react";
+import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle, Star, MessageSquare } from "lucide-react";
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import heroImage from "@/assets/hero-image.jpg";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -37,6 +37,43 @@ const steps = [
   { step: 4, title: "Study & Earn", description: "Complete sessions and earn XP rewards" },
 ];
 
+const stats = [
+  { value: "10,000+", label: "Active Students" },
+  { value: "50,000+", label: "Study Sessions" },
+  { value: "95%", label: "Success Rate" },
+  { value: "100+", label: "Universities" },
+];
+
+const testimonials = [
+  {
+    name: "Sarah Johnson",
+    institution: "MIT",
+    text: "Pair2Pass completely transformed how I study. Finding reliable study partners has never been easier!",
+    rating: 5,
+  },
+  {
+    name: "Michael Chen",
+    institution: "Stanford",
+    text: "The gamification aspect keeps me motivated. I've improved my grades and made great friends.",
+    rating: 5,
+  },
+  {
+    name: "Emma Rodriguez",
+    institution: "Harvard",
+    text: "Being able to verify my study partners gives me confidence. The platform is intuitive and effective.",
+    rating: 5,
+  },
+];
+
+const institutions = [
+  { name: "MIT", logo: "🎓" },
+  { name: "Stanford", logo: "🏛️" },
+  { name: "Harvard", logo: "📚" },
+  { name: "Oxford", logo: "🎯" },
+  { name: "Cambridge", logo: "⚡" },
+  { name: "Yale", logo: "🌟" },
+];
+
 export default function Home() {
   const [showWalletDialog, setShowWalletDialog] = useState(false);
 
@@ -56,21 +93,50 @@ export default function Home() {
               Build your academic reputation while earning XP and NFT badges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {/* <Button 
-                variant="secondary" 
-                size="lg" 
-                className="text-lg px-8 py-4 transition-all duration-300"
-                onClick={() => setShowWalletDialog(true)}
-              >
-                Open App
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary transition-all duration-300">
-                Learn More
-              </Button> */}
-
               <ConnectButton label="Open App"/>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Stats */}
+      <section className="py-12 bg-background border-b border-border transition-colors duration-300">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center animate-fade-in">
+                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-sm md:text-base text-muted-foreground">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trusted Institutions */}
+      <section className="py-12 bg-muted/30 dark:bg-muted/10 border-b border-border transition-colors duration-300">
+        <div className="container mx-auto px-4">
+          <h3 className="text-center text-sm font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
+            Trusted by students from leading institutions
+          </h3>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            {institutions.map((institution, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center group transition-all duration-300 hover:scale-110"
+              >
+                <div className="text-4xl mb-2 grayscale group-hover:grayscale-0 transition-all duration-300">
+                  {institution.logo}
+                </div>
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                  {institution.name}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -103,8 +169,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* Testimonials Section */}
       <section className="py-20 bg-muted/30 dark:bg-muted/10 transition-colors duration-300">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 transition-colors duration-300">
+              What Students Say
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto transition-colors duration-300">
+              Join thousands of students who have transformed their study experience
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-border/20 dark:border-border/10">
+                <CardContent className="p-6">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <MessageSquare className="h-8 w-8 text-primary/20 mb-3" />
+                  <p className="text-muted-foreground mb-4 italic">"{testimonial.text}"</p>
+                  <div className="border-t pt-4">
+                    <p className="font-semibold text-foreground">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.institution}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 bg-background transition-colors duration-300">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 transition-colors duration-300">

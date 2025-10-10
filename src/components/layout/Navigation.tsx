@@ -17,6 +17,12 @@ const allNavItems = [
   { icon: User, label: "Profile", path: "/profile",protected:true },
 ];
 
+const publicNavItems = [
+  { label: "How it Works", path: "/#how-it-works", isAnchor: true },
+  { label: "Blog", path: "/blog" },
+  { label: "Community", path: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", isExternal: true },
+];
+
 
 
 export function Navigation() {
@@ -63,6 +69,39 @@ export function Navigation() {
                 <item.icon className="h-4 w-4 flex-shrink-0" />
                 <span className="flex-shrink-0">{item.label}</span>
               </NavLink>
+            ))}
+            {publicNavItems.map((item) => (
+              item.isAnchor ? (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-muted-foreground hover:text-foreground hover:glass-card whitespace-nowrap cursor-pointer"
+                >
+                  {item.label}
+                </a>
+              ) : item.isExternal ? (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-muted-foreground hover:text-foreground hover:glass-card whitespace-nowrap"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-muted-foreground hover:text-foreground hover:glass-card whitespace-nowrap"
+                >
+                  {item.label}
+                </NavLink>
+              )
             ))}
           </div>
 

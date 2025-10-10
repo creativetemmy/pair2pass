@@ -32,12 +32,12 @@ export function Badge({ type, title, description, earned = false, className }: B
     <div className={cn("group cursor-pointer", className)}>
       <div className={cn(
         "relative rounded-xl p-4 transition-all duration-300 group-hover:scale-105",
-        earned ? "gradient-card shadow-card" : "bg-muted/50 opacity-60"
+        earned ? "bg-badge-gold border-2 border-badge-gold-foreground/20 shadow-gold" : "bg-muted/50 opacity-60"
       )}>
         <div className={cn(
           "h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3 transition-all duration-300",
           earned ? colorClass : "bg-muted",
-          earned && "shadow-lg animate-float"
+          earned && "shadow-lg animate-float shadow-gold"
         )}>
           <Icon className={cn(
             "h-6 w-6",
@@ -46,7 +46,7 @@ export function Badge({ type, title, description, earned = false, className }: B
         </div>
         <h3 className={cn(
           "font-semibold text-center mb-1",
-          earned ? "text-foreground" : "text-muted-foreground"
+          earned ? "text-badge-gold-foreground" : "text-muted-foreground"
         )}>
           {title}
         </h3>
@@ -54,7 +54,7 @@ export function Badge({ type, title, description, earned = false, className }: B
           {description}
         </p>
         {earned && (
-          <div className="absolute top-2 right-2 h-3 w-3 rounded-full bg-success animate-pulse" />
+          <div className="absolute top-2 right-2 h-3 w-3 rounded-full bg-success animate-pulse shadow-gold" />
         )}
       </div>
     </div>

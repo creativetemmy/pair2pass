@@ -42,6 +42,10 @@ export default {
 					DEFAULT: 'hsl(var(--success))',
 					foreground: 'hsl(var(--success-foreground))'
 				},
+				'badge-gold': {
+					DEFAULT: 'hsl(var(--badge-gold))',
+					foreground: 'hsl(var(--badge-gold-foreground))'
+				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'

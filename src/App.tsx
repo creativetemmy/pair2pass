@@ -18,6 +18,8 @@ import Profile from "./pages/Profile";
 import ProfilePage from "./pages/ProfilePage";
 import Leaderboard from "./pages/Leaderboard";
 import SessionLobby from "./pages/SessionLobby";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -56,6 +58,8 @@ const AppRouter = () => {
           <Route path="/session/:sessionId" element={<ProtectedRoute requireVerification={true}><SessionLobby /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute requireVerification={false}><Profile /></ProtectedRoute>} />
           <Route path="/profile/:id" element={<ProtectedRoute requireVerification={true}><ProfilePage /></ProtectedRoute>} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
