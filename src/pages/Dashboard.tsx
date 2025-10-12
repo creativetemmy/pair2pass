@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { XPBadge } from "@/components/gamification/XPBadge";
+import { PassPointsBadge } from "@/components/gamification/PassPointsBadge";
 import { Badge } from "@/components/gamification/Badge";
 import { ActiveSessionCard } from "@/components/ActiveSessionCard";
 import { CancelSessionModal } from "@/components/CancelSessionModal";
@@ -58,7 +58,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-foreground transition-colors duration-300">Dashboard</h1>
           <p className="text-muted-foreground transition-colors duration-300">Track your study progress and achievements</p>
         </div>
-        <XPBadge xp={Math.floor(stats.hoursStudied * 20)} level={Math.floor(stats.hoursStudied / 10) + 1} />
+        <PassPointsBadge passPoints={Math.floor(stats.hoursStudied * 20)} level={Math.floor(stats.hoursStudied / 10) + 1} />
       </div>
 
       {/* Stats Cards */}
@@ -227,7 +227,7 @@ export default function Dashboard() {
                               </span>
                             ))}
                           </div>
-                          <p className="text-sm font-medium text-success">+{session.xp_earned} XP</p>
+                          <p className="text-sm font-medium text-success">+{session.xp_earned} PASS</p>
                         </>
                       )}
                       {!session.rating && (

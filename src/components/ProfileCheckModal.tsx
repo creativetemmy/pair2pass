@@ -123,7 +123,7 @@ export function ProfileCheckModal({
             </div>
           </div>
 
-          {/* XP Bonus Preview */}
+          {/* Pass Points Bonus Preview */}
           <div className="p-4 rounded-lg gradient-secondary/10 border border-secondary/20">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
@@ -132,7 +132,7 @@ export function ProfileCheckModal({
               <div>
                 <p className="text-sm font-semibold text-foreground">Bonus Reward</p>
                 <p className="text-xs text-muted-foreground">
-                  Complete your profile to earn <span className="text-yellow-500 font-bold">+200 XP</span>
+                  Complete your profile to earn <span className="text-yellow-500 font-bold">+200 PASS</span>
                 </p>
               </div>
             </div>

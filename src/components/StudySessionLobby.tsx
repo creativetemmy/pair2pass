@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { XPBadge } from "@/components/gamification/XPBadge";
+import { PassPointsBadge } from "@/components/gamification/PassPointsBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Users, Trophy, Clock, MessageCircle, Video, Zap, Link, ExternalLink } from "lucide-react";
@@ -304,7 +304,7 @@ export function StudySessionLobby({
                   <h4 className="font-semibold text-lg mb-2">{currentUser.name}</h4>
                   <p className="text-sm text-muted-foreground mb-3">You</p>
                   
-                  <XPBadge xp={currentUser.xp} level={currentUser.level} className="justify-center mb-4" />
+                  <PassPointsBadge passPoints={currentUser.xp} level={currentUser.level} className="justify-center mb-4" showTier={false} />
                   
                   <Button
                     onClick={handleMarkReady}
@@ -356,7 +356,7 @@ export function StudySessionLobby({
                   <h4 className="font-semibold text-lg mb-2">{partner.name}</h4>
                   <p className="text-sm text-muted-foreground mb-3">Study Partner</p>
                   
-                  <XPBadge xp={partner.xp} level={partner.level} className="justify-center mb-4" />
+                  <PassPointsBadge passPoints={partner.xp} level={partner.level} className="justify-center mb-4" showTier={false} />
                   
                   <div className={cn(
                     "w-full py-2 px-4 rounded-md border-2 transition-all duration-300 font-medium",
@@ -452,7 +452,7 @@ export function StudySessionLobby({
                   </div>
                   <div className="flex items-center gap-2">
                     <Zap className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-medium text-primary">+50 XP on completion</span>
+                    <span className="text-sm font-medium text-primary">+50 PASS on completion</span>
                   </div>
                 </div>
               </CardContent>

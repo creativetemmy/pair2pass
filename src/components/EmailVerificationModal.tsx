@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { awardXP } from "@/lib/xpSystem";
+import { awardPassPoints } from "@/lib/passPointsSystem";
 import { useAccount } from "wagmi";
 import { createClient } from "@supabase/supabase-js";
 
@@ -142,7 +142,7 @@ export function EmailVerificationModal({
         .eq("email", email)
         .neq("id", verification.id);
 
-      awardXP(address, "EMAIL_VERIFIED");
+      awardPassPoints(address, "EMAIL_VERIFIED");
       
       // Create notification and send welcome email
       const { data: profile } = await supabase

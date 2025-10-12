@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { awardPassPoints } from '@/lib/passPointsSystem';
 
 export interface Profile {
   id?: string;
@@ -110,8 +111,11 @@ export function useProfile(walletAddress?: string) {
         preferred_study_times: (data as any)?.preferred_study_times || []
       });
       
-      // Send profile completion notification
+      // Send profile completion notification and award Pass Points
       if (data) {
+        // Award Pass Points for profile completion
+        await awardPassPoints(walletAddress.toLowerCase(), 'PROFILE_COMPLETED');
+        
         await supabase.from('notifications').insert({
           user_wallet: walletAddress.toLowerCase(),
           type: 'profile_complete',

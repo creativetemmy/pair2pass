@@ -1,13 +1,17 @@
 import { Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getUserTier } from "@/lib/passPointsSystem";
 
-interface XPBadgeProps {
-  xp: number;
+interface PassPointsBadgeProps {
+  passPoints: number;
   level: number;
   className?: string;
+  showTier?: boolean;
 }
 
-export function XPBadge({ xp, level, className }: XPBadgeProps) {
+export function PassPointsBadge({ passPoints, level, className, showTier = true }: PassPointsBadgeProps) {
+  const tier = getUserTier(passPoints);
+  
   return (
     <div className={cn("flex items-center space-x-3", className)}>
       <div className="relative">
@@ -21,9 +25,16 @@ export function XPBadge({ xp, level, className }: XPBadgeProps) {
       <div>
         <div className="flex items-center space-x-1">
           <Star className="h-4 w-4 text-badge-gold-foreground fill-badge-gold" />
-          <span className="font-semibold text-foreground">{xp} XP</span>
+          <span className="font-semibold text-foreground">{passPoints.toLocaleString()} PASS</span>
         </div>
-        <p className="text-sm text-muted-foreground">Level {level}</p>
+        {showTier ? (
+          <p className="text-sm">
+            <span className={cn("font-medium", tier.color)}>{tier.icon} {tier.name}</span>
+            <span className="text-muted-foreground ml-1">• Level {level}</span>
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">Level {level}</p>
+        )}
       </div>
     </div>
   );

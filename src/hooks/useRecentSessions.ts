@@ -53,7 +53,7 @@ export const useRecentSessions = () => {
               partner_wallet: partnerWallet,
               created_at: session.created_at,
               rating: review?.rating,
-              xp_earned: review?.rating ? review.rating * 30 : 0 // Calculate XP based on rating
+              xp_earned: review?.rating ? review.rating * 30 : 0 // Calculate Pass Points based on rating
             };
           })
         );

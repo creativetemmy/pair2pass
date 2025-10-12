@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { XPBadge } from "@/components/gamification/XPBadge";
+import { PassPointsBadge } from "@/components/gamification/PassPointsBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
 import { NftBadge } from "@/components/gamification/NftBadge";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
@@ -730,7 +730,7 @@ export default function Profile() {
                 {address}
               </p>
               
-              <XPBadge xp={profile?.xp || 0} level={profile?.level || 1} className="justify-center" />
+              <PassPointsBadge passPoints={profile?.xp || 0} level={profile?.level || 1} className="justify-center" />
               
               <div className="mt-4 pt-4 border-t border-border">
                 <div className="text-sm text-muted-foreground">

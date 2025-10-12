@@ -38,10 +38,10 @@ const studyGoals: StudyGoal[] = [
 ];
 
 const durations = [
-  { value: "30", label: "30 minutes", xp: "25 XP" },
-  { value: "45", label: "45 minutes", xp: "40 XP" },
-  { value: "60", label: "60 minutes", xp: "60 XP" },
-  { value: "120", label: "2 hours", xp: "150 XP" }
+  { value: "30", label: "30 minutes", xp: "25 PASS" },
+  { value: "45", label: "45 minutes", xp: "40 PASS" },
+  { value: "60", label: "60 minutes", xp: "60 PASS" },
+  { value: "120", label: "2 hours", xp: "150 PASS" }
 ];
 
 interface NewStudySessionModalProps {
@@ -150,7 +150,7 @@ export function NewStudySessionModal({
                 <div>
                   <p className="text-sm font-semibold text-foreground">Quest Rewards</p>
                   <p className="text-xs text-muted-foreground">
-                    Earn XP + reputation points for completing this session
+                    Earn Pass Points + reputation points for completing this session
                   </p>
                 </div>
               </div>

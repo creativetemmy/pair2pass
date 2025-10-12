@@ -8,7 +8,7 @@ import {
 const faqData = [
   {
     question: "What is Pair2Pass?",
-    answer: "Pair2Pass is a Web3-powered platform that connects students with verified study partners. Students can build their academic reputation, earn XP, and unlock NFT badges while learning together."
+    answer: "Pair2Pass is a Web3-powered platform that connects students with verified study partners. Students can build their academic reputation, earn Pass Points, and unlock NFT badges while learning together."
   },
   {
     question: "How do I find a study partner?",
@@ -19,8 +19,8 @@ const faqData = [
     answer: "Yes, a wallet is required to sign up and receive your Student Passport NFT. Don't worry — we make it simple, even if you're new to Web3."
   },
   {
-    question: "What are Pass Points and XP?",
-    answer: "Pass Points are reputation points you earn after completing study sessions and receiving good reviews. XP is experience that helps you level up, unlock new features, and showcase your academic growth."
+    question: "What are Pass Points?",
+    answer: "Pass Points are the unified reward system in Pair2Pass. You earn Pass Points by completing study sessions, receiving good reviews, and achieving milestones. As you accumulate Pass Points, you advance through tiers (Beginner → Explorer → Scholar → Expert → Master) and unlock exclusive features, badges, and benefits."
   },
   {
     question: "How do NFT badges work?",

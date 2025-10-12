@@ -7,7 +7,7 @@ import { Star, CheckCircle, Award, Loader2, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { awardXP, updateSessionStats } from "@/lib/xpSystem";
+import { awardPassPoints, updateSessionStats } from "@/lib/passPointsSystem";
 import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
 import { baseSepolia } from 'wagmi/chains';
 
@@ -103,12 +103,12 @@ export const SessionReviewModal = ({
 
       if (sessionError) throw sessionError;
 
-      // Award XP and update stats for session completion
+      // Award Pass Points and update stats for session completion
       await Promise.all([
-        awardXP(address, 'SESSION_COMPLETED'),
+        awardPassPoints(address, 'SESSION_COMPLETED'),
         updateSessionStats(address, sessionDuration, rating),
-        // Award XP to partner for being helped
-        awardXP(partnerWallet, 'PARTNER_HELPED', false)
+        // Award Pass Points to partner for being helped
+        awardPassPoints(partnerWallet, 'PARTNER_HELPED', false)
       ]);
 
       // Send session completion notifications
@@ -125,7 +125,7 @@ export const SessionReviewModal = ({
         user_wallet: address,
         type: 'session_complete',
         title: '✅ Session Completed!',
-        message: 'Your study session was marked as complete. You earned XP and can now mint your NFT badge!',
+        message: 'Your study session was marked as complete. You earned Pass Points and can now mint your NFT badge!',
         data: { sessionId, rating }
       });
 
@@ -253,7 +253,7 @@ export const SessionReviewModal = ({
                   Study Session Completed!
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  You've successfully completed your study session and earned XP. 
+                  You've successfully completed your study session and earned Pass Points. 
                   Want to commemorate this achievement?
                 </p>
               </div>
