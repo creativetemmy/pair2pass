@@ -109,6 +109,27 @@ export function useProfile(walletAddress?: string) {
         study_goals: (data as any)?.study_goals || [],
         preferred_study_times: (data as any)?.preferred_study_times || []
       });
+      
+      // Send profile completion notification
+      if (data) {
+        await supabase.from('notifications').insert({
+          user_wallet: walletAddress.toLowerCase(),
+          type: 'profile_complete',
+          title: '🎉 Profile Completed!',
+          message: 'Great job! Now you can find study partners. Start your learning journey!',
+          data: { action: 'profile_completed' }
+        });
+
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            type: 'profile_complete',
+            to: profileData.email || '',
+            userName: profileData.name || 'Student',
+            walletAddress: walletAddress.toLowerCase()
+          }
+        }).catch(err => console.log('Email send failed:', err));
+      }
+      
       toast({
         title: "Success",
         description: "Profile created successfully!",

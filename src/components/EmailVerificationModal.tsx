@@ -143,6 +143,31 @@ export function EmailVerificationModal({
         .neq("id", verification.id);
 
       awardXP(address, "EMAIL_VERIFIED");
+      
+      // Create notification and send welcome email
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .eq('wallet_address', address)
+        .single();
+
+      await supabase.from('notifications').insert({
+        user_wallet: address,
+        type: 'welcome',
+        title: '🎓 Welcome to Pair2Pass!',
+        message: 'Your email has been verified. Start finding study partners now!',
+        data: { action: 'email_verified' }
+      });
+
+      await supabase.functions.invoke('send-notification-email', {
+        body: {
+          type: 'welcome',
+          to: email,
+          userName: profile?.name || 'Student',
+          walletAddress: address
+        }
+      });
+
       setStep("success");
 
       setTimeout(() => {

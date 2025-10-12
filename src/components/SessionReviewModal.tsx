@@ -110,6 +110,35 @@ export const SessionReviewModal = ({
         // Award XP to partner for being helped
         awardXP(partnerWallet, 'PARTNER_HELPED', false)
       ]);
+
+      // Send session completion notifications
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .in('wallet_address', [address, partnerWallet]);
+
+      const userProfile = profiles?.find(p => p.email && p.email !== '');
+      const partnerProfile = profiles?.find(p => p.email && p.email !== '');
+
+      // Notify current user
+      await supabase.from('notifications').insert({
+        user_wallet: address,
+        type: 'session_complete',
+        title: '✅ Session Completed!',
+        message: 'Your study session was marked as complete. You earned XP and can now mint your NFT badge!',
+        data: { sessionId, rating }
+      });
+
+      if (userProfile?.email) {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            type: 'session_complete',
+            to: userProfile.email,
+            userName: userProfile.name || 'Student',
+            sessionId
+          }
+        }).catch(err => console.log('Email send failed:', err));
+      }
       
       // Show success view instead of closing
       setShowSuccessView(true);
@@ -164,10 +193,42 @@ export const SessionReviewModal = ({
   useEffect(() => {
     if (isConfirmed && isMintingNFT) {
       setIsMintingNFT(false);
+      
+      // Create badge unlocked notification
+      if (address) {
+        supabase.from('notifications').insert({
+          user_wallet: address,
+          type: 'badge_unlocked',
+          title: '⛓️ NFT Badge Unlocked!',
+          message: 'Your "Study Session" NFT badge has been minted and added to your profile!',
+          data: { badgeType: 'study_session', txHash: hash }
+        });
+
+        // Send email notification
+        supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('wallet_address', address)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile?.email) {
+              supabase.functions.invoke('send-notification-email', {
+                body: {
+                  type: 'badge_unlocked',
+                  to: profile.email,
+                  userName: profile.name || 'Student',
+                  badgeName: 'Study Session Badge',
+                  walletAddress: address
+                }
+              }).catch(err => console.log('Email send failed:', err));
+            }
+          });
+      }
+      
       toast.success("Proof of Study NFT minted successfully! 🎓");
       onClose();
     }
-  }, [isConfirmed, isMintingNFT, onClose]);
+  }, [isConfirmed, isMintingNFT, onClose, address, hash]);
 
   // Show success view after review submission
   if (showSuccessView) {

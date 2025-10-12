@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Home, Users, Calendar, User, Wallet, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,8 +26,9 @@ const publicNavItems = [
 
 
 export function Navigation() {
-
-  const {  isConnected } = useAccount()
+  const { isConnected } = useAccount();
+  const location = useLocation();
+  const isHomepage = location.pathname === '/';
  
   
  
@@ -70,7 +71,7 @@ export function Navigation() {
                 <span className="flex-shrink-0">{item.label}</span>
               </NavLink>
             ))}
-            {publicNavItems.map((item) => (
+            {isHomepage && publicNavItems.map((item) => (
               item.isAnchor ? (
                 <a
                   key={item.path}

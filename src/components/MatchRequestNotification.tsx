@@ -68,6 +68,37 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
       // Mark notification as read
       onRead();
 
+      // Create match found notifications for both users
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .in('wallet_address', [matchRequest.requester_wallet, matchRequest.target_wallet]);
+
+      const requesterProfile = profiles?.find(p => p.email);
+      const targetProfile = profiles?.find(p => p.email);
+
+      // Notify requester that match was accepted
+      await supabase.from('notifications').insert({
+        user_wallet: matchRequest.requester_wallet,
+        type: 'match_found',
+        title: '🎉 Match Accepted!',
+        message: `Your study partner request for ${subject} was accepted! Session starting soon.`,
+        data: { sessionId: session.id, subject, goal }
+      });
+
+      if (requesterProfile?.email) {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            type: 'match_found',
+            to: requesterProfile.email,
+            userName: requesterProfile.name || 'Student',
+            partnerName: requesterName,
+            subject,
+            sessionId: session.id
+          }
+        }).catch(err => console.log('Email send failed:', err));
+      }
+
       toast({
         title: "Match Accepted! 🎉",
         description: "Redirecting to session lobby...",

@@ -117,6 +117,34 @@ export const awardXP = async (
 
       // Show level up notification
       if (newLevel > oldLevel) {
+        // Create milestone notification
+        await supabase.from('notifications').insert({
+          user_wallet: walletAddress,
+          type: 'milestone_reached',
+          title: '🏆 Level Up!',
+          message: `Congratulations! You've reached Level ${newLevel}. Keep building your study streaks!`,
+          data: { level: newLevel, oldLevel }
+        });
+
+        // Get user profile for email
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('wallet_address', walletAddress)
+          .single();
+
+        if (profile?.email) {
+          await supabase.functions.invoke('send-notification-email', {
+            body: {
+              type: 'milestone_reached',
+              to: profile.email,
+              userName: profile.name || 'Student',
+              level: newLevel,
+              xp: newXP
+            }
+          }).catch(err => console.log('Email send failed:', err));
+        }
+
         setTimeout(() => {
           toast({
             title: "Level Up! 🚀",
