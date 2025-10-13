@@ -151,7 +151,9 @@ const handler = async (req: Request): Promise<Response> => {
                 </ol>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.blogUrl || 'https://pair2pass.com/blog'}" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.blogUrl || "https://pair2pass.com/blog"
+                }" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   Read Our Getting Started Guide
                 </a>
               </p>
@@ -170,7 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
               <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
                 🎉 Profile Complete!
               </h1>
-              <p>Congratulations ${data.userName || ''}!</p>
+              <p>Congratulations ${data.userName || ""}!</p>
               <p>Your profile is now complete and visible to potential study partners.</p>
               <div style="background-color: #d4edda; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #28a745;">
                 <p style="margin: 0; color: #155724;">
@@ -179,7 +181,9 @@ const handler = async (req: Request): Promise<Response> => {
                 </p>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.findPartnerUrl || 'https://pair2pass.com/find-partner'}" style="display: inline-block; background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.findPartnerUrl || "https://pair2pass.com/find-partner"
+                }" style="display: inline-block; background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   Find a Study Partner Now
                 </a>
               </p>
@@ -190,7 +194,9 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "match_found":
-        subject = `🤝 Study Partner Found - ${data.partnerName} for ${data.subject || data.sessionSubject}`;
+        subject = `🤝 Study Partner Found - ${data.partnerName} for ${
+          data.subject || data.sessionSubject
+        }`;
         htmlContent = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
             <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -198,12 +204,20 @@ const handler = async (req: Request): Promise<Response> => {
                 🤝 You've Been Matched!
               </h1>
               <p>Great news!</p>
-              <p>You've been matched with <strong>${data.partnerName}</strong> for <strong>${data.subject || data.sessionSubject}</strong>.</p>
+              <p>You've been matched with <strong>${
+                data.partnerName
+              }</strong> for <strong>${
+          data.subject || data.sessionSubject
+        }</strong>.</p>
               <div style="background-color: #fff3cd; padding: 20px; border-radius: 6px; margin: 25px 0;">
                 <h3 style="color: #856404; margin-top: 0;">Session Details:</h3>
                 <ul style="margin: 10px 0; padding-left: 20px;">
-                  <li><strong>Subject:</strong> ${data.subject || data.sessionSubject}</li>
-                  <li><strong>Goal:</strong> ${data.goal || data.sessionGoal || 'Not specified'}</li>
+                  <li><strong>Subject:</strong> ${
+                    data.subject || data.sessionSubject
+                  }</li>
+                  <li><strong>Goal:</strong> ${
+                    data.goal || data.sessionGoal || "Not specified"
+                  }</li>
                   <li><strong>Duration:</strong> ${data.duration} minutes</li>
                 </ul>
               </div>
@@ -211,14 +225,18 @@ const handler = async (req: Request): Promise<Response> => {
                 ⏰ <strong>Action Required:</strong> Please confirm your study session within the next 30 minutes to avoid auto-cancellation.
               </p>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.confirmUrl || 'https://pair2pass.com/dashboard'}" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.confirmUrl || "https://pair2pass.com/dashboard"
+                }" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   Confirm Study Session
                 </a>
               </p>
             </div>
           </div>
         `;
-        textContent = `You've been matched with ${data.partnerName} for ${data.subject || data.sessionSubject}. Confirm your session now!`;
+        textContent = `You've been matched with ${data.partnerName} for ${
+          data.subject || data.sessionSubject
+        }. Confirm your session now!`;
         break;
 
       case "confirmation_reminder":
@@ -229,26 +247,36 @@ const handler = async (req: Request): Promise<Response> => {
               <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
                 ⏰ Session Expiring Soon
               </h1>
-              <p>Hi ${data.userName || ''},</p>
-              <p>Your partner <strong>${data.partnerName}</strong> hasn't confirmed your study session yet.</p>
+              <p>Hi ${data.userName || ""},</p>
+              <p>Your partner <strong>${
+                data.partnerName
+              }</strong> hasn't confirmed your study session yet.</p>
               <div style="background-color: #f8d7da; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #f5c6cb;">
                 <p style="margin: 0; color: #721c24;">
                   ⚠️ <strong>Time's running out!</strong><br>
-                  This session will auto-cancel in ${data.minutesLeft || '15'} minutes if not confirmed.
+                  This session will auto-cancel in ${
+                    data.minutesLeft || "15"
+                  } minutes if not confirmed.
                 </p>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.remindUrl || 'https://pair2pass.com/dashboard'}" style="display: inline-block; background-color: #ffc107; color: #333; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 10px;">
+                <a href="${
+                  data.remindUrl || "https://pair2pass.com/dashboard"
+                }" style="display: inline-block; background-color: #ffc107; color: #333; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 10px;">
                   Send Reminder
                 </a>
-                <a href="${data.findNewUrl || 'https://pair2pass.com/find-partner'}" style="display: inline-block; background-color: #6c757d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.findNewUrl || "https://pair2pass.com/find-partner"
+                }" style="display: inline-block; background-color: #6c757d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   Find Another Partner
                 </a>
               </p>
             </div>
           </div>
         `;
-        textContent = `Your partner hasn't confirmed yet. Session will auto-cancel in ${data.minutesLeft || '15'} minutes.`;
+        textContent = `Your partner hasn't confirmed yet. Session will auto-cancel in ${
+          data.minutesLeft || "15"
+        } minutes.`;
         break;
 
       case "session_reminder":
@@ -259,18 +287,32 @@ const handler = async (req: Request): Promise<Response> => {
               <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
                 📚 Session Starting Soon!
               </h1>
-              <p>Hi ${data.userName || ''},</p>
-              <p>Your study session with <strong>${data.partnerName}</strong> starts in <strong>10 minutes</strong>!</p>
+              <p>Hi ${data.userName || ""},</p>
+              <p>Your study session with <strong>${
+                data.partnerName
+              }</strong> starts in <strong>10 minutes</strong>!</p>
               <div style="background-color: #d1ecf1; padding: 20px; border-radius: 6px; margin: 25px 0;">
                 <h3 style="color: #0c5460; margin-top: 0;">Session Details:</h3>
                 <ul style="margin: 10px 0; padding-left: 20px;">
-                  <li><strong>Subject:</strong> ${data.subject || data.sessionSubject}</li>
-                  <li><strong>Duration:</strong> ${data.duration || '60'} minutes</li>
-                  <li><strong>Meeting Link:</strong> ${data.meetingLink ? `<a href="${data.meetingLink}" style="color: #007bff;">Join here</a>` : 'Check dashboard'}</li>
+                  <li><strong>Subject:</strong> ${
+                    data.subject || data.sessionSubject
+                  }</li>
+                  <li><strong>Duration:</strong> ${
+                    data.duration || "60"
+                  } minutes</li>
+                  <li><strong>Meeting Link:</strong> ${
+                    data.meetingLink
+                      ? `<a href="${data.meetingLink}" style="color: #007bff;">Join here</a>`
+                      : "Check dashboard"
+                  }</li>
                 </ul>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.sessionUrl || data.meetingLink || 'https://pair2pass.com/session-lobby'}" style="display: inline-block; background-color: #17a2b8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.sessionUrl ||
+                  data.meetingLink ||
+                  "https://pair2pass.com/session-lobby"
+                }" style="display: inline-block; background-color: #17a2b8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   Join Session Lobby
                 </a>
               </p>
@@ -289,12 +331,14 @@ const handler = async (req: Request): Promise<Response> => {
               <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
                 ✅ Session Completed Successfully!
               </h1>
-              <p>Great job ${data.userName || ''}!</p>
-              <p>You've completed your study session with <strong>${data.partnerName}</strong>.</p>
+              <p>Great job ${data.userName || ""}!</p>
+              <p>You've completed your study session with <strong>${
+                data.partnerName
+              }</strong>.</p>
               <div style="background-color: #fef9e7; padding: 20px; border-radius: 6px; margin: 25px 0; text-align: center;">
                 <h2 style="color: #f39c12; margin: 0 0 15px 0;">🎉 You Earned:</h2>
                 <div style="font-size: 32px; font-weight: bold; color: #27ae60;">
-                  +${data.xpEarned || '60'} XP
+                  +${data.xpEarned || "60"} XP
                 </div>
               </div>
               <div style="background-color: #e8f5e9; padding: 20px; border-radius: 6px; margin: 25px 0;">
@@ -304,18 +348,22 @@ const handler = async (req: Request): Promise<Response> => {
                 </p>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.mintUrl || 'https://pair2pass.com/dashboard'}" style="display: inline-block; background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.mintUrl || "https://pair2pass.com/dashboard"
+                }" style="display: inline-block; background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   Mint Your NFT Badge
                 </a>
               </p>
             </div>
           </div>
         `;
-        textContent = `Session completed! You earned +${data.xpEarned || '60'} XP. Mint your Study Session NFT now!`;
+        textContent = `Session completed! You earned +${
+          data.xpEarned || "60"
+        } XP. Mint your Study Session NFT now!`;
         break;
 
       case "milestone_reached":
-        subject = `🏆 Level ${data.level || 'Up'} Achieved - You're on Fire!`;
+        subject = `🏆 Level ${data.level || "Up"} Achieved - You're on Fire!`;
         htmlContent = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
             <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -324,19 +372,27 @@ const handler = async (req: Request): Promise<Response> => {
               </h1>
               <div style="text-align: center; margin: 30px 0;">
                 <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-                <h2 style="color: #f39c12; margin: 0;">You've Reached Level ${data.level || '10'}!</h2>
+                <h2 style="color: #f39c12; margin: 0;">You've Reached Level ${
+                  data.level || "10"
+                }!</h2>
                 <p style="font-size: 18px; color: #666; margin: 20px 0;">
-                  Total XP: <strong style="color: #27ae60;">${data.totalXP || '1000'}</strong>
+                  Total XP: <strong style="color: #27ae60;">${
+                    data.totalXP || "1000"
+                  }</strong>
                 </p>
               </div>
               <div style="background-color: #fef9e7; padding: 20px; border-radius: 6px; margin: 25px 0;">
                 <p style="margin: 0; text-align: center; color: #856404;">
                   🔥 <strong>Keep building your study streaks!</strong><br>
-                  You're in the top ${data.topPercentage || '20'}% of Pair2Pass students.
+                  You're in the top ${
+                    data.topPercentage || "20"
+                  }% of Pair2Pass students.
                 </p>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.profileUrl || 'https://pair2pass.com/profile'}" style="display: inline-block; background-color: #f39c12; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.profileUrl || "https://pair2pass.com/profile"
+                }" style="display: inline-block; background-color: #f39c12; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   View Your Profile
                 </a>
               </p>
@@ -347,7 +403,7 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "badge_unlocked":
-        subject = `⛓️ New Badge Unlocked: ${data.badgeName || 'Achievement'}!`;
+        subject = `⛓️ New Badge Unlocked: ${data.badgeName || "Achievement"}!`;
         htmlContent = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
             <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -355,10 +411,17 @@ const handler = async (req: Request): Promise<Response> => {
                 ⛓️ New Badge Unlocked!
               </h1>
               <div style="text-align: center; margin: 30px 0;">
-                <div style="font-size: 64px; margin-bottom: 20px;">${data.badgeEmoji || '🏅'}</div>
-                <h2 style="color: #6f42c1; margin: 0;">${data.badgeName || 'Consistent Learner'}</h2>
+                <div style="font-size: 64px; margin-bottom: 20px;">${
+                  data.badgeEmoji || "🏅"
+                }</div>
+                <h2 style="color: #6f42c1; margin: 0;">${
+                  data.badgeName || "Consistent Learner"
+                }</h2>
                 <p style="font-size: 16px; color: #666; margin: 20px 0;">
-                  ${data.badgeDescription || 'This badge has been added to your profile.'}
+                  ${
+                    data.badgeDescription ||
+                    "This badge has been added to your profile."
+                  }
                 </p>
               </div>
               <div style="background-color: #e7e3f5; padding: 20px; border-radius: 6px; margin: 25px 0;">
@@ -368,7 +431,9 @@ const handler = async (req: Request): Promise<Response> => {
                 </p>
               </div>
               <p style="text-align: center; margin: 30px 0;">
-                <a href="${data.profileUrl || 'https://pair2pass.com/profile'}" style="display: inline-block; background-color: #6f42c1; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                <a href="${
+                  data.profileUrl || "https://pair2pass.com/profile"
+                }" style="display: inline-block; background-color: #6f42c1; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                   View Your Badges
                 </a>
               </p>
@@ -457,7 +522,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await fetch("https://send.api.mailtrap.io/api/send", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${mailtrapToken}`,
+        "Api-Token": `${Deno.env.get("MAILTRAP_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
