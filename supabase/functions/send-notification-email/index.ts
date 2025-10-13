@@ -78,8 +78,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Check if user has verified email
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("PROJECT_URL") ?? "",
+      Deno.env.get("SERVICE_ROLE_KEY") ?? ""
     );
 
     const { data: profile, error: profileError } = await supabase
