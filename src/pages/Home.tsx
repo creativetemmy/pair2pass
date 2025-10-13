@@ -38,10 +38,10 @@ const steps = [
 ];
 
 const stats = [
-  { value: "10,000+", label: "Active Students" },
-  { value: "50,000+", label: "Study Sessions" },
+  { value: "15+", label: "Active Students" },
+  { value: "10", label: "Study Sessions" },
   { value: "95%", label: "Success Rate" },
-  { value: "100+", label: "Universities" },
+  { value: "3+", label: "Universities" },
 ];
 
 const testimonials = [
