@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle, Star, MessageSquare } from "lucide-react";
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import heroImage from "@/assets/hero-image.jpg";
+import fuoyeLogo from "@/assets/institutions/fuoye-logo.png";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import FAQ from "@/components/FAQ";
 
@@ -66,12 +67,12 @@ const testimonials = [
 ];
 
 const institutions = [
-  { name: "MIT", logo: "🎓" },
-  { name: "Stanford", logo: "🏛️" },
-  { name: "Harvard", logo: "📚" },
-  { name: "Oxford", logo: "🎯" },
-  { name: "Cambridge", logo: "⚡" },
-  { name: "Yale", logo: "🌟" },
+  { name: "Federal University Oye-Ekiti", logo: fuoyeLogo, isImage: true },
+  { name: "Add Your Institution", logo: null, isPlaceholder: true },
+  { name: "Add Your Institution", logo: null, isPlaceholder: true },
+  { name: "Add Your Institution", logo: null, isPlaceholder: true },
+  { name: "Add Your Institution", logo: null, isPlaceholder: true },
+  { name: "Add Your Institution", logo: null, isPlaceholder: true },
 ];
 
 export default function Home() {
@@ -127,12 +128,26 @@ export default function Home() {
             {institutions.map((institution, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center group transition-all duration-300 hover:scale-110"
+                className={`flex flex-col items-center group transition-all duration-300 ${
+                  institution.isPlaceholder ? 'opacity-30' : 'hover:scale-110'
+                }`}
               >
-                <div className="text-4xl mb-2 grayscale group-hover:grayscale-0 transition-all duration-300">
-                  {institution.logo}
-                </div>
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                {institution.isImage && institution.logo ? (
+                  <img
+                    src={institution.logo}
+                    alt={institution.name}
+                    className="h-20 w-20 object-contain grayscale group-hover:grayscale-0 transition-all duration-300 mb-2"
+                  />
+                ) : institution.isPlaceholder ? (
+                  <div className="h-20 w-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center mb-2">
+                    <span className="text-2xl text-muted-foreground/50">+</span>
+                  </div>
+                ) : (
+                  <div className="text-4xl mb-2 grayscale group-hover:grayscale-0 transition-all duration-300">
+                    {institution.logo}
+                  </div>
+                )}
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300 text-center max-w-[120px]">
                   {institution.name}
                 </span>
               </div>
