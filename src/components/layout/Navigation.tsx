@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, User, Wallet, Trophy } from "lucide-react";
+import { Home, Users, Calendar, User, Wallet, Trophy, Droplets } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -14,6 +14,7 @@ const allNavItems = [
   { icon: Users, label: "Find Partner", path: "/find-partner", protected:true},
   { icon: Calendar, label: "Sessions", path: "/session", protected:true},
   { icon: Trophy, label: "Leaderboard", path: "/leaderboard", protected:true},
+  { icon: Droplets, label: "Faucet", path: "/faucet", protected:true},
   { icon: User, label: "Profile", path: "/profile",protected:true },
 ];
 

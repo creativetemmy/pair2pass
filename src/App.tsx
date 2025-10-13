@@ -20,6 +20,7 @@ import Leaderboard from "./pages/Leaderboard";
 import SessionLobby from "./pages/SessionLobby";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Faucet from "./pages/Faucet";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -60,11 +61,12 @@ const AppRouter = () => {
           <Route path="/profile/:id" element={<ProtectedRoute requireVerification={true}><ProfilePage /></ProtectedRoute>} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path="/faucet" element={<ProtectedRoute requireVerification={false}><Faucet /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isConnected && !isHomepage && <Footer />}
+      {isHomepage && <Footer />}
     </div>
   );
 };

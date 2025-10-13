@@ -73,8 +73,8 @@ export const PASS_POINTS_REWARDS: Record<string, PassPointsReward> = {
   },
   PROFILE_COMPLETED: {
     action: 'PROFILE_COMPLETED',
-    amount: 30,
-    description: 'Profile completed'
+    amount: 50,
+    description: 'Profile completed and badge minted'
   },
   FIRST_SESSION: {
     action: 'FIRST_SESSION',
