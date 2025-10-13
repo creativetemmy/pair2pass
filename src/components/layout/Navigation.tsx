@@ -21,7 +21,7 @@ const allNavItems = [
 const publicNavItems = [
   { label: "How it Works", path: "/#how-it-works", isAnchor: true },
   { label: "Blog", path: "/blog" },
-  { label: "Community", path: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", isExternal: true },
+  { label: " Join Community", path: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", isExternal: true },
 ];
 
 
