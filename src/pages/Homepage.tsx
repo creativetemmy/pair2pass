@@ -520,6 +520,31 @@ export default function Homepage() {
         // Continue anyway - the match request was created
       }
 
+      // Send email notification to the partner if they have a verified email
+      if (partner.email) {
+        const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
+          body: {
+            email: partner.email,
+            type: 'session_matched',
+            data: {
+              userName: partner.name || 'Student',
+              partnerName: profile?.name || 'Someone',
+              sessionSubject: sessionData?.subject || 'General Study',
+              sessionGoal: sessionData?.goal || 'Study Together',
+              duration: sessionData?.duration || 60,
+              sessionId: matchRequest.id,
+              sessionTime: 'To be confirmed',
+              message: `${profile?.name || 'Someone'} has invited you to a study session!`
+            }
+          }
+        });
+
+        if (emailError) {
+          console.error('Error sending invitation email:', emailError);
+          // Don't fail the whole operation if email fails
+        }
+      }
+
       toast.success("Invitation sent! You'll be notified when they respond.");
       setShowMatchmakingResults(false);
       
