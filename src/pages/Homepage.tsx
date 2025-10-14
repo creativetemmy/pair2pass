@@ -478,6 +478,19 @@ export default function Homepage() {
     console.log("Inviting partner:", partner);
     
     try {
+      // Fetch requester and target emails from profiles table
+      const { data: requesterProfile } = await supabase
+        .from('profiles')
+        .select('email, name')
+        .eq('wallet_address', address)
+        .maybeSingle();
+
+      const { data: targetProfile } = await supabase
+        .from('profiles')
+        .select('email, name')
+        .eq('wallet_address', partner.wallet_address || partner.id)
+        .maybeSingle();
+
       // Create match request in database
       const { data: matchRequest, error: matchError } = await supabase
         .from('match_requests')
@@ -504,11 +517,11 @@ export default function Homepage() {
         .insert({
           user_wallet: partner.wallet_address || partner.id,
           title: 'New Study Partner Request',
-          message: `${profile?.name || 'Someone'} wants to study ${sessionData?.subject || ''} with you for ${sessionData?.goal || ''}. Accept?`,
+          message: `${requesterProfile?.name || profile?.name || 'Someone'} wants to study ${sessionData?.subject || ''} with you for ${sessionData?.goal || ''}. Accept?`,
           type: 'match_request',
           data: {
             matchRequestId: matchRequest.id,
-            requesterName: profile?.name || 'Someone',
+            requesterName: requesterProfile?.name || profile?.name || 'Someone',
             subject: sessionData?.subject || '',
             goal: sessionData?.goal || '',
             duration: sessionData?.duration || 60
@@ -518,6 +531,36 @@ export default function Homepage() {
       if (notificationError) {
         console.error('Error creating notification:', notificationError);
         // Continue anyway - the match request was created
+      }
+
+      // Send email notification to the target partner using their email from database
+      const targetEmail = targetProfile?.email || partner.email;
+      if (targetEmail) {
+        const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
+          body: {
+            email: targetEmail,
+            type: 'session_matched',
+            data: {
+              userName: targetProfile?.name || partner.name || 'Student',
+              partnerName: requesterProfile?.name || profile?.name || 'Someone',
+              sessionSubject: sessionData?.subject || 'General Study',
+              sessionGoal: sessionData?.goal || 'Study Together',
+              duration: sessionData?.duration || 60,
+              sessionId: matchRequest.id,
+              sessionTime: 'To be confirmed',
+              message: `${requesterProfile?.name || profile?.name || 'Someone'} has invited you to a study session!`
+            }
+          }
+        });
+
+        if (emailError) {
+          console.error('Error sending invitation email:', emailError);
+          // Don't fail the whole operation if email fails
+        } else {
+          console.log('Email sent successfully to:', targetEmail);
+        }
+      } else {
+        console.log('No email found for target partner');
       }
 
       toast.success("Invitation sent! You'll be notified when they respond.");
