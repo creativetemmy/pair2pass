@@ -67,11 +67,11 @@ const testimonials = [
   },
 ];
 
-const institutions = [
+const institutions: Array<{ name: string; logo: string | null; isImage: boolean; isPlaceholder?: boolean }> = [
   { name: "Federal University Oye-Ekiti", logo: fuoyeLogo, isImage: true },
   { name: "Osun State University", logo: uniosunLogo, isImage: true },
-  // { name: "Add Your Institution", logo: null, isPlaceholder: true },
-  //name: "Add Your Institution", logo: null, isPlaceholder: true },
+  { name: "Add Your Institution", logo: null, isImage: false, isPlaceholder: true },
+  { name: "Add Your Institution", logo: null, isImage: false, isPlaceholder: true },
 ];
 
 export default function Home() {
