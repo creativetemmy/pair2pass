@@ -22,44 +22,50 @@ interface MatchRequestNotificationProps {
   onRead: () => void;
 }
 
-export function MatchRequestNotification({ notification, onRead }: MatchRequestNotificationProps) {
+export function MatchRequestNotification({
+  notification,
+  onRead,
+}: MatchRequestNotificationProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
-  
-  const { matchRequestId, requesterName, subject, goal, duration } = notification.data;
+
+  const { matchRequestId, requesterName, subject, goal, duration } =
+    notification.data;
 
   const handleAccept = async () => {
     setProcessing(true);
     try {
       // Update match request status to accepted
       const { error: updateError } = await supabase
-        .from('match_requests')
-        .update({ status: 'accepted' })
-        .eq('id', matchRequestId);
+        .from("match_requests")
+        .update({ status: "accepted" })
+        .eq("id", matchRequestId);
 
       if (updateError) throw updateError;
 
       // Get the match request details to create session
       const { data: matchRequest, error: fetchError } = await supabase
-        .from('match_requests')
-        .select('*')
-        .eq('id', matchRequestId)
+        .from("match_requests")
+        .select("*")
+        .eq("id", matchRequestId)
         .single();
 
       if (fetchError) throw fetchError;
 
       // Create study session
       const { data: session, error: sessionError } = await supabase
-        .from('study_sessions')
-        .insert([{
-          partner_1_id: matchRequest.requester_wallet,
-          partner_2_id: matchRequest.target_wallet,
-          subject: matchRequest.subject,
-          goal: matchRequest.goal,
-          duration: matchRequest.duration,
-          status: 'waiting'
-        }])
+        .from("study_sessions")
+        .insert([
+          {
+            partner_1_id: matchRequest.requester_wallet,
+            partner_2_id: matchRequest.target_wallet,
+            subject: matchRequest.subject,
+            goal: matchRequest.goal,
+            duration: matchRequest.duration,
+            status: "waiting",
+          },
+        ])
         .select()
         .single();
 
@@ -69,34 +75,62 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
       onRead();
 
       // Create match found notifications for both users
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('name, email')
-        .in('wallet_address', [matchRequest.requester_wallet, matchRequest.target_wallet]);
 
-      const requesterProfile = profiles?.find(p => p.email);
-      const targetProfile = profiles?.find(p => p.email);
+      const { data: requesterProfile } = await supabase
+        .from("profiles")
+        .select("name, email")
+        .eq("wallet_address", matchRequest.requester_wallet)
+        .single();
+
+      const { data: targetProfile } = await supabase
+        .from("profiles")
+        .select("name, email")
+        .eq("wallet_address", matchRequest.requester_wallet)
+        .single();
 
       // Notify requester that match was accepted
-      await supabase.from('notifications').insert({
+      await supabase.from("notifications").insert({
         user_wallet: matchRequest.requester_wallet,
-        type: 'match_found',
-        title: '🎉 Match Accepted!',
+        type: "match_found",
+        title: "🎉 Match Accepted!",
         message: `Your study partner request for ${subject} was accepted! Session starting soon.`,
-        data: { sessionId: session.id, subject, goal }
+        data: { sessionId: session.id, subject, goal },
       });
 
       if (requesterProfile?.email) {
-        await supabase.functions.invoke('send-notification-email', {
-          body: {
-            type: 'match_found',
-            to: requesterProfile.email,
-            userName: requesterProfile.name || 'Student',
-            partnerName: requesterName,
-            subject,
-            sessionId: session.id
-          }
-        }).catch(err => console.log('Email send failed:', err));
+        await supabase.functions
+          .invoke("send-notification-email", {
+            body: {
+              type: "match_found",
+              email: requesterProfile.email,
+              data: {
+                userName: requesterProfile.name || "Student",
+                partnerName: targetProfile?.name || "Student",
+                subject,
+                sessionId: session.id,
+              },
+            },
+          })
+          .catch((err) => console.log("Email send failed:", err));
+
+
+           await supabase.functions
+          .invoke("send-notification-email", {
+            body: {
+              type: "match_found",
+              email: targetProfile.email,
+              data: {
+                userName: targetProfile.name || "Student",
+                partnerName: requesterName,
+                subject,
+                sessionId: session.id,
+              },
+            },
+          })
+          .catch((err) => console.log("Email send failed:", err));
+
+
+          
       }
 
       toast({
@@ -107,7 +141,7 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
       // Redirect to session lobby
       navigate(`/session/${session.id}`);
     } catch (error) {
-      console.error('Error accepting match:', error);
+      console.error("Error accepting match:", error);
       toast({
         title: "Error",
         description: "Failed to accept match request",
@@ -123,29 +157,30 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
     try {
       // Update match request status to rejected
       const { error } = await supabase
-        .from('match_requests')
-        .update({ status: 'rejected' })
-        .eq('id', matchRequestId);
+        .from("match_requests")
+        .update({ status: "rejected" })
+        .eq("id", matchRequestId);
 
       if (error) throw error;
 
       // Create notification for requester about rejection
       const { data: matchRequest } = await supabase
-        .from('match_requests')
-        .select('requester_wallet')
-        .eq('id', matchRequestId)
+        .from("match_requests")
+        .select("requester_wallet")
+        .eq("id", matchRequestId)
         .single();
 
       if (matchRequest) {
-        await supabase
-          .from('notifications')
-          .insert([{
+        await supabase.from("notifications").insert([
+          {
             user_wallet: matchRequest.requester_wallet,
-            type: 'match_rejected',
-            title: 'Match Request Declined',
-            message: 'Your study partner request was declined. Try another match!',
-            data: { subject, goal }
-          }]);
+            type: "match_rejected",
+            title: "Match Request Declined",
+            message:
+              "Your study partner request was declined. Try another match!",
+            data: { subject, goal },
+          },
+        ]);
       }
 
       // Mark notification as read
@@ -156,7 +191,7 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
         description: "The request has been declined politely.",
       });
     } catch (error) {
-      console.error('Error rejecting match:', error);
+      console.error("Error rejecting match:", error);
       toast({
         title: "Error",
         description: "Failed to reject match request",
@@ -174,28 +209,29 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
           <div className="flex items-center space-x-2">
             <User className="h-4 w-4 text-primary" />
             <span className="font-medium text-sm">{requesterName}</span>
-            <Badge variant="secondary" className="text-xs">Study Request</Badge>
+            <Badge variant="secondary" className="text-xs">
+              Study Request
+            </Badge>
           </div>
           {!notification.read && (
             <div className="w-2 h-2 bg-primary rounded-full"></div>
           )}
         </div>
-        
+
         <div className="space-y-1">
           <p className="text-sm">
-            📩 <strong>{requesterName}</strong> wants to study <strong>{subject}</strong> with you!
+            📩 <strong>{requesterName}</strong> wants to study{" "}
+            <strong>{subject}</strong> with you!
           </p>
-          <p className="text-xs text-muted-foreground">
-            Goal: {goal}
-          </p>
+          <p className="text-xs text-muted-foreground">Goal: {goal}</p>
           <p className="text-xs text-muted-foreground">
             Duration: {duration} minutes
           </p>
         </div>
 
         <div className="flex space-x-2 pt-2">
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             className="flex-1"
             onClick={handleAccept}
             disabled={processing}
@@ -203,9 +239,9 @@ export function MatchRequestNotification({ notification, onRead }: MatchRequestN
             <Check className="h-3 w-3 mr-1" />
             Accept
           </Button>
-          <Button 
-            size="sm" 
-            variant="outline" 
+          <Button
+            size="sm"
+            variant="outline"
             className="flex-1"
             onClick={handleReject}
             disabled={processing}

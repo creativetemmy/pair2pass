@@ -127,9 +127,11 @@ export function useProfile(walletAddress?: string) {
         await supabase.functions.invoke('send-notification-email', {
           body: {
             type: 'profile_complete',
-            to: profileData.email || '',
-            userName: profileData.name || 'Student',
-            walletAddress: walletAddress.toLowerCase()
+            email: profileData.email || '',
+            data: {
+              userName: profileData.name || 'Student',
+              walletAddress: walletAddress.toLowerCase()
+            }
           }
         }).catch(err => console.log('Email send failed:', err));
       }
