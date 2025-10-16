@@ -48,30 +48,29 @@ const stats = [
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
-    institution: "MIT",
+    name: "Temitope O.",
+    institution: "University of Osun",
     text: "Pair2Pass completely transformed how I study. Finding reliable study partners has never been easier!",
     rating: 5,
   },
   {
-    name: "Michael Chen",
-    institution: "Stanford",
+    name: "Ore Olawoyin",
+    institution: "Federal University Oye-Ekiti",
     text: "The gamification aspect keeps me motivated. I've improved my grades and made great friends.",
     rating: 5,
   },
-  {
-    name: "Emma Rodriguez",
-    institution: "Harvard",
-    text: "Being able to verify my study partners gives me confidence. The platform is intuitive and effective.",
-    rating: 5,
-  },
+  // {
+  //   name: "Tobi",
+  //   institution: "Universiity of Lagos",
+  //   text: "Being able to verify my study partners gives me confidence. The platform is intuitive and effective.",
+  //   rating: 5,
+  // },
 ];
 
-const institutions: Array<{ name: string; logo: string | null; isImage: boolean; isPlaceholder?: boolean }> = [
+const institutions = [
   { name: "Federal University Oye-Ekiti", logo: fuoyeLogo, isImage: true },
   { name: "Osun State University", logo: uniosunLogo, isImage: true },
-  { name: "Add Your Institution", logo: null, isImage: false, isPlaceholder: true },
-  { name: "Add Your Institution", logo: null, isImage: false, isPlaceholder: true },
+  
 ];
 
 export default function Home() {
