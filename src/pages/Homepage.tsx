@@ -539,15 +539,14 @@ export default function Homepage() {
         const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
           body: {
             email: targetEmail,
-            type: 'session_matched',
+            type: 'send_request',
             data: {
               userName: targetProfile?.name || partner.name || 'Student',
               partnerName: requesterProfile?.name || profile?.name || 'Someone',
-              sessionSubject: sessionData?.subject || 'General Study',
-              sessionGoal: sessionData?.goal || 'Study Together',
+              subject: sessionData?.subject || 'General Study',
+              goal: sessionData?.goal || 'Study Together',
               duration: sessionData?.duration || 60,
-              sessionId: matchRequest.id,
-              sessionTime: 'To be confirmed',
+              findPartnerUrl: 'https://pair2pass.com/homepage',
               message: `${requesterProfile?.name || profile?.name || 'Someone'} has invited you to a study session!`
             }
           }

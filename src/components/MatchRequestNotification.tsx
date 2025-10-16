@@ -97,6 +97,7 @@ export function MatchRequestNotification({
         data: { sessionId: session.id, subject, goal },
       });
 
+      // Send email to requester
       if (requesterProfile?.email) {
         await supabase.functions
           .invoke("send-notification-email", {
@@ -112,9 +113,11 @@ export function MatchRequestNotification({
             },
           })
           .catch((err) => console.log("Email send failed:", err));
+      }
 
-
-           await supabase.functions
+      // Send email to target
+      if (targetProfile?.email) {
+        await supabase.functions
           .invoke("send-notification-email", {
             body: {
               type: "match_found",
@@ -128,9 +131,6 @@ export function MatchRequestNotification({
             },
           })
           .catch((err) => console.log("Email send failed:", err));
-
-
-          
       }
 
       toast({
