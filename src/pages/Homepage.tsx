@@ -512,10 +512,21 @@ export default function Homepage() {
       }
 
       // Create notification for the target partner
+      const targetWalletAddress = partner.wallet_address;
+      
+      console.log('📧 Creating notification for wallet:', targetWalletAddress);
+      console.log('📧 Match request ID:', matchRequest.id);
+      
+      if (!targetWalletAddress) {
+        console.error('Target wallet address not found');
+        toast.error("Failed to send invitation. Partner wallet address missing.");
+        return;
+      }
+
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
-          user_wallet: partner.wallet_address || partner.id,
+          user_wallet: targetWalletAddress,
           title: 'New Study Partner Request',
           message: `${requesterProfile?.name || profile?.name || 'Someone'} wants to study ${sessionData?.subject || ''} with you for ${sessionData?.goal || ''}. Accept?`,
           type: 'match_request',
@@ -527,6 +538,8 @@ export default function Homepage() {
             duration: sessionData?.duration || 60
           }
         });
+
+      console.log('📧 Notification created, error:', notificationError);
 
       if (notificationError) {
         console.error('Error creating notification:', notificationError);

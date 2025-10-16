@@ -61,6 +61,8 @@ export function NotificationBell() {
   const fetchNotifications = async () => {
     if (!address) return;
 
+    console.log('🔔 Fetching notifications for wallet:', address);
+
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -73,6 +75,7 @@ export function NotificationBell() {
       return;
     }
 
+    console.log('🔔 Fetched notifications:', data);
     setNotifications(data || []);
     setUnreadCount(data?.filter(n => !n.read).length || 0);
   };

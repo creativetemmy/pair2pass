@@ -124,6 +124,9 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
         .single();
 
       // Create notification for the target user
+      console.log('📧 ConnectModal: Creating notification for wallet:', partner.wallet_address);
+      console.log('📧 ConnectModal: Match request ID:', matchRequest.id);
+      
       const { error: notificationError } = await supabase
         .from("notifications")
         .insert([
@@ -142,6 +145,8 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
           },
         ]);
 
+      console.log('📧 ConnectModal: Notification created, error:', notificationError);
+      
       if (notificationError) throw notificationError;
 
       await supabase.functions
