@@ -144,7 +144,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
 
       if (notificationError) throw notificationError;
 
-      await supbase.functions
+      await supabase.functions
         .invoke("send-notification-email", {
           body: {
             type: "send_request",

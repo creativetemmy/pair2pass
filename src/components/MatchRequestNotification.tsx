@@ -85,7 +85,7 @@ export function MatchRequestNotification({
       const { data: targetProfile } = await supabase
         .from("profiles")
         .select("name, email")
-        .eq("wallet_address", matchRequest.requester_wallet)
+        .eq("wallet_address", matchRequest.target_wallet)
         .single();
 
       // Notify requester that match was accepted
