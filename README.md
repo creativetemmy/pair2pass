@@ -1,3 +1,3 @@
-This project is designed and built to connect students with studying partner.
+The Web3 platform connecting students for verified study partnerships. 
 
-It is a web app designed to help learners to excel academically.
+Build your academic reputation while earning XP and NFT badges.
