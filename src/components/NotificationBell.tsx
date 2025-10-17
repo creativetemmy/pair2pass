@@ -85,26 +85,28 @@ export function NotificationBell() {
     setMatchRequestCount(data?.filter(n => n.type === 'match_request' && !n.read).length || 0);
   };
 
-  const markAsRead = async (notificationId: string) => {
-    const { error } = await supabase
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read
+    await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', notificationId);
-
-    if (error) {
-      console.error('Error marking notification as read:', error);
-      return;
-    }
+      .eq('id', notification.id);
 
     setNotifications(prev => 
       prev.map(n => 
-        n.id === notificationId ? { ...n, read: true } : n
+        n.id === notification.id ? { ...n, read: true } : n
       )
     );
-    const notification = notifications.find(n => n.id === notificationId);
     setUnreadCount(prev => Math.max(0, prev - 1));
-    if (notification?.type === 'match_request') {
+    if (notification.type === 'match_request') {
       setMatchRequestCount(prev => Math.max(0, prev - 1));
+    }
+
+    // Navigate based on notification type
+    if (notification.type === 'match_request') {
+      navigate('/match-requests');
+    } else if (notification.data?.sessionId) {
+      navigate(`/session/${notification.data.sessionId}`);
     }
   };
 
@@ -159,7 +161,7 @@ export function NotificationBell() {
                 className={`p-3 border-b hover:bg-muted/50 cursor-pointer ${
                   !notification.read ? 'bg-primary/5' : ''
                 }`}
-                onClick={() => markAsRead(notification.id)}
+                onClick={() => handleNotificationClick(notification)}
               >
                 <h4 className="font-medium text-sm">{notification.title}</h4>
                 <p className="text-xs text-muted-foreground mt-1">

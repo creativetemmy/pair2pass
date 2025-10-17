@@ -132,12 +132,17 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
   const handleAccept = async () => {
     setProcessing(true);
     try {
+      console.log('Accepting match request:', request.id);
+      
       const { error: updateError } = await supabase
         .from("match_requests")
         .update({ status: "accepted" })
         .eq("id", request.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating match request:', updateError);
+        throw updateError;
+      }
 
       const { data: session, error: sessionError } = await supabase
         .from("study_sessions")
