@@ -79,18 +79,18 @@ export function MatchRequestNotification({
       const { data: requesterProfile } = await supabase
         .from("profiles")
         .select("name, email")
-        .eq("wallet_address", matchRequest.requester_wallet)
+        .eq("wallet_address", matchRequest.requester_wallet?.toLowerCase())
         .single();
 
       const { data: targetProfile } = await supabase
         .from("profiles")
         .select("name, email")
-        .eq("wallet_address", matchRequest.target_wallet)
+        .eq("wallet_address", matchRequest.target_wallet?.toLowerCase())
         .single();
 
       // Notify requester that match was accepted
       await supabase.from("notifications").insert({
-        user_wallet: matchRequest.requester_wallet,
+        user_wallet: matchRequest.requester_wallet?.toLowerCase(),
         type: "match_found",
         title: "🎉 Match Accepted!",
         message: `Your study partner request for ${subject} was accepted! Session starting soon.`,
@@ -173,7 +173,7 @@ export function MatchRequestNotification({
       if (matchRequest) {
         await supabase.from("notifications").insert([
           {
-            user_wallet: matchRequest.requester_wallet,
+            user_wallet: matchRequest.requester_wallet?.toLowerCase(),
             type: "match_rejected",
             title: "Match Request Declined",
             message:

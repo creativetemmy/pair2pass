@@ -88,14 +88,17 @@ export function NotificationBell() {
       .update({ read: true })
       .eq('id', notificationId);
 
-    if (!error) {
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId ? { ...n, read: true } : n
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+    if (error) {
+      console.error('Error marking notification as read:', error);
+      return;
     }
+
+    setNotifications(prev => 
+      prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   return (

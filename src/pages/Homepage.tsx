@@ -482,21 +482,21 @@ export default function Homepage() {
       const { data: requesterProfile } = await supabase
         .from('profiles')
         .select('email, name')
-        .eq('wallet_address', address)
+        .eq('wallet_address', address?.toLowerCase())
         .maybeSingle();
 
       const { data: targetProfile } = await supabase
         .from('profiles')
         .select('email, name')
-        .eq('wallet_address', partner.wallet_address || partner.id)
+        .eq('wallet_address', (partner.wallet_address || partner.id)?.toLowerCase())
         .maybeSingle();
 
       // Create match request in database
       const { data: matchRequest, error: matchError } = await supabase
         .from('match_requests')
         .insert({
-          requester_wallet: address || 'current_user',
-          target_wallet: partner.wallet_address || partner.id,
+          requester_wallet: address?.toLowerCase() || 'current_user',
+          target_wallet: (partner.wallet_address || partner.id)?.toLowerCase(),
           subject: sessionData?.subject || 'General Study',
           goal: sessionData?.goal || 'Study Together',
           duration: sessionData?.duration || 60,

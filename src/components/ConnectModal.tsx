@@ -120,7 +120,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
       const { data: targetProfile } = await supabase
         .from("profiles")
         .select("name, email")
-        .eq("wallet_address", partner.wallet_address)
+        .eq("wallet_address", partner.wallet_address?.toLowerCase())
         .single();
 
       // Create notification for the target user
