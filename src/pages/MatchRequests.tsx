@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
 
 export default function MatchRequests() {
   const { requests, loading, refetch } = useMatchRequests();
@@ -63,9 +64,13 @@ interface MatchRequestCardProps {
 function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { address } = useAccount();
   const [processing, setProcessing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isExpired, setIsExpired] = useState(false);
+
+  // Validate if current user is the target (recipient) of this request
+  const isTargetUser = address?.toLowerCase() === request.target_wallet?.toLowerCase();
 
   useEffect(() => {
     const calculateTimeRemaining = () => {
@@ -130,10 +135,32 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
   };
 
   const handleAccept = async () => {
+    if (!isTargetUser) {
+      toast({
+        title: "Not Authorized",
+        description: "You can only accept requests sent to you.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!address) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to accept this request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setProcessing(true);
     try {
-      console.log('Accepting match request:', request.id);
-      
+      console.log('Starting accept process for request:', request.id);
+      console.log('Requester wallet:', request.requester_wallet);
+      console.log('Target wallet:', request.target_wallet);
+      console.log('Current user wallet:', address);
+
+      // Step 1: Update match request status
       const { error: updateError } = await supabase
         .from("match_requests")
         .update({ status: "accepted" })
@@ -141,15 +168,18 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
 
       if (updateError) {
         console.error('Error updating match request:', updateError);
-        throw updateError;
+        throw new Error(`Failed to update match request: ${updateError.message}`);
       }
 
+      console.log('Match request updated successfully, creating session...');
+
+      // Step 2: Create study session
       const { data: session, error: sessionError } = await supabase
         .from("study_sessions")
         .insert([
           {
-            partner_1_id: request.requester_wallet,
-            partner_2_id: request.target_wallet,
+            partner_1_id: request.requester_wallet?.toLowerCase(),
+            partner_2_id: request.target_wallet?.toLowerCase(),
             subject: request.subject,
             goal: request.goal,
             duration: request.duration,
@@ -159,7 +189,12 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
         .select()
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('Error creating study session:', sessionError);
+        throw new Error(`Failed to create study session: ${sessionError.message}`);
+      }
+
+      console.log('Study session created:', session.id);
 
       const { data: requesterProfile } = await supabase
         .from("profiles")
@@ -220,12 +255,14 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
         description: "Redirecting to session lobby...",
       });
 
-      navigate(`/session/${session.id}`);
-    } catch (error) {
+      setTimeout(() => {
+        navigate(`/session/${session.id}`);
+      }, 500);
+    } catch (error: any) {
       console.error("Error accepting match:", error);
       toast({
-        title: "Error",
-        description: "Failed to accept match request",
+        title: "Unable to accept match request",
+        description: error.message || "Please try again or contact support if the issue persists.",
         variant: "destructive",
       });
     } finally {
@@ -354,7 +391,7 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
             className="flex-1"
             size="lg"
             onClick={handleAccept}
-            disabled={processing || isExpired}
+            disabled={processing || isExpired || !isTargetUser}
           >
             <Check className="h-4 w-4 mr-2" />
             Accept Request
@@ -364,12 +401,18 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
             className="flex-1"
             size="lg"
             onClick={handleReject}
-            disabled={processing || isExpired}
+            disabled={processing || isExpired || !isTargetUser}
           >
             <X className="h-4 w-4 mr-2" />
             Decline
           </Button>
         </div>
+
+        {!isTargetUser && (
+          <p className="text-xs text-center text-muted-foreground pt-2">
+            This request was not sent to your wallet
+          </p>
+        )}
 
         <p className="text-xs text-center text-muted-foreground">
           Requested {new Date(request.created_at).toLocaleString()}
