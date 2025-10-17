@@ -535,7 +535,8 @@ export default function Homepage() {
             requesterName: requesterProfile?.name || profile?.name || 'Someone',
             subject: sessionData?.subject || '',
             goal: sessionData?.goal || '',
-            duration: sessionData?.duration || 60
+            duration: sessionData?.duration || 60,
+            expiresAt: matchRequest.expires_at
           }
         });
 

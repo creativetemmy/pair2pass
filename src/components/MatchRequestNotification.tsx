@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, User } from "lucide-react";
+import { Check, X, User, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -29,9 +29,85 @@ export function MatchRequestNotification({
   const { toast } = useToast();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [isExpired, setIsExpired] = useState(false);
 
-  const { matchRequestId, requesterName, subject, goal, duration } =
+  const { matchRequestId, requesterName, subject, goal, duration, expiresAt } =
     notification.data;
+
+  useEffect(() => {
+    const calculateTimeRemaining = () => {
+      if (!expiresAt) return;
+      
+      const now = new Date().getTime();
+      const expiry = new Date(expiresAt).getTime();
+      const diff = expiry - now;
+      
+      if (diff <= 0) {
+        setIsExpired(true);
+        setTimeRemaining(0);
+        handleExpiration();
+        return;
+      }
+      
+      setTimeRemaining(Math.floor(diff / 1000)); // in seconds
+    };
+
+    calculateTimeRemaining();
+    const interval = setInterval(calculateTimeRemaining, 1000);
+
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  const formatTimeRemaining = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleExpiration = async () => {
+    if (isExpired) return; // Prevent duplicate calls
+    
+    try {
+      // Update match request status to expired
+      await supabase
+        .from("match_requests")
+        .update({ status: "expired" })
+        .eq("id", matchRequestId);
+
+      // Get match request details
+      const { data: matchRequest } = await supabase
+        .from("match_requests")
+        .select("requester_wallet, target_wallet")
+        .eq("id", matchRequestId)
+        .single();
+
+      if (matchRequest) {
+        // Notify requester
+        await supabase.from("notifications").insert({
+          user_wallet: matchRequest.requester_wallet?.toLowerCase(),
+          type: "match_expired",
+          title: "⏱️ Request Expired",
+          message: `Your study partner request for ${subject} has expired. Try sending another request!`,
+          data: { subject, goal },
+        });
+
+        // Notify target
+        await supabase.from("notifications").insert({
+          user_wallet: matchRequest.target_wallet?.toLowerCase(),
+          type: "match_expired",
+          title: "⏱️ Request Expired",
+          message: `A study partner request for ${subject} has expired.`,
+          data: { subject, goal },
+        });
+      }
+
+      // Mark current notification as read
+      onRead();
+    } catch (error) {
+      console.error("Error handling expiration:", error);
+    }
+  };
 
   const handleAccept = async () => {
     setProcessing(true);
@@ -202,6 +278,24 @@ export function MatchRequestNotification({
     }
   };
 
+  if (isExpired) {
+    return (
+      <Card className="m-2 border-destructive/20 bg-destructive/5">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-4 w-4 text-destructive" />
+            <Badge variant="destructive" className="text-xs">
+              Expired
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            This study partner request has expired.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="m-2 border-primary/20">
       <CardContent className="p-4 space-y-3">
@@ -227,6 +321,12 @@ export function MatchRequestNotification({
           <p className="text-xs text-muted-foreground">
             Duration: {duration} minutes
           </p>
+          {timeRemaining !== null && (
+            <div className="flex items-center space-x-1 text-xs text-primary font-medium">
+              <Clock className="h-3 w-3" />
+              <span>Expires in: {formatTimeRemaining(timeRemaining)}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex space-x-2 pt-2">
@@ -234,7 +334,7 @@ export function MatchRequestNotification({
             size="sm"
             className="flex-1"
             onClick={handleAccept}
-            disabled={processing}
+            disabled={processing || isExpired}
           >
             <Check className="h-3 w-3 mr-1" />
             Accept
@@ -244,7 +344,7 @@ export function MatchRequestNotification({
             variant="outline"
             className="flex-1"
             onClick={handleReject}
-            disabled={processing}
+            disabled={processing || isExpired}
           >
             <X className="h-3 w-3 mr-1" />
             Decline
