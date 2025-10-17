@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "wagmi";
-import { MatchRequestNotification } from "./MatchRequestNotification";
+import { useNavigate } from "react-router-dom";
 
 interface Notification {
   id: string;
@@ -23,8 +23,10 @@ interface Notification {
 
 export function NotificationBell() {
   const { address } = useAccount();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [matchRequestCount, setMatchRequestCount] = useState(0);
 
   useEffect(() => {
     if (!address) return;
@@ -80,6 +82,7 @@ export function NotificationBell() {
     console.log('🔔 Fetched notifications:', data);
     setNotifications(data || []);
     setUnreadCount(data?.filter(n => !n.read).length || 0);
+    setMatchRequestCount(data?.filter(n => n.type === 'match_request' && !n.read).length || 0);
   };
 
   const markAsRead = async (notificationId: string) => {
@@ -98,7 +101,11 @@ export function NotificationBell() {
         n.id === notificationId ? { ...n, read: true } : n
       )
     );
+    const notification = notifications.find(n => n.id === notificationId);
     setUnreadCount(prev => Math.max(0, prev - 1));
+    if (notification?.type === 'match_request') {
+      setMatchRequestCount(prev => Math.max(0, prev - 1));
+    }
   };
 
   return (
@@ -120,35 +127,47 @@ export function NotificationBell() {
         <div className="p-3 border-b">
           <h3 className="font-semibold text-sm">Notifications</h3>
         </div>
+        {matchRequestCount > 0 && (
+          <div className="p-4 border-b bg-primary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">
+                  {matchRequestCount} pending match {matchRequestCount === 1 ? 'request' : 'requests'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Review and respond to study partner requests
+                </p>
+              </div>
+              <Button 
+                size="sm" 
+                onClick={() => navigate('/match-requests')}
+              >
+                View All
+              </Button>
+            </div>
+          </div>
+        )}
         {notifications.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground text-sm">
             No notifications yet
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto">
-            {notifications.map((notification) => (
-              <div key={notification.id}>
-                {notification.type === 'match_request' ? (
-                  <MatchRequestNotification 
-                    notification={notification}
-                    onRead={() => markAsRead(notification.id)}
-                  />
-                ) : (
-                  <div 
-                    className={`p-3 border-b hover:bg-muted/50 cursor-pointer ${
-                      !notification.read ? 'bg-primary/5' : ''
-                    }`}
-                    onClick={() => markAsRead(notification.id)}
-                  >
-                    <h4 className="font-medium text-sm">{notification.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(notification.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                )}
+            {notifications.filter(n => n.type !== 'match_request').map((notification) => (
+              <div 
+                key={notification.id}
+                className={`p-3 border-b hover:bg-muted/50 cursor-pointer ${
+                  !notification.read ? 'bg-primary/5' : ''
+                }`}
+                onClick={() => markAsRead(notification.id)}
+              >
+                <h4 className="font-medium text-sm">{notification.title}</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {notification.message}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {new Date(notification.created_at).toLocaleString()}
+                </p>
               </div>
             ))}
           </div>

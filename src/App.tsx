@@ -13,6 +13,7 @@ import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import FindPartner from "./pages/FindPartner";
 import MatchConfirmation from "./pages/MatchConfirmation";
+import MatchRequests from "./pages/MatchRequests";
 import SessionCheckIn from "./pages/SessionCheckIn";
 import Profile from "./pages/Profile";
 import ProfilePage from "./pages/ProfilePage";
@@ -54,6 +55,7 @@ const AppRouter = () => {
           <Route path="/session" element={<ProtectedRoute requireVerification={false}><Dashboard /></ProtectedRoute>} />
           <Route path="/find-partner" element={<ProtectedRoute requireVerification={true}><FindPartner /></ProtectedRoute>} />
           <Route path="/match-confirmation" element={<ProtectedRoute requireVerification={true}><MatchConfirmation /></ProtectedRoute>} />
+          <Route path="/match-requests" element={<ProtectedRoute requireVerification={true}><MatchRequests /></ProtectedRoute>} />
           <Route path="/session-checkin/:sessionId" element={<ProtectedRoute requireVerification={true}><SessionCheckIn /></ProtectedRoute>} />
           <Route path="/leaderboard" element={<ProtectedRoute requireVerification={false}><Leaderboard /></ProtectedRoute>} />
           <Route path="/session/:sessionId" element={<ProtectedRoute requireVerification={true}><SessionLobby /></ProtectedRoute>} />

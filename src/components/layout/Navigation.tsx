@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, User, Wallet, Trophy, Droplets } from "lucide-react";
+import { Home, Users, Calendar, User, Wallet, Trophy, Droplets, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -12,6 +12,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 const allNavItems = [
   { icon: Home, label: "Dashboard", path: "/homepage" ,protected:true},
   { icon: Users, label: "Find Partner", path: "/find-partner", protected:true},
+  { icon: Inbox, label: "Requests", path: "/match-requests", protected:true},
   { icon: Calendar, label: "Sessions", path: "/session", protected:true},
   { icon: Trophy, label: "Leaderboard", path: "/leaderboard", protected:true},
   { icon: Droplets, label: "Faucet", path: "/faucet", protected:true},
