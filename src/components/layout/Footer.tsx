@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Facebook, Twitter, Instagram, Linkedin, Github, Mail, MessageSquare } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -36,13 +36,13 @@ export function Footer() {
   const publicLinks = [
     { label: "How it Works", href: "/#how-it-works", isAnchor: true },
     { label: "Blog", href: "/blog" },
-    { label: "Community", href: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", isExternal: true },
+    { label: "WhatsApp Community", href: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", isExternal: true },
   ];
 
   const socialLinks = [
     { icon: Twitter, href: "https://x.com/pair2pass", label: "X (Twitter)", color: "hover:text-blue-400" },
-    { icon: Github, href: "https://github.com/pair2pass", label: "GitHub", color: "hover:text-gray-400" },
-    { icon: MessageSquare, href: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", label: "WhatsApp Community", color: "hover:text-green-400" },
+    { icon: Instagram, href: "https://www.instagram.com/pair2pass/", label: "Instagram", color: "hover:text-pink-400" },
+    { icon: MessageSquare, href: "https://chat.whatsapp.com/HU3QsSuzV7pGBRHkKHR5eb", label: "WhatsApp", color: "hover:text-green-400" },
   ];
 
   const legalLinks = [

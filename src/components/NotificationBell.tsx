@@ -33,6 +33,7 @@ export function NotificationBell() {
     fetchNotifications();
 
     // Set up realtime subscription
+    const normalizedAddress = address.toLowerCase();
     const channel = supabase
       .channel('notifications')
       .on(
@@ -41,7 +42,7 @@ export function NotificationBell() {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_wallet=eq.${address}`
+          filter: `user_wallet=eq.${normalizedAddress}`
         },
         (payload) => {
           const newNotification = payload.new as Notification;
@@ -61,12 +62,13 @@ export function NotificationBell() {
   const fetchNotifications = async () => {
     if (!address) return;
 
-    console.log('🔔 Fetching notifications for wallet:', address);
+    const normalizedAddress = address.toLowerCase();
+    console.log('🔔 Fetching notifications for wallet:', normalizedAddress);
 
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
-      .eq('user_wallet', address)
+      .eq('user_wallet', normalizedAddress)
       .order('created_at', { ascending: false })
       .limit(10);
 

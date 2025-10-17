@@ -131,7 +131,7 @@ export function ConnectModal({ partner, isOpen, onClose }: ConnectModalProps) {
         .from("notifications")
         .insert([
           {
-            user_wallet: partner.wallet_address,
+            user_wallet: partner.wallet_address?.toLowerCase(),
             type: "match_request",
             title: "New Study Partner Request",
             message: `${currentUserName} wants to study ${formData.subject} with you for ${formData.goal}. Accept?`,

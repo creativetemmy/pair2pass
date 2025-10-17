@@ -512,7 +512,7 @@ export default function Homepage() {
       }
 
       // Create notification for the target partner
-      const targetWalletAddress = partner.wallet_address;
+      const targetWalletAddress = partner.wallet_address?.toLowerCase();
       
       console.log('📧 Creating notification for wallet:', targetWalletAddress);
       console.log('📧 Match request ID:', matchRequest.id);

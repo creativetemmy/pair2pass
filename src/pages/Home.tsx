@@ -261,13 +261,13 @@ export default function Home() {
           <Button
             size="lg"
             onClick={() => setShowWalletDialog(true)}
-            className="bg-white text-primary hover:bg-white/90 transition-all duration-300 text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl"
+            className="bg-white text-primary hover:bg-white/90 transition-all duration-300 text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl mb-8"
           >
             Start Learning
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-white/90 max-w-2xl mx-auto">
             Join thousands of students already building their academic reputation on Pair2Pass
           </p>
         </div>
