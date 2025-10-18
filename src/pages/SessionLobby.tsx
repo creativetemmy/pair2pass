@@ -13,8 +13,11 @@ import {
   CheckCircle, 
   UserCheck,
   Video,
-  ArrowLeft
+  ArrowLeft,
+  Link,
+  ExternalLink
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +58,9 @@ export default function SessionLobby() {
   const [isReady, setIsReady] = useState(false);
   const [countdown, setCountdown] = useState(300); // 5 minutes in seconds
   const [countdownActive, setCountdownActive] = useState(false);
+  const [videoLink, setVideoLink] = useState("");
+  const [linkInput, setLinkInput] = useState("");
+  const [showLinkForm, setShowLinkForm] = useState(false);
 
   useEffect(() => {
     if (!sessionId || !address) return;
@@ -73,8 +79,20 @@ export default function SessionLobby() {
           filter: `id=eq.${sessionId}`
         },
         (payload) => {
+          console.log('Session update received:', payload);
           const updatedSession = payload.new as StudySession;
           setSession(updatedSession);
+          
+          // Update video link if changed
+          if (updatedSession.video_link) {
+            setVideoLink(updatedSession.video_link);
+          }
+          
+          // Update ready status
+          const currentUserReady = updatedSession.partner_1_id.toLowerCase() === address?.toLowerCase()
+            ? updatedSession.partner_1_ready 
+            : updatedSession.partner_2_ready;
+          setIsReady(currentUserReady);
           
           // Check if both partners are ready
           if (updatedSession.partner_1_ready && updatedSession.partner_2_ready && !countdownActive) {
@@ -123,9 +141,14 @@ export default function SessionLobby() {
       if (sessionError) throw sessionError;
 
       setSession(sessionData);
+      
+      // Set video link if exists
+      if (sessionData.video_link) {
+        setVideoLink(sessionData.video_link);
+      }
 
-      // Determine partner wallet address
-      const partnerWallet = sessionData.partner_1_id === address 
+      // Determine partner wallet address (case-insensitive)
+      const partnerWallet = sessionData.partner_1_id.toLowerCase() === address?.toLowerCase()
         ? sessionData.partner_2_id 
         : sessionData.partner_1_id;
 
@@ -141,8 +164,8 @@ export default function SessionLobby() {
 
       setPartner(partnerData);
 
-      // Set current user's ready status
-      const currentUserReady = sessionData.partner_1_id === address 
+      // Set current user's ready status (case-insensitive)
+      const currentUserReady = sessionData.partner_1_id.toLowerCase() === address?.toLowerCase()
         ? sessionData.partner_1_ready 
         : sessionData.partner_2_ready;
       setIsReady(currentUserReady);
@@ -160,11 +183,61 @@ export default function SessionLobby() {
     }
   };
 
+  const handleSubmitLink = async () => {
+    if (!linkInput.trim()) {
+      toast({
+        title: "Invalid Input",
+        description: "Please enter a valid session link.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log('Submitting video link:', linkInput.trim());
+      const { error } = await supabase
+        .from('study_sessions')
+        .update({ video_link: linkInput.trim() })
+        .eq('id', sessionId);
+
+      if (error) throw error;
+
+      setVideoLink(linkInput.trim());
+      setLinkInput("");
+      setShowLinkForm(false);
+      
+      toast({
+        title: "Session Link Added",
+        description: "Both partners can now join the study session!",
+      });
+    } catch (error) {
+      console.error('Error updating session link:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add session link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleMarkReady = async () => {
     if (!session || !address) return;
 
+    if (!videoLink) {
+      toast({
+        title: "Meeting Link Required",
+        description: "Please add a meeting link before marking ready.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const readyField = session.partner_1_id === address ? 'partner_1_ready' : 'partner_2_ready';
+      const readyField = session.partner_1_id.toLowerCase() === address.toLowerCase() 
+        ? 'partner_1_ready' 
+        : 'partner_2_ready';
+      
+      console.log('Marking ready:', { readyField, sessionId, address });
       
       const { error } = await supabase
         .from('study_sessions')
@@ -185,6 +258,12 @@ export default function SessionLobby() {
         description: "Failed to mark as ready",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleJoinSession = () => {
+    if (videoLink) {
+      window.open(videoLink, '_blank');
     }
   };
 
@@ -262,7 +341,7 @@ export default function SessionLobby() {
   }
 
   const bothReady = session.partner_1_ready && session.partner_2_ready;
-  const partnerReady = session.partner_1_id === address 
+  const partnerReady = session.partner_1_id.toLowerCase() === address?.toLowerCase()
     ? session.partner_2_ready 
     : session.partner_1_ready;
 
@@ -360,6 +439,76 @@ export default function SessionLobby() {
                   <span>🔥 {partner.xp} XP</span>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Video Link Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Link className="h-5 w-5" />
+              <span>Session Link</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center space-y-4">
+              {videoLink ? (
+                <>
+                  <p className="text-sm text-muted-foreground">Ready to join your study session!</p>
+                  <Button
+                    onClick={handleJoinSession}
+                    className="w-full"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Join Study Session
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {!showLinkForm ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-3">No session link added yet</p>
+                      <Button
+                        onClick={() => setShowLinkForm(true)}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <Link className="h-4 w-4 mr-2" />
+                        Add Session Link
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="Paste Google Meet, Zoom, or any video link..."
+                        value={linkInput}
+                        onChange={(e) => setLinkInput(e.target.value)}
+                        className="w-full"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleSubmitLink}
+                          disabled={!linkInput.trim()}
+                          className="flex-1"
+                        >
+                          Submit Link
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setShowLinkForm(false);
+                            setLinkInput("");
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
