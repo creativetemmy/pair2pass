@@ -79,29 +79,49 @@ export default function SessionLobby() {
           filter: `id=eq.${sessionId}`
         },
         (payload) => {
-          console.log('Session update received:', payload);
+          console.log('=== REALTIME UPDATE RECEIVED ===');
+          console.log('Payload:', payload);
           const updatedSession = payload.new as StudySession;
+          console.log('Updated session:', updatedSession);
+          console.log('Current address:', address);
+          console.log('Partner 1 ID:', updatedSession.partner_1_id);
+          console.log('Partner 2 ID:', updatedSession.partner_2_id);
+          console.log('Partner 1 ready:', updatedSession.partner_1_ready);
+          console.log('Partner 2 ready:', updatedSession.partner_2_ready);
+          
           setSession(updatedSession);
           
           // Update video link if changed
           if (updatedSession.video_link) {
+            console.log('Video link updated:', updatedSession.video_link);
             setVideoLink(updatedSession.video_link);
           }
           
-          // Update ready status
-          const currentUserReady = updatedSession.partner_1_id.toLowerCase() === address?.toLowerCase()
+          // Determine which partner is the current user (case-insensitive)
+          const isPartner1 = updatedSession.partner_1_id.toLowerCase() === address?.toLowerCase();
+          const currentUserReady = isPartner1
             ? updatedSession.partner_1_ready 
             : updatedSession.partner_2_ready;
+          
+          console.log('Is current user partner 1?:', isPartner1);
+          console.log('Current user ready status:', currentUserReady);
+          
           setIsReady(currentUserReady);
           
           // Check if both partners are ready
-          if (updatedSession.partner_1_ready && updatedSession.partner_2_ready && !countdownActive) {
+          const bothReady = updatedSession.partner_1_ready && updatedSession.partner_2_ready;
+          console.log('Both partners ready?:', bothReady);
+          console.log('Countdown active?:', countdownActive);
+          
+          if (bothReady && !countdownActive) {
+            console.log('Starting countdown!');
             setCountdownActive(true);
             toast({
               title: "Both partners ready! 🎉",
               description: "Session starting in 5 minutes. Get prepared!",
             });
           }
+          console.log('=== END REALTIME UPDATE ===');
         }
       )
       .subscribe();
@@ -221,7 +241,10 @@ export default function SessionLobby() {
   };
 
   const handleMarkReady = async () => {
-    if (!session || !address) return;
+    if (!session || !address) {
+      console.log('Cannot mark ready - missing session or address');
+      return;
+    }
 
     if (!videoLink) {
       toast({
@@ -233,24 +256,37 @@ export default function SessionLobby() {
     }
 
     try {
-      const readyField = session.partner_1_id.toLowerCase() === address.toLowerCase() 
-        ? 'partner_1_ready' 
-        : 'partner_2_ready';
+      const isPartner1 = session.partner_1_id.toLowerCase() === address.toLowerCase();
+      const readyField = isPartner1 ? 'partner_1_ready' : 'partner_2_ready';
       
-      console.log('Marking ready:', { readyField, sessionId, address });
+      console.log('=== MARKING READY ===');
+      console.log('Session ID:', sessionId);
+      console.log('Current address:', address);
+      console.log('Partner 1 ID:', session.partner_1_id);
+      console.log('Partner 2 ID:', session.partner_2_id);
+      console.log('Is Partner 1?:', isPartner1);
+      console.log('Ready field to update:', readyField);
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('study_sessions')
         .update({ [readyField]: true })
-        .eq('id', sessionId);
+        .eq('id', sessionId)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
+      console.log('Update successful! Data:', data);
       setIsReady(true);
+      
       toast({
         title: "Ready! ✅",
         description: "Waiting for your partner to be ready...",
       });
+      console.log('=== END MARKING READY ===');
     } catch (error) {
       console.error('Error marking ready:', error);
       toast({
