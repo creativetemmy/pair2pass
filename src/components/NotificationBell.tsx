@@ -80,9 +80,42 @@ export function NotificationBell() {
     }
 
     console.log('🔔 Fetched notifications:', data);
-    setNotifications(data || []);
-    setUnreadCount(data?.filter(n => !n.read).length || 0);
-    setMatchRequestCount(data?.filter(n => n.type === 'match_request' && !n.read).length || 0);
+
+    // Filter out match_request notifications where the request no longer exists or is not pending
+    const validNotifications = [];
+    let validMatchRequestCount = 0;
+
+    for (const notification of data || []) {
+      if (notification.type === 'match_request' && !notification.read) {
+        // Check if the match request still exists and is pending
+        const notificationData = notification.data as any;
+        const { data: matchRequest } = await supabase
+          .from('match_requests')
+          .select('id, status, expires_at')
+          .eq('id', notificationData?.matchRequestId)
+          .single();
+
+        // Only count if request exists, is pending, and not expired
+        if (matchRequest && 
+            matchRequest.status === 'pending' && 
+            new Date(matchRequest.expires_at) > new Date()) {
+          validMatchRequestCount++;
+          validNotifications.push(notification);
+        } else {
+          // Mark stale notification as read
+          await supabase
+            .from('notifications')
+            .update({ read: true })
+            .eq('id', notification.id);
+        }
+      } else {
+        validNotifications.push(notification);
+      }
+    }
+
+    setNotifications(validNotifications);
+    setUnreadCount(validNotifications.filter(n => !n.read).length);
+    setMatchRequestCount(validMatchRequestCount);
   };
 
   const handleNotificationClick = async (notification: Notification) => {
