@@ -23,11 +23,13 @@ export const useRecentSessions = () => {
         return;
       }
       try {
+        const lowerAddress = address.toLowerCase();
+        
         // Fetch completed sessions
         const { data: sessions, error } = await supabase
           .from('study_sessions')
           .select('*')
-          .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
+          .or(`partner_1_id.eq.${lowerAddress},partner_2_id.eq.${lowerAddress}`)
           .eq('status', 'completed')
           .order('created_at', { ascending: false })
           .limit(5);
@@ -37,14 +39,14 @@ export const useRecentSessions = () => {
         // Get reviews for these sessions
         const sessionsWithDetails = await Promise.all(
           (sessions || []).map(async (session) => {
-            const partnerWallet = session.partner_1_id === address ? session.partner_2_id : session.partner_1_id;
+            const partnerWallet = session.partner_1_id === lowerAddress ? session.partner_2_id : session.partner_1_id;
             
             // Fetch review for this session where current user was reviewed
             const { data: review } = await supabase
               .from('session_reviews')
               .select('rating')
               .eq('session_id', session.id)
-              .eq('reviewed_wallet', address)
+              .eq('reviewed_wallet', lowerAddress)
               .single();
 
             return {

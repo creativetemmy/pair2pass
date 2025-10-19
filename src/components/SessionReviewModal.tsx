@@ -113,13 +113,9 @@ export const SessionReviewModal = ({
 
       if (sessionError) throw sessionError;
 
-      // Award Pass Points and update stats for session completion
-      await Promise.all([
-        awardPassPoints(address, "SESSION_COMPLETED"),
-        updateSessionStats(address, sessionDuration, rating),
-        // Award Pass Points to partner for being helped
-        awardPassPoints(partnerWallet, "PARTNER_HELPED", false),
-      ]);
+      // Note: Pass Points are now awarded AFTER NFT minting to prevent spam
+      // Only update session stats here (no points awarded yet)
+      await updateSessionStats(address, sessionDuration, rating);
 
       // Send session completion notifications
 
@@ -223,52 +219,82 @@ export const SessionReviewModal = ({
     }
   };
 
-  // Handle NFT minting success
+  // Handle NFT minting success and award Pass Points ONLY after successful mint
   useEffect(() => {
     if (isConfirmed && isMintingNFT) {
       setIsMintingNFT(false);
 
-      // Create badge unlocked notification
+      // Award Pass Points ONLY AFTER successful NFT minting
       if (address) {
+        // Get session data for awarding points
+        (async () => {
+          try {
+            const { data: session } = await supabase
+              .from("study_sessions")
+              .select("partner_1_id, partner_2_id")
+              .eq("id", sessionId)
+              .single();
+
+            if (session) {
+              const partner = session.partner_1_id === address.toLowerCase() 
+                ? session.partner_2_id 
+                : session.partner_1_id;
+
+              // NOW award Pass Points after NFT mint
+              await Promise.all([
+                awardPassPoints(address, "SESSION_COMPLETED"),
+                awardPassPoints(partner, "PARTNER_HELPED", false),
+              ]);
+
+              toast.success("Pass Points awarded! 🎉");
+            }
+          } catch (err) {
+            console.error("Error awarding points:", err);
+          }
+        })();
+
+        // Create badge unlocked notification
         supabase.from("notifications").insert({
           user_wallet: address,
           type: "badge_unlocked",
           title: "⛓️ NFT Badge Unlocked!",
           message:
-            'Your "Study Session" NFT badge has been minted and added to your profile!',
+            'Your "Study Session" NFT badge has been minted and you earned Pass Points!',
           data: { badgeType: "study_session", txHash: hash },
         });
 
         // Send email notification
-        supabase
-          .from("profiles")
-          .select("name, email")
-          .eq("wallet_address", address)
-          .single()
-          .then(({ data: profile }) => {
-            if (profile?.email) {
-              supabase.functions
-                .invoke("send-notification-email", {
-                  body: {
-                    type: "badge_unlocked",
-                    email: profile.email,
+        (async () => {
+          try {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("name, email")
+              .eq("wallet_address", address)
+              .single();
 
-                    data: {
-                      userName: profile.name || "Student",
-                      badgeName: "Study Session Badge",
-                      walletAddress: address,
-                    },
+            if (profile?.email) {
+              await supabase.functions.invoke("send-notification-email", {
+                body: {
+                  type: "badge_unlocked",
+                  email: profile.email,
+                  data: {
+                    userName: profile.name || "Student",
+                    badgeName: "Study Session Badge",
+                    walletAddress: address,
                   },
-                })
-                .catch((err) => console.log("Email send failed:", err));
+                },
+              });
             }
-          });
+          } catch (err) {
+            console.log("Email send failed:", err);
+          }
+        })();
       }
 
       toast.success("Proof of Study NFT minted successfully! 🎓");
       onClose();
     }
-  }, [isConfirmed, isMintingNFT, onClose, address, hash]);
+  }, [isConfirmed, isMintingNFT, onClose, address, hash, sessionId]);
 
   // Show success view after review submission
   if (showSuccessView) {
@@ -293,8 +319,8 @@ export const SessionReviewModal = ({
                   Study Session Completed!
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  You've successfully completed your study session and earned
-                  Pass Points. Want to commemorate this achievement?
+                  You've successfully completed your study session! 
+                  <strong className="text-foreground"> To earn Pass Points, you must mint an NFT badge.</strong> This prevents point spam and records your achievement on-chain.
                 </p>
               </div>
 
@@ -307,7 +333,7 @@ export const SessionReviewModal = ({
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   Mint an NFT badge to permanently record this study session on
-                  the blockchain!
+                  the blockchain and unlock your Pass Points rewards!
                 </p>
 
                 <div className="flex gap-3">
