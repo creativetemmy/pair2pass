@@ -9,6 +9,7 @@ const corsHeaders = {
 
 interface CreateSessionRequest {
   matchRequestId: string;
+  walletAddress: string;
 }
 
 serve(async (req) => {
@@ -21,24 +22,14 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get user from auth header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("Missing authorization header");
+    const { matchRequestId, walletAddress } = await req.json() as CreateSessionRequest;
+
+    if (!walletAddress) {
+      throw new Error("Wallet address is required");
     }
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
-
-    if (authError || !user) {
-      throw new Error("Unauthorized");
-    }
-
-    const { matchRequestId } = await req.json() as CreateSessionRequest;
 
     console.log("Creating session for match request:", matchRequestId);
-    console.log("Requesting user:", user.id);
+    console.log("Requesting user:", walletAddress);
 
     // Fetch and validate match request
     const { data: matchRequest, error: fetchError } = await supabase
@@ -68,7 +59,7 @@ serve(async (req) => {
     }
 
     // Validate user is the target
-    if (matchRequest.target_wallet?.toLowerCase() !== user.id.toLowerCase()) {
+    if (matchRequest.target_wallet?.toLowerCase() !== walletAddress.toLowerCase()) {
       throw new Error("You are not the target of this request");
     }
 

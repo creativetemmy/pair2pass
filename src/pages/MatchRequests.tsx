@@ -157,19 +157,17 @@ function MatchRequestCard({ request, onSuccess }: MatchRequestCardProps) {
     try {
       console.log('Accepting request via edge function:', request.id);
 
-      // Get auth token
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Not authenticated");
+      if (!address) {
+        throw new Error("Wallet not connected");
       }
 
       // Call edge function to create session with validation
       const { data, error } = await supabase.functions.invoke(
         "create-study-session",
         {
-          body: { matchRequestId: request.id },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
+          body: { 
+            matchRequestId: request.id,
+            walletAddress: address.toLowerCase()
           },
         }
       );

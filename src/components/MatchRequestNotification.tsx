@@ -6,6 +6,7 @@ import { Check, X, User, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
 
 interface Notification {
   id: string;
@@ -28,6 +29,7 @@ export function MatchRequestNotification({
 }: MatchRequestNotificationProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { address } = useAccount();
   const [processing, setProcessing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isExpired, setIsExpired] = useState(false);
@@ -114,19 +116,17 @@ export function MatchRequestNotification({
     try {
       console.log('Accepting request via edge function:', matchRequestId);
 
-      // Get auth token
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Not authenticated");
+      if (!address) {
+        throw new Error("Wallet not connected");
       }
 
       // Call edge function to create session with validation
       const { data, error } = await supabase.functions.invoke(
         "create-study-session",
         {
-          body: { matchRequestId },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
+          body: { 
+            matchRequestId,
+            walletAddress: address.toLowerCase()
           },
         }
       );
