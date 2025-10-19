@@ -374,6 +374,10 @@ export type Database = {
       }
     }
     Functions: {
+      auto_expire_abandoned_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_public_profile_fields: {
         Args: Record<PropertyKey, never>
         Returns: {
