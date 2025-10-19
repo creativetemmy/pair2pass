@@ -27,10 +27,12 @@ export const useActiveSession = () => {
     const fetchActiveSession = async () => {
       try {
         console.log('Fetching active session for address:', address);
+        // Use lowercase for case-insensitive wallet address matching
+        const lowerAddress = address.toLowerCase();
         const { data, error } = await supabase
           .from('study_sessions')
           .select('*')
-          .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
+          .or(`partner_1_id.eq.${lowerAddress},partner_2_id.eq.${lowerAddress}`)
           .eq('status', 'active')
           .maybeSingle();
 
@@ -60,7 +62,7 @@ export const useActiveSession = () => {
           event: '*',
           schema: 'public',
           table: 'study_sessions',
-          filter: `partner_1_id=eq.${address}`,
+          filter: `partner_1_id=eq.${address.toLowerCase()}`,
         },
         fetchActiveSession
       )
@@ -70,7 +72,7 @@ export const useActiveSession = () => {
           event: '*',
           schema: 'public',
           table: 'study_sessions',
-          filter: `partner_2_id=eq.${address}`,
+          filter: `partner_2_id=eq.${address.toLowerCase()}`,
         },
         fetchActiveSession
       )

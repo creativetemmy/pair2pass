@@ -39,9 +39,10 @@ export const useSessionDetails = (sessionId?: string) => {
           // Fetch specific session by ID
           query = query.eq('id', targetSessionId);
         } else if (address) {
-          // Fetch active session for current user
+          // Fetch active session for current user (lowercase for case-insensitive match)
+          const lowerAddress = address.toLowerCase();
           query = query
-            .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
+            .or(`partner_1_id.eq.${lowerAddress},partner_2_id.eq.${lowerAddress}`)
             .eq('status', 'active');
         } else {
           setError('No session ID provided and no wallet connected');
@@ -82,7 +83,7 @@ export const useSessionDetails = (sessionId?: string) => {
             event: '*',
             schema: 'public',
             table: 'study_sessions',
-            filter: targetSessionId ? `id=eq.${targetSessionId}` : `partner_1_id=eq.${address}`,
+            filter: targetSessionId ? `id=eq.${targetSessionId}` : `partner_1_id=eq.${address?.toLowerCase()}`,
           },
           fetchSessionDetails
         );
@@ -94,7 +95,7 @@ export const useSessionDetails = (sessionId?: string) => {
             event: '*',
             schema: 'public',
             table: 'study_sessions',
-            filter: `partner_2_id=eq.${address}`,
+            filter: `partner_2_id=eq.${address?.toLowerCase()}`,
           },
           fetchSessionDetails
         );
