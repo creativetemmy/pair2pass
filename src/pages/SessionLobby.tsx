@@ -66,8 +66,44 @@ export default function SessionLobby() {
     if (!sessionId || !address) return;
     
     fetchSessionData();
+
+    // Polling fallback function
+    const pollSession = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('study_sessions')
+          .select('*')
+          .eq('id', sessionId)
+          .single();
+
+        if (error) throw error;
+        if (data) {
+          console.log('📊 POLLING UPDATE:', data);
+          setSession(data);
+          
+          if (data.video_link) {
+            setVideoLink(data.video_link);
+          }
+          
+          const isPartner1 = data.partner_1_id.toLowerCase() === address?.toLowerCase();
+          const currentUserReady = isPartner1 ? data.partner_1_ready : data.partner_2_ready;
+          setIsReady(currentUserReady);
+          
+          const bothReady = data.partner_1_ready && data.partner_2_ready;
+          if (bothReady && !countdownActive) {
+            setCountdownActive(true);
+            toast({
+              title: "Both partners ready! 🎉",
+              description: "Session starting in 5 minutes. Get prepared!",
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    };
     
-    // Set up realtime subscription for session updates
+    // Set up realtime subscription with fallback polling
     const channel = supabase
       .channel(`session-${sessionId}`)
       .on(
@@ -126,8 +162,15 @@ export default function SessionLobby() {
       )
       .subscribe();
 
+    // Start polling as fallback (every 3 seconds)
+    const pollInterval = setInterval(pollSession, 3000);
+    
+    // Initial poll
+    pollSession();
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, [sessionId, address, countdownActive]);
 

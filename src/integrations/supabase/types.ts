@@ -242,6 +242,7 @@ export type Database = {
           duration: number
           goal: string
           id: string
+          match_request_id: string | null
           partner_1_id: string
           partner_1_ready: boolean | null
           partner_2_id: string
@@ -256,6 +257,7 @@ export type Database = {
           duration: number
           goal: string
           id?: string
+          match_request_id?: string | null
           partner_1_id: string
           partner_1_ready?: boolean | null
           partner_2_id: string
@@ -270,6 +272,7 @@ export type Database = {
           duration?: number
           goal?: string
           id?: string
+          match_request_id?: string | null
           partner_1_id?: string
           partner_1_ready?: boolean | null
           partner_2_id?: string
@@ -279,7 +282,15 @@ export type Database = {
           updated_at?: string
           video_link?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_match_request_id_fkey"
+            columns: ["match_request_id"]
+            isOneToOne: false
+            referencedRelation: "match_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -391,6 +402,14 @@ export type Database = {
           wallet_address: string
           xp: number
         }[]
+      }
+      has_active_session: {
+        Args: { _wallet: string }
+        Returns: boolean
+      }
+      is_user_ready: {
+        Args: { _wallet: string }
+        Returns: boolean
       }
     }
     Enums: {

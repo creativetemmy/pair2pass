@@ -112,115 +112,58 @@ export function MatchRequestNotification({
   const handleAccept = async () => {
     setProcessing(true);
     try {
-      // Update match request status to accepted
-      const { error: updateError } = await supabase
-        .from("match_requests")
-        .update({ status: "accepted" })
-        .eq("id", matchRequestId);
+      console.log('Accepting request via edge function:', matchRequestId);
 
-      if (updateError) throw updateError;
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Not authenticated");
+      }
 
-      // Get the match request details to create session
-      const { data: matchRequest, error: fetchError } = await supabase
-        .from("match_requests")
-        .select("*")
-        .eq("id", matchRequestId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Create study session
-      const { data: session, error: sessionError } = await supabase
-        .from("study_sessions")
-        .insert([
-          {
-            partner_1_id: matchRequest.requester_wallet,
-            partner_2_id: matchRequest.target_wallet,
-            subject: matchRequest.subject,
-            goal: matchRequest.goal,
-            duration: matchRequest.duration,
-            status: "waiting",
+      // Call edge function to create session with validation
+      const { data, error } = await supabase.functions.invoke(
+        "create-study-session",
+        {
+          body: { matchRequestId },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
           },
-        ])
-        .select()
-        .single();
+        }
+      );
 
-      if (sessionError) throw sessionError;
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to create session");
+
+      console.log('Session created successfully:', data.sessionId);
 
       // Mark notification as read
       onRead();
-
-      // Create match found notifications for both users
-
-      const { data: requesterProfile } = await supabase
-        .from("profiles")
-        .select("name, email")
-        .eq("wallet_address", matchRequest.requester_wallet?.toLowerCase())
-        .single();
-
-      const { data: targetProfile } = await supabase
-        .from("profiles")
-        .select("name, email")
-        .eq("wallet_address", matchRequest.target_wallet?.toLowerCase())
-        .single();
-
-      // Notify requester that match was accepted
-      await supabase.from("notifications").insert({
-        user_wallet: matchRequest.requester_wallet?.toLowerCase(),
-        type: "match_found",
-        title: "🎉 Match Accepted!",
-        message: `Your study partner request for ${subject} was accepted! Session starting soon.`,
-        data: { sessionId: session.id, subject, goal },
-      });
-
-      // Send email to requester
-      if (requesterProfile?.email) {
-        await supabase.functions
-          .invoke("send-notification-email", {
-            body: {
-              type: "match_found",
-              email: requesterProfile.email,
-              data: {
-                userName: requesterProfile.name || "Student",
-                partnerName: targetProfile?.name || "Student",
-                subject,
-                sessionId: session.id,
-              },
-            },
-          })
-          .catch((err) => console.log("Email send failed:", err));
-      }
-
-      // Send email to target
-      if (targetProfile?.email) {
-        await supabase.functions
-          .invoke("send-notification-email", {
-            body: {
-              type: "match_found",
-              email: targetProfile.email,
-              data: {
-                userName: targetProfile.name || "Student",
-                partnerName: requesterName,
-                subject,
-                sessionId: session.id,
-              },
-            },
-          })
-          .catch((err) => console.log("Email send failed:", err));
-      }
 
       toast({
         title: "Match Accepted! 🎉",
         description: "Redirecting to session lobby...",
       });
 
-      // Redirect to session lobby
-      navigate(`/session/${session.id}`);
-    } catch (error) {
+      // Navigate immediately - session is ready
+      navigate(`/session/${data.sessionId}`);
+    } catch (error: any) {
       console.error("Error accepting match:", error);
+      
+      let errorMessage = error.message || "Failed to accept match request";
+      
+      // Provide helpful error messages
+      if (errorMessage.includes("already has an active session")) {
+        errorMessage = "One of you already has an active session. Please complete it first.";
+      } else if (errorMessage.includes("expired")) {
+        errorMessage = "This request has expired.";
+        onRead(); // Mark as read
+      } else if (errorMessage.includes("incomplete") || errorMessage.includes("not verified")) {
+        errorMessage = "Profile verification required. Please complete your profile and verify your email.";
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to accept match request",
+        title: "Unable to accept request",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
