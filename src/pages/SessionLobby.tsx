@@ -350,6 +350,7 @@ export default function SessionLobby() {
     if (!session) return;
 
     try {
+      console.log('Starting session...');
       // Update session status to active
       const { error } = await supabase
         .from('study_sessions')
@@ -358,14 +359,15 @@ export default function SessionLobby() {
 
       if (error) throw error;
 
+      console.log('Session status updated to active');
+
       toast({
         title: "Session Started! 🚀",
         description: "Your study session is now active. Good luck!",
       });
 
-      // Here you could redirect to a video call or study interface
-      // For now, we'll redirect to dashboard
-      navigate('/homepage');
+      // Navigate to session check-in page for the active session
+      navigate('/session-check-in');
     } catch (error) {
       console.error('Error starting session:', error);
       toast({
