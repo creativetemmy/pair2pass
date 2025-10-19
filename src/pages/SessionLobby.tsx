@@ -367,7 +367,7 @@ export default function SessionLobby() {
       });
 
       // Navigate to session check-in page for the active session
-      navigate('/session-check-in');
+      navigate(`/session-checkin/${sessionId}`);
     } catch (error) {
       console.error('Error starting session:', error);
       toast({
