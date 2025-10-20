@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, User, Search, Tag, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface BlogPost {
@@ -173,13 +173,6 @@ export default function Blog() {
                   className="group hover:shadow-xl transition-all duration-300 border-border/20 dark:border-border/10 flex flex-col"
                 >
                   <CardContent className="p-6 flex flex-col flex-1">
-                    {/* Category Badge */}
-                    <div className="mb-4">
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary">
-                        {post.category}
-                      </span>
-                    </div>
-
                     {/* Title */}
                     <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                       {post.title}
@@ -190,33 +183,14 @@ export default function Blog() {
                       {post.excerpt}
                     </p>
 
-                    {/* Meta Information */}
-                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        <span>{post.author}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>{formatDate(post.date)}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{post.readTime}</span>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 text-xs text-muted-foreground"
-                        >
-                          <Tag className="h-3 w-3" />
-                          {tag}
-                        </span>
-                      ))}
+                    {/* Author with Logo */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <img 
+                        src="/pair2pass.png" 
+                        alt="Pair2Pass Logo" 
+                        className="h-6 w-6 rounded-full object-contain"
+                      />
+                      <span className="text-sm font-medium text-foreground">Pair2Pass Team</span>
                     </div>
 
                     {/* Read More Link */}

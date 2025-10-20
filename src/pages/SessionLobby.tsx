@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { 
   Clock, 
   Users, 
@@ -258,9 +257,18 @@ export default function SessionLobby() {
 
     try {
       console.log('Submitting video link:', linkInput.trim());
+      
+      // Determine which partner is the current user
+      const isPartner1 = session?.partner_1_id.toLowerCase() === address?.toLowerCase();
+      const readyField = isPartner1 ? 'partner_1_ready' : 'partner_2_ready';
+      
+      // Update video link AND mark current user as ready
       const { error } = await supabase
         .from('study_sessions')
-        .update({ video_link: linkInput.trim() })
+        .update({ 
+          video_link: linkInput.trim(),
+          [readyField]: true // Auto-mark ready when link is added
+        })
         .eq('id', sessionId);
 
       if (error) throw error;
@@ -268,10 +276,11 @@ export default function SessionLobby() {
       setVideoLink(linkInput.trim());
       setLinkInput("");
       setShowLinkForm(false);
+      setIsReady(true);
       
       toast({
         title: "Session Link Added",
-        description: "Both partners can now join the study session!",
+        description: "You're ready! Waiting for your partner...",
       });
     } catch (error) {
       console.error('Error updating session link:', error);
@@ -283,62 +292,8 @@ export default function SessionLobby() {
     }
   };
 
-  const handleMarkReady = async () => {
-    if (!session || !address) {
-      console.log('Cannot mark ready - missing session or address');
-      return;
-    }
-
-    if (!videoLink) {
-      toast({
-        title: "Meeting Link Required",
-        description: "Please add a meeting link before marking ready.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const isPartner1 = session.partner_1_id.toLowerCase() === address.toLowerCase();
-      const readyField = isPartner1 ? 'partner_1_ready' : 'partner_2_ready';
-      
-      console.log('=== MARKING READY ===');
-      console.log('Session ID:', sessionId);
-      console.log('Current address:', address);
-      console.log('Partner 1 ID:', session.partner_1_id);
-      console.log('Partner 2 ID:', session.partner_2_id);
-      console.log('Is Partner 1?:', isPartner1);
-      console.log('Ready field to update:', readyField);
-      
-      const { data, error } = await supabase
-        .from('study_sessions')
-        .update({ [readyField]: true })
-        .eq('id', sessionId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
-
-      console.log('Update successful! Data:', data);
-      setIsReady(true);
-      
-      toast({
-        title: "Ready! ✅",
-        description: "Waiting for your partner to be ready...",
-      });
-      console.log('=== END MARKING READY ===');
-    } catch (error) {
-      console.error('Error marking ready:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mark as ready",
-        variant: "destructive",
-      });
-    }
-  };
+  // Ready status is now automatically set when video link is added
+  // No manual "Mark Ready" button needed
 
   const handleJoinSession = () => {
     if (videoLink) {
@@ -603,53 +558,43 @@ export default function SessionLobby() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span>You are ready:</span>
-              {isReady ? (
-                <Badge variant="default" className="bg-green-500">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Ready
-                </Badge>
-              ) : (
-                <Badge variant="outline">Not Ready</Badge>
-              )}
-            </div>
-            <div className="flex items-center justify-between">
-              <span>{partner.name || "Partner"} is ready:</span>
-              {partnerReady ? (
-                <Badge variant="default" className="bg-green-500">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Ready
-                </Badge>
-              ) : (
-                <Badge variant="outline">Waiting...</Badge>
-              )}
-            </div>
-            
-            <Separator />
-            
-            {!bothReady && (
-              <div className="text-center space-y-4">
-                {!isReady ? (
-                  <Button onClick={handleMarkReady} className="w-full">
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Mark as Ready
-                  </Button>
+            <div className="text-center space-y-3">
+              <p className="text-sm text-muted-foreground">
+                You'll be marked ready automatically when you add the session link
+              </p>
+              
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                <span className="font-medium">You:</span>
+                {isReady ? (
+                  <Badge variant="default" className="bg-green-500">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Ready
+                  </Badge>
                 ) : (
-                  <p className="text-muted-foreground">
-                    Waiting for {partner.name || "your partner"} to be ready...
-                  </p>
+                  <Badge variant="outline">Add link to get ready</Badge>
                 )}
               </div>
-            )}
-
-            {bothReady && !countdownActive && (
-              <div className="text-center">
-                <p className="text-green-600 font-medium">
-                  🎉 Both partners are ready! Session will start automatically.
-                </p>
+              
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                <span className="font-medium">{partner.name || "Partner"}:</span>
+                {partnerReady ? (
+                  <Badge variant="default" className="bg-green-500">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Ready
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">Waiting...</Badge>
+                )}
               </div>
-            )}
+
+              {bothReady && (
+                <div className="mt-4 p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                  <p className="text-green-600 dark:text-green-400 font-medium">
+                    🎉 Both partners ready! Starting countdown...
+                  </p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 

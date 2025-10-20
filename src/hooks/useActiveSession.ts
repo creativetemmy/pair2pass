@@ -41,8 +41,24 @@ export const useActiveSession = () => {
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching active session:', error);
         } else {
-          setActiveSession(data);
-          console.log('Active session set:', data);
+          // Filter out expired sessions (created_at + duration has passed)
+          if (data) {
+            const sessionStart = new Date(data.created_at).getTime();
+            const sessionDuration = data.duration * 60 * 1000; // Convert minutes to milliseconds
+            const sessionEnd = sessionStart + sessionDuration;
+            const now = Date.now();
+            
+            // Only set as active if session hasn't expired
+            if (now < sessionEnd) {
+              setActiveSession(data);
+              console.log('Active session set:', data);
+            } else {
+              console.log('Session expired, not setting as active');
+              setActiveSession(null);
+            }
+          } else {
+            setActiveSession(null);
+          }
         }
       } catch (error) {
         console.error('Error fetching active session:', error);
