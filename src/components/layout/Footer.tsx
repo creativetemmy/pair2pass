@@ -184,7 +184,15 @@ export function Footer() {
               © {new Date().getFullYear()} Pair2Pass. All rights reserved.
             </p>
             <p className="text-sm text-muted-foreground text-center md:text-right">
-              Built with ❤️ for students worldwide
+              Built with ❤️ by{" "}
+              <a 
+                href="https://blocktrainlabs.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline transition-colors duration-300"
+              >
+                Blocktrain Labs
+              </a>
             </p>
           </div>
         </div>
