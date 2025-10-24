@@ -1,24 +1,26 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, User, ArrowLeft, Share2 } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 // This would normally come from a CMS or database
 const blogPosts: { [key: string]: any } = {
   "getting-started-with-pair2pass": {
     title: "Getting Started with Pair2Pass: A Complete Guide",
-    author: "Team Pair2Pass",
+    author: "Pair2Pass Team",
     date: "2025-01-15",
     readTime: "5 min read",
     category: "Tutorial",
     tags: ["Getting Started", "Web3", "Study Tips"],
+    headerImage: "/pair2pass.png",
     content: `
       <h2>Welcome to Pair2Pass!</h2>
       <p>Getting started with Pair2Pass is easy. This comprehensive guide will walk you through everything you need to know to begin your journey toward better study habits and academic success.</p>
       
       <h3>Step 1: Connect Your Wallet</h3>
       <p>Pair2Pass uses Web3 technology to verify your identity and secure your academic reputation. To get started, you'll need to connect a Web3 wallet like MetaMask or WalletConnect.</p>
+      <img src="/pair2pass.png" alt="Connect your wallet" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
       
       <h3>Step 2: Complete Your Profile</h3>
       <p>After connecting your wallet, complete your profile by adding your academic details, study preferences, and availability. This helps us match you with the perfect study partners.</p>
@@ -115,11 +117,6 @@ export default function BlogPost() {
     toast.success("Link copied to clipboard!");
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  };
-
   if (!post) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -162,20 +159,14 @@ export default function BlogPost() {
               {post.title}
             </h1>
 
-            {/* Meta Information */}
-            <div className="flex flex-wrap gap-6 text-muted-foreground mb-6">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                <span>{post.author}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <span>{formatDate(post.date)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                <span>{post.readTime}</span>
-              </div>
+            {/* Author with Logo */}
+            <div className="flex items-center gap-2 mb-6">
+              <img 
+                src="/pair2pass.png" 
+                alt="Pair2Pass Logo" 
+                className="h-8 w-8 rounded-full object-contain"
+              />
+              <span className="text-lg font-medium text-foreground">Pair2Pass Team</span>
             </div>
 
             {/* Share Button */}
@@ -186,6 +177,21 @@ export default function BlogPost() {
           </div>
         </div>
       </section>
+
+      {/* Header Image */}
+      {post.headerImage && (
+        <section className="py-0">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <img 
+                src={post.headerImage} 
+                alt={post.title}
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Content */}
       <section className="py-12">
@@ -200,7 +206,8 @@ export default function BlogPost() {
                   prose-strong:text-foreground
                   prose-ul:text-muted-foreground
                   prose-ol:text-muted-foreground
-                  prose-li:text-muted-foreground"
+                  prose-li:text-muted-foreground
+                  prose-img:rounded-lg prose-img:shadow-md"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
 

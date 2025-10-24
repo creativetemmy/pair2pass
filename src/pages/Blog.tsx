@@ -15,7 +15,7 @@ interface BlogPost {
   readTime: string;
   category: string;
   tags: string[];
-  image?: string;
+  headerImage?: string;
 }
 
 const blogPosts: BlogPost[] = [
@@ -24,11 +24,12 @@ const blogPosts: BlogPost[] = [
     title: "Getting Started with Pair2Pass: A Complete Guide",
     excerpt: "Learn how to set up your account, connect your wallet, and find your first study partner on Pair2Pass.",
     content: "Full blog post content here...",
-    author: "Team Pair2Pass",
+    author: "Pair2Pass Team",
     date: "2025-01-15",
     readTime: "5 min read",
     category: "Tutorial",
     tags: ["Getting Started", "Web3", "Study Tips"],
+    headerImage: "/pair2pass.png",
   },
   {
     id: "maximizing-xp-rewards",
@@ -170,8 +171,19 @@ export default function Blog() {
               {filteredPosts.map((post) => (
                 <Card
                   key={post.id}
-                  className="group hover:shadow-xl transition-all duration-300 border-border/20 dark:border-border/10 flex flex-col"
+                  className="group hover:shadow-xl transition-all duration-300 border-border/20 dark:border-border/10 flex flex-col overflow-hidden"
                 >
+                  {/* Header Image */}
+                  {post.headerImage && (
+                    <div className="w-full h-48 overflow-hidden">
+                      <img 
+                        src={post.headerImage} 
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  
                   <CardContent className="p-6 flex flex-col flex-1">
                     {/* Title */}
                     <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
