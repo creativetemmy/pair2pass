@@ -13,7 +13,7 @@ const blogPosts: { [key: string]: any } = {
     readTime: "5 min read",
     category: "Tutorial",
     tags: ["Getting Started", "Web3", "Study Tips"],
-    headerImage: "/pair2pass.png",
+    headerImage: "/pair2pass_logo(n).png",
     content: `
       <h2><strong>Welcome to Pair2Pass!</strong></h2>
       <p>Getting started with Pair2Pass is easy. This comprehensive guide will walk you through everything you need to know to begin your journey toward better study habits and academic success.</p>
@@ -42,10 +42,11 @@ const blogPosts: { [key: string]: any } = {
       <br/>
       <h2><b>Tips for Success</b></h2>
       <ul>
-        <li>Be consistent with your study sessions</li>
-        <li>Communicate clearly with your study partners</li>
-        <li>Set specific goals for each session</li>
-        <li>Take advantage of the gamification features</li>
+        <li>Join your study sessions early.</li>
+        <li>Be consistent with your study sessions.</li>
+        <li>Communicate clearly with your study partners.</li>
+        <li>Set specific goals for each session.</li>
+        <li>Maximize the gamification features.</li>
       </ul>
       
       <p>Ready to transform your study experience? <br/>
@@ -54,35 +55,38 @@ const blogPosts: { [key: string]: any } = {
     `,
   },
   "maximizing-xp-rewards": {
-    title: "Maximizing Your XP Rewards: Tips and Strategies",
+    title: "Maximizing Your Pass Points Rewards: Tips and Strategies",
     author: "Sarah Johnson",
     date: "2025-01-10",
     readTime: "7 min read",
     category: "Tips & Tricks",
     tags: ["XP", "Gamification", "Rewards"],
     content: `
-      <h2>Understanding the XP System</h2>
-      <p>Pair2Pass rewards your dedication to studying with Experience Points (XP) that help you level up and unlock exclusive badges.</p>
+      <h2>Understanding the Pass Points System</h2><br/>
+      <p>Pair2Pass rewards your dedication to studying with Pass Points that help you level up and unlock exclusive badges.</p><br/>
       
-      <h3>How to Earn XP</h3>
+      <h3><b>How to Earn Pass Points</b></h3><br/>
       <ul>
-        <li><strong>Complete Study Sessions:</strong> Earn 50-100 XP per session</li>
-        <li><strong>Maintain Streaks:</strong> Get bonus XP for consecutive days</li>
-        <li><strong>Help Others:</strong> Earn XP by being a reliable study partner</li>
-        <li><strong>Achieve Milestones:</strong> Unlock special XP bonuses</li>
+        <li><strong>Complete Study Sessions:</strong> Earn 50-100 Pass Points per session</li>
+        <li><strong>Maintain Streaks:</strong> Get bonus Pass Points for consecutive days</li>
+        <li><strong>Help Others:</strong> Earn Pass Points by being a reliable study partner</li>
+        <li><strong>Achieve Milestones:</strong> Unlock special Pass Points bonuses</li>
       </ul>
       
-      <h3>Advanced Strategies</h3>
-      <p>Here are some pro tips to maximize your XP earnings:</p>
-      <ol>
+      <!--
+      // <h3>Advanced Strategies</h3>
+      // <p>Here are some pro tips to maximize your XP earnings:</p>
+       <ol>
         <li>Study during peak hours for bonus multipliers</li>
-        <li>Complete weekly challenges for extra rewards</li>
-        <li>Refer friends to earn referral bonuses</li>
-        <li>Participate in community events</li>
+         <li>Complete weekly challenges for extra rewards</li>
+         <li>Refer friends to earn referral bonuses</li>
+         <li>Participate in community events</li>
       </ol>
       
       <h2>Climbing the Leaderboard</h2>
-      <p>Use your XP wisely to climb the leaderboard and gain recognition in the Pair2Pass community. Top performers earn special badges and privileges!</p>
+       <p>Use your XP wisely to climb the leaderboard and gain recognition in the Pair2Pass community. Top performers earn special badges and privileges!</p>
+      -->
+      
     `,
   },
   "effective-study-sessions": {
@@ -93,27 +97,30 @@ const blogPosts: { [key: string]: any } = {
     category: "Study Tips",
     tags: ["Productivity", "Study Techniques", "Collaboration"],
     content: `
-      <h2>The Art of Virtual Studying</h2>
-      <p>Virtual study sessions can be just as effective as in-person ones when done right. Here's how to make the most of your online study time.</p>
+      <h2><b>The Art of Virtual Studying</b></h2><br/>
+      <p>Virtual study sessions can be just as effective as in-person ones when done right. Here's how to make the most of your online study time.</p><br/>
       
-      <h3>Before the Session</h3>
+      <h3><b>Before the Session:</b></h3>
+      </>
       <ul>
         <li>Set clear objectives and goals</li>
         <li>Prepare materials and resources</li>
         <li>Test your technology setup</li>
-        <li>Communicate expectations with your partner</li>
+        <li>Communicate effeciently with your study partner</li>
       </ul>
+      <br/>
       
-      <h3>During the Session</h3>
+      <h3><b>During the Session:</b></h3>
       <p>Maintain focus and engagement with these techniques:</p>
       <ol>
-        <li><strong>Pomodoro Technique:</strong> Study for 25 minutes, break for 5</li>
+        <li><strong>Pomodoro Technique:</strong> Study and take breaks where necessary</li>
         <li><strong>Active Participation:</strong> Both partners should contribute</li>
         <li><strong>Screen Sharing:</strong> Use it to collaborate on problems</li>
         <li><strong>Stay Accountable:</strong> Keep each other on track</li>
       </ol>
+      <br/>
       
-      <h3>After the Session</h3>
+      <h3><b>After the Session:</b></h3>
       <p>Wrap up effectively by reviewing what you learned, scheduling your next session, and providing feedback to your study partner.</p>
     `,
   },
