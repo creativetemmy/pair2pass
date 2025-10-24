@@ -15,23 +15,32 @@ const blogPosts: { [key: string]: any } = {
     tags: ["Getting Started", "Web3", "Study Tips"],
     headerImage: "/pair2pass.png",
     content: `
-      <h2>Welcome to Pair2Pass!</h2>
+      <h2><strong>Welcome to Pair2Pass!</strong></h2>
       <p>Getting started with Pair2Pass is easy. This comprehensive guide will walk you through everything you need to know to begin your journey toward better study habits and academic success.</p>
+      <br/><p>Each successfully completed study session earns you Experience Points (XP) that contribute to your overall level and unlock exclusive badges. The more you study, the higher you climb on the leaderboard!</p><br/>
       
-      <h3>Step 1: Connect Your Wallet</h3>
-      <p>Pair2Pass uses Web3 technology to verify your identity and secure your academic reputation. To get started, you'll need to connect a Web3 wallet like MetaMask or WalletConnect.</p>
-      <img src="/pair2pass.png" alt="Connect your wallet" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
+      <h3><b>Step 1: Connect Your Wallet</b></h3>
+      <p>Pair2Pass uses Web3 technology to verify your identity and secure your academic reputation. To get started, you'll need to connect a Web3 wallet like MetaMask or WalletConnect.</p><br/>
+      <img src="/connect_wallet.png" alt="Connect your wallet" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
       
-      <h3>Step 2: Complete Your Profile</h3>
-      <p>After connecting your wallet, complete your profile by adding your academic details, study preferences, and availability. This helps us match you with the perfect study partners.</p>
+      <h3><b>Step 2: Complete Your Profile</b></h3>
+      <p>After connecting your wallet, complete your profile by adding your academic details, study preferences, and availability. Also verify your email. This helps us match you with the perfect study partners.</p><br/>
+      <img src="/profile.png" alt="Complete your profile" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
+
+      <h3><b>Step 3: Mint your Profile NFT</b></h3>
+      <p>After completing your profile details, mint your profile NFT on Base Network (Sepolia Testnet). Your NFT is non-transfarable and it is a proof of registration on the platform. You can check your NFt details on Base scan.</p><br/>
+      <img src="/profile_completion.png" alt="Profile NFT" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
       
-      <h3>Step 3: Find Study Partners</h3>
-      <p>Use our intelligent matching system to find students who share your courses, study goals, and learning style. You can filter by subject, availability, and experience level.</p>
+      <h3><b>Step 4: Find Study Partners</b></h3>
+      <p>Use our intelligent matching system to find students who share your courses, study goals, and learning style. You can filter by subject, availability, and experience level.</p><br/>
+      <img src="/pair2pass_find_partner.png" alt="Profile NFT" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
       
-      <h3>Step 4: Start Studying and Earning</h3>
-      <p>Join or create study sessions, collaborate with your partners, and earn XP and badges as you progress. The more you study, the higher you climb on the leaderboard!</p>
+      <h3><b>Step 5: Start Studying and Earning</b></h3>
+      <p>Join or create study sessions instantly, collaborate with your partners, and earn XP and badges as you progress. The more you study, the higher you climb on the leaderboard!</p><br/>
+      <img src="/pair2pass_join_session.png" alt="Profile NFT" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;" />
       
-      <h2>Tips for Success</h2>
+      <br/>
+      <h2><b>Tips for Success</b></h2>
       <ul>
         <li>Be consistent with your study sessions</li>
         <li>Communicate clearly with your study partners</li>
@@ -39,7 +48,9 @@ const blogPosts: { [key: string]: any } = {
         <li>Take advantage of the gamification features</li>
       </ul>
       
-      <p>Ready to transform your study experience? Connect your wallet and get started today!</p>
+      <p>Ready to transform your study experience? <br/>
+      
+      <br/>Connect your wallet and get started today!</p>
     `,
   },
   "maximizing-xp-rewards": {
