@@ -17,13 +17,13 @@ import { CheckCircle, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { awardPassPoints } from "@/lib/passPointsSystem";
-import { useAccount } from "wagmi";
-import { createClient } from "@supabase/supabase-js";
 
 interface EmailVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   email: string;
+  userId: string;
+  walletAddress?: string;
   onVerificationSuccess: () => void;
 }
 
@@ -31,6 +31,8 @@ export function EmailVerificationModal({
   isOpen,
   onClose,
   email,
+  userId,
+  walletAddress,
   onVerificationSuccess,
 }: EmailVerificationModalProps) {
   const [step, setStep] = useState<"sending" | "verify" | "success">("sending");
@@ -38,7 +40,6 @@ export function EmailVerificationModal({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
-  const { address } = useAccount();
 
   useEffect(() => {
     console.log("📬 EmailVerificationModal effect:", { isOpen, step });
@@ -49,9 +50,9 @@ export function EmailVerificationModal({
   }, [isOpen, step]);
 
   const sendOTP = async () => {
-    console.log("📨 sendOTP called", { email, address });
-    if (!email || !address) {
-      console.error("❌ Missing email or address:", { email, address });
+    console.log("📨 sendOTP called", { email, userId });
+    if (!email || !userId) {
+      console.error("❌ Missing email or userId:", { email, userId });
       return;
     }
     setSending(true);
@@ -65,7 +66,8 @@ export function EmailVerificationModal({
         .from("email_verifications")
         .insert({
           email,
-          wallet_address: address,
+          user_id: userId,
+          wallet_address: walletAddress || null,
           otp,
           verified: false,
           expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
@@ -76,7 +78,7 @@ export function EmailVerificationModal({
       const { error: funcError } = await supabase.functions.invoke(
         "send-email",
         {
-          body: { email, walletAddress: address, otp },
+          body: { email, userId, walletAddress, otp },
         }
       );
 
@@ -100,7 +102,7 @@ export function EmailVerificationModal({
   };
 
   const verifyOTP = async () => {
-    if (!otp || otp.length !== 6 || !address) return;
+    if (!otp || otp.length !== 6 || !userId) return;
     setLoading(true);
 
     try {
@@ -108,7 +110,7 @@ export function EmailVerificationModal({
         .from("email_verifications")
         .select("*")
         .eq("email", email)
-        .eq("wallet_address", address)
+        .eq("user_id", userId)
         .eq("verified", false)
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false })
@@ -133,7 +135,7 @@ export function EmailVerificationModal({
       await supabase
         .from("profiles")
         .update({ is_email_verified: true })
-        .eq("wallet_address", address);
+        .eq("user_id", userId);
 
       // Optionally cleanup
       await supabase
@@ -142,17 +144,20 @@ export function EmailVerificationModal({
         .eq("email", email)
         .neq("id", verification.id);
 
-      awardPassPoints(address, "EMAIL_VERIFIED");
+      // Award points if wallet is connected
+      if (walletAddress) {
+        awardPassPoints(walletAddress, "EMAIL_VERIFIED");
+      }
 
       // Create notification and send welcome email
       const { data: profile } = await supabase
         .from("profiles")
         .select("name, email")
-        .eq("wallet_address", address)
+        .eq("user_id", userId)
         .single();
 
       await supabase.from("notifications").insert({
-        user_wallet: address,
+        user_id: userId,
         type: "welcome",
         title: "🎓 Welcome to Pair2Pass!",
         message:
@@ -166,7 +171,7 @@ export function EmailVerificationModal({
           email,
           data: {
             userName: profile?.name || "Student",
-            walletAddress: address,
+            userId,
           },
         },
       });

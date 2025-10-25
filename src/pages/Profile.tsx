@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEnsName } from "wagmi";
 import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { baseSepolia } from 'wagmi/chains'
 
@@ -59,6 +60,7 @@ const initialProfileData: Partial<Profile> = {
 
 export default function Profile() {
   const { address, chainId, isConnected } = useAccount();
+  const { user } = useAuth();
   const { data: ensName } = useEnsName({ address });
   const { profile, loading, saving, saveProfile } = useProfile(address);
   const profileCompletion = useProfileCompletion(profile);
@@ -1333,6 +1335,8 @@ export default function Profile() {
         isOpen={isVerificationModalOpen}
         onClose={() => setIsVerificationModalOpen(false)}
         email={editedProfile.email || ""}
+        userId={user?.id || ""}
+        walletAddress={address}
         onVerificationSuccess={handleVerificationSuccess}
       />
 

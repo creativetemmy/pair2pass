@@ -8,12 +8,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock, User, GraduationCap } from 'lucide-react';
+import { EmailVerificationModal } from '@/components/EmailVerificationModal';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [signUpForm, setSignUpForm] = useState({ name: '', email: '', password: '' });
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
-  const { signUp, signIn } = useAuth();
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationUserId, setVerificationUserId] = useState('');
+  const [verificationEmail, setVerificationEmail] = useState('');
+  const { signUp, signIn, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -30,21 +34,30 @@ export default function Auth() {
           description: error.message || 'Failed to create account. Please try again.',
           variant: 'destructive',
         });
+        setIsLoading(false);
         return;
       }
 
+      // Wait a moment for the user to be created
+      setTimeout(() => {
+        if (user) {
+          setVerificationUserId(user.id);
+          setVerificationEmail(signUpForm.email);
+          setShowVerificationModal(true);
+          setIsLoading(false);
+        }
+      }, 1000);
+
       toast({
-        title: 'Welcome to Pair2Pass! 🎉',
-        description: 'Your account has been created successfully. Please check your email to verify your account.',
+        title: 'Account Created! 🎉',
+        description: 'Please verify your email to continue.',
       });
-      navigate('/homepage');
     } catch (error: any) {
       toast({
         title: 'Error',
         description: error.message || 'An unexpected error occurred',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -82,8 +95,19 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
-      <div className="w-full max-w-md space-y-8">
+    <>
+      <EmailVerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        email={verificationEmail}
+        userId={verificationUserId}
+        onVerificationSuccess={() => {
+          navigate('/homepage');
+        }}
+      />
+      
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
+        <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-4">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -257,7 +281,8 @@ export default function Auth() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

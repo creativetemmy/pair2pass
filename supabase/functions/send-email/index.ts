@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, walletAddress, otp } = await req.json();
+    const { email, userId, walletAddress, otp } = await req.json();
 
     const response = await fetch("https://send.api.mailtrap.io/api/send", {
       method: "POST",
@@ -55,12 +55,14 @@ serve(async (req) => {
                      </div> 
                      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #dee2e6;"> 
                        <p style="color: #6c757d; font-size: 12px; margin: 0;"> 
-                         This email was sent from Pair2Pass for wallet address: ${walletAddress.substring(
-                           0,
-                           6
-                         )}...${walletAddress.substring(
-          walletAddress.length - 4
-        )} </p>
+                         This email was sent from Pair2Pass${
+                           walletAddress
+                             ? ` for wallet address: ${walletAddress.substring(
+                                 0,
+                                 6
+                               )}...${walletAddress.substring(walletAddress.length - 4)}`
+                             : ""
+                         } </p>
                           </div> </div> </div>`,
         text: `Pair2Pass Email Verification Your verification code is: ${otp} Enter this code in the Pair2Pass app to verify your email address. This code will expire in 10 minutes for security. If you didn't request this verification, please ignore this email.`,
       }),
