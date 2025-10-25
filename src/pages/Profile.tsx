@@ -12,9 +12,10 @@ import { PassPointsBadge } from "@/components/gamification/PassPointsBadge";
 import { Badge as AchievementBadge } from "@/components/gamification/Badge";
 import { NftBadge } from "@/components/gamification/NftBadge";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
+import { WalletExplanationModal } from "@/components/WalletExplanationModal";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel, AlertDialogFooter } from "@/components/ui/alert-dialog";
-import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award, RefreshCw } from "lucide-react";
+import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award, RefreshCw, Wallet } from "lucide-react";
 import { useAccount, useContractRead, useReadContract, useReadContracts, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { useAuthProfile, type Profile } from "@/hooks/useAuthProfile";
@@ -124,6 +125,7 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isClaimingPassport, setIsClaimingPassport] = useState(false);
   const [isMintingStudyNFT, setIsMintingStudyNFT] = useState(false);
   const [showPassportModal, setShowPassportModal] = useState(false);
@@ -387,92 +389,78 @@ export default function Profile() {
   };
 
   const handleClaimPassport = async () => {
+    // Check if wallet is connected first
+    if (!isConnected || !address) {
+      setIsWalletModalOpen(true);
+      return;
+    }
 
-     writeContract({
-       ...pair2PassContractConfig,
-       functionName: 'mintProfileNft',
-       args: ["Profile Badge"],
-       chain: baseSepolia,
-       account:address
-     })
-
-    if (!profile?.wallet_address) return;
-    
     try {
       setIsClaimingPassport(true);
       
-      // Update the has_passport field in the database
-      const { error } = await supabase
-        .from('profiles')
-        .update({ has_passport: true })
-        .eq('wallet_address', profile.wallet_address);
-
-      if (error) {
-        console.error('Error claiming passport:', error);
-        toast({
-          title: "Error",
-          description: "Failed to claim Student Passport. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Update local state
-      setEditedProfile(prev => ({ ...prev, has_passport: true }));
+      // Mint the NFT
+      writeContract({
+        ...pair2PassContractConfig,
+        functionName: 'mintProfileNft',
+        args: ["Profile Badge"],
+        chain: baseSepolia,
+        account: address
+      });
       
-      // Show success modal
-      setShowPassportModal(true);
+      // Update the wallet_address in profile if not already set
+      if (!profile?.wallet_address) {
+        await supabase
+          .from('profiles')
+          .update({ wallet_address: address })
+          .eq('user_id', user?.id);
+      }
       
     } catch (error) {
       console.error('Error in handleClaimPassport:', error);
       toast({
         title: "Error",
-        description: "Failed to claim Student Passport. Please try again.",
+        description: "Failed to mint Student Passport. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsClaimingPassport(false);
     }
   };
 
   const handleMintStudyNFT = async () => {
-
-     writeContract({
-       ...pair2PassContractConfig,
-       functionName: 'mintBadgeNft',
-       args: ["Study Badge"],
-       chain: baseSepolia,
-       account:address
-     })
-
-
-    setIsMintingStudyNFT(true);
-
-    if  (isConfirmed){
-      setIsMintingStudyNFT(false);
-      setAchievementsRefreshKey(prev => prev + 1);
-      window.location.reload();
-
+    // Check if wallet is connected first
+    if (!isConnected || !address) {
+      setIsWalletModalOpen(true);
+      return;
     }
-    // try {
-    //   // Here you would integrate with your NFT minting contract
-    //   // For now, we'll just simulate the minting process
-    //   await new Promise(resolve => setTimeout(resolve, 2000));
+
+    try {
+      setIsMintingStudyNFT(true);
       
-    //   toast({
-    //     title: "Proof of Study NFT Minted! 🎓",
-    //     description: "Your proof of study NFT has been minted to your wallet.",
-    //   });
-    // } catch (error) {
-    //   console.error('Error minting study NFT:', error);
-    //   toast({
-    //     title: "Error",
-    //     description: "Failed to mint study NFT. Please try again.",
-    //     variant: "destructive",
-    //   });
-    // } finally {
-    //   setIsMintingStudyNFT(false);
-    // }
+      writeContract({
+        ...pair2PassContractConfig,
+        functionName: 'mintBadgeNft',
+        args: ["Study Badge"],
+        chain: baseSepolia,
+        account: address
+      });
+
+      // Update the wallet_address in profile if not already set
+      if (!profile?.wallet_address) {
+        await supabase
+          .from('profiles')
+          .update({ wallet_address: address })
+          .eq('user_id', user?.id);
+      }
+      
+    } catch (error) {
+      console.error('Error minting study NFT:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mint study NFT. Please try again.",
+        variant: "destructive",
+      });
+      setIsMintingStudyNFT(false);
+    }
   };
 
   if (loading) {
@@ -776,9 +764,21 @@ export default function Profile() {
                 {profile?.name || "Anonymous User"}
               </h1>
               <p className="text-muted-foreground mb-2">{profile?.ens_name || ensName || "No ENS"}</p>
-              <p className="text-xs text-muted-foreground mb-4 font-mono">
-                {address}
-              </p>
+              {address ? (
+                <p className="text-xs text-muted-foreground mb-4 font-mono">
+                  {address.slice(0, 6)}...{address.slice(-4)}
+                </p>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsWalletModalOpen(true)}
+                  className="text-xs mb-4"
+                >
+                  <Wallet className="h-3 w-3 mr-1" />
+                  Connect Wallet for Web3 Features
+                </Button>
+              )}
               
               <PassPointsBadge passPoints={profile?.xp || 0} level={profile?.level || 1} className="justify-center" />
               
@@ -1247,24 +1247,28 @@ export default function Profile() {
                                 Your profile is complete! Ready to mint your passport?
                               </p>
                             </div>
-                            <Button 
+                             <Button 
                               onClick={handleClaimPassport}
-                              disabled={isConfirming}
+                              disabled={isConfirming || isClaimingPassport}
                               className="w-full max-w-xs mx-auto gradient-primary hover:opacity-90 shadow-primary transition-all duration-300 hover:scale-105 hover:shadow-glow rounded-xl text-primary-foreground font-semibold"
                             >
-                              {isConfirming ? (
+                              {isConfirming || isClaimingPassport ? (
                                 <>
                                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                  Minting your NFT…
-                               
+                                  {isConfirming ? "Minting your NFT…" : "Preparing…"}
                                 </>
                               ) : (
                                 <>
                                   <Award className="h-5 w-5 mr-2" />
-                                  Mint Passport NFT
+                                  {isConnected ? "Mint Passport NFT" : "Connect Wallet to Mint"}
                                 </>
                               )}
                             </Button>
+                            {!isConnected && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                You'll need to connect a Web3 wallet to mint your NFT
+                              </p>
+                            )}
                           </>
                         ) : (
                           <>
@@ -1342,10 +1346,10 @@ export default function Profile() {
                     </div>
                     <Button 
                       onClick={handleMintStudyNFT}
-                      disabled={isMintingStudyNFT}
+                      disabled={isMintingStudyNFT || isConfirming}
                       className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
                     >
-                      {isConfirming ? (
+                      {isConfirming || isMintingStudyNFT ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Minting...
@@ -1394,6 +1398,17 @@ export default function Profile() {
         userId={user?.id || ""}
         walletAddress={address}
         onVerificationSuccess={handleVerificationSuccess}
+      />
+
+      <WalletExplanationModal
+        open={isWalletModalOpen}
+        onOpenChange={setIsWalletModalOpen}
+        onConnected={() => {
+          toast({
+            title: "Wallet Connected! 🎉",
+            description: "You can now mint your NFT badges.",
+          });
+        }}
       />
 
       {/* Success Modal for Passport Claim */}
