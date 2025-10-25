@@ -1,14 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { useAccount } from "wagmi";
-import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthProfile } from "@/hooks/useAuthProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, X } from "lucide-react";
 import { useState } from "react";
 
 export const VerificationBanner = () => {
-  const { address } = useAccount();
-  const { profile, loading } = useProfile(address);
+  const { user } = useAuth();
+  const { profile, loading } = useAuthProfile();
   const profileCompletion = useProfileCompletion(profile);
   const navigate = useNavigate();
   const [dismissed, setDismissed] = useState(false);

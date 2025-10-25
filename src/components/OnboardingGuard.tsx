@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAccount } from "wagmi";
-import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthProfile } from "@/hooks/useAuthProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,8 @@ interface OnboardingStep {
 }
 
 export const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
-  const { address } = useAccount();
-  const { profile, loading } = useProfile(address);
+  const { user } = useAuth();
+  const { profile, loading } = useAuthProfile();
   const profileCompletion = useProfileCompletion(profile);
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,7 +29,7 @@ export const OnboardingGuard = ({ children }: { children: React.ReactNode }) => 
   const allowedPaths = ['/profile', '/homepage', '/leaderboard', '/session'];
 
   useEffect(() => {
-    if (loading || !address) return;
+    if (loading || !user) return;
 
     const isProfileComplete = profileCompletion.isComplete;
     const isEmailVerified = profile?.is_email_verified ?? false;
@@ -41,7 +41,7 @@ export const OnboardingGuard = ({ children }: { children: React.ReactNode }) => 
     } else {
       setShowOnboarding(false);
     }
-  }, [profile, profileCompletion, loading, location.pathname, address]);
+  }, [profile, profileCompletion, loading, location.pathname, user]);
 
   if (loading) {
     return (

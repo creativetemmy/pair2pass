@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, User, Wallet, Trophy, Droplets, Inbox } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Home, Users, Calendar, User, Wallet, Trophy, Droplets, Inbox, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
-import { useAccount } from "wagmi";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 const allNavItems = [
@@ -28,15 +27,13 @@ const publicNavItems = [
 
 
 export function Navigation() {
-  const { isConnected } = useAccount();
+  const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomepage = location.pathname === '/';
  
-  
- 
-
  const navItems = allNavItems.filter((item) => {
-  if (item.protected && !isConnected) return false;   // hide protected if not connected
+  if (item.protected && !user) return false;   // hide protected if not authenticated
   return true; // otherwise keep it
 });
  
@@ -108,23 +105,20 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Theme Toggle & Wallet Button */}
+          {/* Theme Toggle & Auth Button */}
           <div className="hidden md:flex items-center space-x-2">
-            {isConnected && <NotificationBell />}
+            {user && <NotificationBell />}
             <ThemeToggle />
             
-            {/* Open App Button */}
-            {/* <Button 
-              variant="neon" 
-              size="sm" 
-              className="animate-pulse-slow transition-colors duration-300"
-              onClick={() => isConnected ? window.location.href = '/homepage' : setShowWalletDialog(true)}
-            >
-              <Wallet className="h-4 w-4" />
-              {isConnected ? 'Dashboard' : 'Open App'}
-            </Button> */}
-
-            <ConnectButton/>
+            {!user && (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="transition-all duration-300"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Get Started
+              </Button>
+            )}
           </div>
 
           {/* Mobile Theme Toggle */}

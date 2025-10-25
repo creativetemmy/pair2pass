@@ -21,7 +21,7 @@ import {
   Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Profile } from "@/hooks/useProfile";
+import { Profile } from "@/hooks/useAuthProfile";
 
 interface StudyGoal {
   id: string;

@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Check, X, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewStudySessionModal } from "./NewStudySessionModal";
-import { Profile } from "@/hooks/useProfile";
+import { Profile } from "@/hooks/useAuthProfile";
 
 interface ProfileCheckItem {
   label: string;

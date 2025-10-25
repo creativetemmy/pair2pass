@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Search, Clock, Play, Users, BookOpen, Trophy, Star, TrendingUp, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { NewStudySessionModal } from "@/components/NewStudySessionModal";
 import { MatchmakingResults } from "@/components/MatchmakingResults";
 import { StudySessionLobby } from "@/components/StudySessionLobby";
 import { NotificationBell } from "@/components/NotificationBell";
-import { useProfile } from "@/hooks/useProfile";
+import { useAuthProfile } from "@/hooks/useAuthProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,8 +73,9 @@ const mockActivities = [
 ];
 
 export default function Homepage() {
-  const { address, isConnected } = useAccount();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const address = user?.id; // Use user ID instead of wallet address
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState("Programming");
   const [categories, setCategories] = useState<any[]>([]);
@@ -92,7 +93,7 @@ export default function Homepage() {
     sessionsCompleted: { current: 0, target: 10 },
     passPoints: { current: 0, target: 500 }
   });
-  const { profile } = useProfile(address);
+  const { profile } = useAuthProfile();
   const { items, completionPercentage, isComplete } = useProfileCompletion(profile);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileCheck, setShowProfileCheck] = useState(false);
@@ -107,8 +108,8 @@ export default function Homepage() {
   const [userPassPoints, setUserPassPoints] = useState(0);
 
   useEffect(() => {
-    if (!isConnected) {
-      navigate("/");
+    if (!user) {
+      navigate("/auth");
       return;
     }
 
@@ -125,7 +126,7 @@ export default function Homepage() {
     fetchUserPassPoints();
 
     return () => clearInterval(timer);
-  }, [isConnected, navigate, address]);
+  }, [user, navigate, address]);
 
   const fetchCategoryData = async () => {
     try {
@@ -338,7 +339,7 @@ export default function Homepage() {
       const { data: userProfile, error: profileError } = await supabase
         .from('profiles')
         .select('xp, sessions_completed, hours_studied')
-        .eq('wallet_address', address)
+        .eq('user_id', address)
         .maybeSingle();
 
       if (profileError) {
@@ -432,7 +433,7 @@ export default function Homepage() {
       const { data: userProfile, error } = await supabase
         .from('profiles')
         .select('xp')
-        .eq('wallet_address', address)
+        .eq('user_id', address)
         .maybeSingle();
 
       if (error) {
@@ -447,7 +448,7 @@ export default function Homepage() {
     }
   };
 
-  if (!isConnected) {
+  if (!user) {
     return null;
   }
 
@@ -481,22 +482,24 @@ export default function Homepage() {
       // Fetch requester and target emails from profiles table
       const { data: requesterProfile } = await supabase
         .from('profiles')
-        .select('email, name')
-        .eq('wallet_address', address?.toLowerCase())
+        .select('email, name, user_id')
+        .eq('user_id', address)
         .maybeSingle();
 
       const { data: targetProfile } = await supabase
         .from('profiles')
-        .select('email, name')
-        .eq('wallet_address', (partner.wallet_address || partner.id)?.toLowerCase())
+        .select('email, name, user_id')
+        .eq('user_id', partner.user_id || partner.id)
         .maybeSingle();
 
       // Create match request in database
       const { data: matchRequest, error: matchError } = await supabase
         .from('match_requests')
         .insert({
-          requester_wallet: address?.toLowerCase() || 'current_user',
-          target_wallet: (partner.wallet_address || partner.id)?.toLowerCase(),
+          requester_id: address,
+          target_id: partner.user_id || partner.id,
+          requester_wallet: '',
+          target_wallet: '',
           subject: sessionData?.subject || 'General Study',
           goal: sessionData?.goal || 'Study Together',
           duration: sessionData?.duration || 60,
@@ -512,21 +515,21 @@ export default function Homepage() {
       }
 
       // Create notification for the target partner
-      const targetWalletAddress = partner.wallet_address?.toLowerCase();
+      const targetUserId = partner.user_id || partner.id;
       
-      console.log('📧 Creating notification for wallet:', targetWalletAddress);
+      console.log('📧 Creating notification for user:', targetUserId);
       console.log('📧 Match request ID:', matchRequest.id);
       
-      if (!targetWalletAddress) {
-        console.error('Target wallet address not found');
-        toast.error("Failed to send invitation. Partner wallet address missing.");
+      if (!targetUserId) {
+        console.error('Target user ID not found');
+        toast.error("Failed to send invitation. Partner user ID missing.");
         return;
       }
 
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
-          user_wallet: targetWalletAddress,
+          user_id: targetUserId,
           title: 'New Study Partner Request',
           message: `${requesterProfile?.name || profile?.name || 'Someone'} wants to study ${sessionData?.subject || ''} with you for ${sessionData?.goal || ''}. Accept?`,
           type: 'match_request',

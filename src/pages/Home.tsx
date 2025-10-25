@@ -18,12 +18,12 @@ const features = [
   {
     icon: Shield,
     title: "Verified Students",
-    description: "All users are verified through blockchain identity and academic credentials.",
+    description: "Connect with verified students through email authentication and academic credentials.",
   },
   {
     icon: Zap,
-    title: "Earn XP & Badges",
-    description: "Gamified learning with rewards for consistent study sessions and achievements.",
+    title: "Earn Rewards",
+    description: "Gamified learning with XP points and digital badges for consistent study sessions.",
   },
   {
     icon: Trophy,
@@ -88,8 +88,8 @@ export default function Home() {
               <span className="text-secondary-glow">Pass Together</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-              The Web3 platform connecting students for verified study partnerships. 
-              Build your academic reputation while earning XP and NFT badges.
+              Connect with verified study partners, build your academic reputation, 
+              and earn rewards for successful collaborations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
