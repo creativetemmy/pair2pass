@@ -193,26 +193,7 @@ const ProfilePage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {profile.skills && profile.skills.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {profile.skills.map((skill) => (
-                    <Badge key={skill} variant="outline">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">No skills listed</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Interests</CardTitle>
+              <CardTitle className="text-lg">Courses of Interest</CardTitle>
             </CardHeader>
             <CardContent>
               {profile.interests && profile.interests.length > 0 ? (
@@ -224,7 +205,26 @@ const ProfilePage = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">No interests listed</p>
+                <p className="text-muted-foreground text-sm">No courses of interest listed</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Personal Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {profile.skills && profile.skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.skills.map((skill) => (
+                    <Badge key={skill} variant="outline">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No personal skills listed</p>
               )}
             </CardContent>
           </Card>

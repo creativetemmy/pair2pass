@@ -551,12 +551,12 @@ export default function Profile() {
             </div>
 
             <div>
-              <Label>Skills</Label>
+              <Label>Personal Skills</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
-                  placeholder="Add a skill (e.g., Python, JavaScript)"
+                  placeholder="Add a personal skill (e.g., Python, JavaScript)"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
                 />
                 <Button type="button" onClick={addSkill} variant="outline">
@@ -636,12 +636,12 @@ export default function Profile() {
             </div>
 
             <div>
-              <Label>Subjects of Interest</Label>
+              <Label>Courses of Interest</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={interestInput}
                   onChange={(e) => setInterestInput(e.target.value)}
-                  placeholder="Add a subject of interest (e.g., AI/ML, Web Development)"
+                  placeholder="Add a course of interest (e.g., AI/ML, Web Development)"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
                 />
                 <Button type="button" onClick={addInterest} variant="outline">
@@ -963,12 +963,12 @@ export default function Profile() {
                     </div>
 
              <div>
-              <Label>Subjects of Interest</Label>
+              <Label>Courses of Interest</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={interestInput}
                   onChange={(e) => setInterestInput(e.target.value)}
-                  placeholder="Add a subject of interest"
+                  placeholder="Add a course of interest"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
                 />
                 <Button type="button" onClick={addInterest} variant="outline">
@@ -990,12 +990,12 @@ export default function Profile() {
             </div>
 
             <div>
-              <Label>Skills</Label>
+              <Label>Personal Skills</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
-                  placeholder="Add a skill"
+                  placeholder="Add a personal skill"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
                 />
                 <Button type="button" onClick={addSkill} variant="outline">
@@ -1103,7 +1103,7 @@ export default function Profile() {
                     </div>
                     
              <div>
-              <h3 className="font-semibold text-foreground mb-3">Subjects of Interest</h3>
+              <h3 className="font-semibold text-foreground mb-3">Courses of Interest</h3>
               <div className="flex flex-wrap gap-2">
                 {profile?.interests?.length ? (
                   profile.interests.map((interest) => (
@@ -1112,13 +1112,13 @@ export default function Profile() {
                     </Badge>
                   ))
                 ) : (
-                  <p className="text-muted-foreground text-sm">No subjects of interest added yet</p>
+                  <p className="text-muted-foreground text-sm">No courses of interest added yet</p>
                 )}
               </div>
             </div>
             
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Skills</h3>
+              <h3 className="font-semibold text-foreground mb-3">Personal Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {profile?.skills?.length ? (
                   profile.skills.map((skill) => (
@@ -1127,7 +1127,7 @@ export default function Profile() {
                     </Badge>
                   ))
                 ) : (
-                  <p className="text-muted-foreground text-sm">No skills added yet</p>
+                  <p className="text-muted-foreground text-sm">No personal skills added yet</p>
                 )}
               </div>
             </div>

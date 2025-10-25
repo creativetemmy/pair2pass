@@ -33,7 +33,7 @@ export const useActiveSession = () => {
           .from('study_sessions')
           .select('*')
           .or(`partner_1_id.eq.${lowerAddress},partner_2_id.eq.${lowerAddress}`)
-          .eq('status', 'active')
+          .in('status', ['waiting', 'active'])
           .maybeSingle();
 
         console.log('Active session query result:', { data, error });
