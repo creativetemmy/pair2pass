@@ -22,8 +22,9 @@ export type Database = {
           id: string
           otp: string
           updated_at: string
+          user_id: string | null
           verified: boolean
-          wallet_address: string
+          wallet_address: string | null
         }
         Insert: {
           created_at?: string
@@ -32,8 +33,9 @@ export type Database = {
           id?: string
           otp: string
           updated_at?: string
+          user_id?: string | null
           verified?: boolean
-          wallet_address: string
+          wallet_address?: string | null
         }
         Update: {
           created_at?: string
@@ -42,8 +44,9 @@ export type Database = {
           id?: string
           otp?: string
           updated_at?: string
+          user_id?: string | null
           verified?: boolean
-          wallet_address?: string
+          wallet_address?: string | null
         }
         Relationships: []
       }
@@ -54,9 +57,11 @@ export type Database = {
           expires_at: string
           goal: string
           id: string
+          requester_id: string | null
           requester_wallet: string
           status: string
           subject: string
+          target_id: string | null
           target_wallet: string
           updated_at: string
         }
@@ -66,9 +71,11 @@ export type Database = {
           expires_at?: string
           goal: string
           id?: string
+          requester_id?: string | null
           requester_wallet: string
           status?: string
           subject: string
+          target_id?: string | null
           target_wallet: string
           updated_at?: string
         }
@@ -78,9 +85,11 @@ export type Database = {
           expires_at?: string
           goal?: string
           id?: string
+          requester_id?: string | null
           requester_wallet?: string
           status?: string
           subject?: string
+          target_id?: string | null
           target_wallet?: string
           updated_at?: string
         }
@@ -95,7 +104,8 @@ export type Database = {
           read: boolean
           title: string
           type: string
-          user_wallet: string
+          user_id: string | null
+          user_wallet: string | null
         }
         Insert: {
           created_at?: string
@@ -105,7 +115,8 @@ export type Database = {
           read?: boolean
           title: string
           type: string
-          user_wallet: string
+          user_id?: string | null
+          user_wallet?: string | null
         }
         Update: {
           created_at?: string
@@ -115,7 +126,8 @@ export type Database = {
           read?: boolean
           title?: string
           type?: string
-          user_wallet?: string
+          user_id?: string | null
+          user_wallet?: string | null
         }
         Relationships: []
       }
@@ -144,7 +156,8 @@ export type Database = {
           skills: string[] | null
           study_goals: string[]
           updated_at: string
-          wallet_address: string
+          user_id: string | null
+          wallet_address: string | null
           xp: number | null
         }
         Insert: {
@@ -171,7 +184,8 @@ export type Database = {
           skills?: string[] | null
           study_goals?: string[]
           updated_at?: string
-          wallet_address: string
+          user_id?: string | null
+          wallet_address?: string | null
           xp?: number | null
         }
         Update: {
@@ -198,7 +212,8 @@ export type Database = {
           skills?: string[] | null
           study_goals?: string[]
           updated_at?: string
-          wallet_address?: string
+          user_id?: string | null
+          wallet_address?: string | null
           xp?: number | null
         }
         Relationships: []
@@ -209,7 +224,9 @@ export type Database = {
           feedback: string | null
           id: string
           rating: number
+          reviewed_id: string | null
           reviewed_wallet: string
+          reviewer_id: string | null
           reviewer_wallet: string
           session_id: string
           updated_at: string
@@ -219,7 +236,9 @@ export type Database = {
           feedback?: string | null
           id?: string
           rating: number
+          reviewed_id?: string | null
           reviewed_wallet: string
+          reviewer_id?: string | null
           reviewer_wallet: string
           session_id: string
           updated_at?: string
@@ -229,7 +248,9 @@ export type Database = {
           feedback?: string | null
           id?: string
           rating?: number
+          reviewed_id?: string | null
           reviewed_wallet?: string
+          reviewer_id?: string | null
           reviewer_wallet?: string
           session_id?: string
           updated_at?: string
@@ -245,8 +266,10 @@ export type Database = {
           match_request_id: string | null
           partner_1_id: string
           partner_1_ready: boolean | null
+          partner_1_user_id: string | null
           partner_2_id: string
           partner_2_ready: boolean | null
+          partner_2_user_id: string | null
           status: string | null
           subject: string
           updated_at: string
@@ -260,8 +283,10 @@ export type Database = {
           match_request_id?: string | null
           partner_1_id: string
           partner_1_ready?: boolean | null
+          partner_1_user_id?: string | null
           partner_2_id: string
           partner_2_ready?: boolean | null
+          partner_2_user_id?: string | null
           status?: string | null
           subject: string
           updated_at?: string
@@ -275,8 +300,10 @@ export type Database = {
           match_request_id?: string | null
           partner_1_id?: string
           partner_1_ready?: boolean | null
+          partner_1_user_id?: string | null
           partner_2_id?: string
           partner_2_ready?: boolean | null
+          partner_2_user_id?: string | null
           status?: string | null
           subject?: string
           updated_at?: string
@@ -374,12 +401,9 @@ export type Database = {
       }
     }
     Functions: {
-      auto_expire_abandoned_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      auto_expire_abandoned_sessions: { Args: never; Returns: undefined }
       get_public_profile_fields: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           academic_level: string
           avatar_url: string
@@ -407,14 +431,8 @@ export type Database = {
           xp: number
         }[]
       }
-      has_active_session: {
-        Args: { _wallet: string }
-        Returns: boolean
-      }
-      is_user_ready: {
-        Args: { _wallet: string }
-        Returns: boolean
-      }
+      has_active_session: { Args: { _user_id: string }; Returns: boolean }
+      is_user_ready: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
