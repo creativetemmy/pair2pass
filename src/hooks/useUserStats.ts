@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAccount } from 'wagmi';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserStats {
   studyPartners: number;
@@ -17,11 +17,11 @@ export const useUserStats = () => {
     averageRating: 0
   });
   const [loading, setLoading] = useState(true);
-  const { address } = useAccount();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!address) {
+      if (!user?.id) {
         setLoading(false);
         return;
       }
@@ -31,23 +31,23 @@ export const useUserStats = () => {
         const { data: profile } = await supabase
           .from('profiles')
           .select('hours_studied, partners_helped, average_rating, interests')
-          .eq('wallet_address', address)
+          .eq('user_id', user.id)
           .single();
 
         // Fetch unique partners count
         const { data: sessionsAsPartner1 } = await supabase
           .from('study_sessions')
-          .select('partner_2_id')
-          .eq('partner_1_id', address);
+          .select('partner_2_user_id')
+          .eq('partner_1_user_id', user.id);
 
         const { data: sessionsAsPartner2 } = await supabase
           .from('study_sessions')
-          .select('partner_1_id')
-          .eq('partner_2_id', address);
+          .select('partner_1_user_id')
+          .eq('partner_2_user_id', user.id);
 
         const uniquePartners = new Set([
-          ...(sessionsAsPartner1?.map(s => s.partner_2_id) || []),
-          ...(sessionsAsPartner2?.map(s => s.partner_1_id) || [])
+          ...(sessionsAsPartner1?.map(s => s.partner_2_user_id) || []),
+          ...(sessionsAsPartner2?.map(s => s.partner_1_user_id) || [])
         ]);
 
         setStats({
@@ -64,7 +64,7 @@ export const useUserStats = () => {
     };
 
     fetchStats();
-  }, [address]);
+  }, [user?.id]);
 
   return { stats, loading };
 };

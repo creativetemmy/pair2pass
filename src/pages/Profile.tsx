@@ -152,8 +152,8 @@ export default function Profile() {
     }
   }, [isConfirmed, refetchProfileBadge, refetchAchievements, toast]);
 
-  if (!isConnected) {
-    return <Navigate to="/" replace />;
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
 

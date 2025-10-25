@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAccount } from 'wagmi';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UpcomingSession {
   id: string;
   subject: string;
   goal: string;
-  partner_wallet: string;
+  partner_user_id: string;
+  partner_name?: string;
   duration: number;
   created_at: string;
   status: string;
@@ -15,21 +16,21 @@ interface UpcomingSession {
 export const useUpcomingSessions = () => {
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const { address } = useAccount();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchUpcomingSessions = async () => {
-      if (!address) {
+      if (!user?.id) {
         setLoading(false);
         return;
       }
 
       try {
-        console.log('Fetching upcoming sessions for address:', address);
+        console.log('Fetching upcoming sessions for user:', user.id);
         const { data, error } = await supabase
           .from('study_sessions')
           .select('*')
-          .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
+          .or(`partner_1_user_id.eq.${user.id},partner_2_user_id.eq.${user.id}`)
           .eq('status', 'waiting')
           .order('created_at', { ascending: true });
 
@@ -37,10 +38,25 @@ export const useUpcomingSessions = () => {
 
         if (error) throw error;
 
-        const sessionsWithPartner = data?.map(session => ({
-          ...session,
-          partner_wallet: session.partner_1_id === address ? session.partner_2_id : session.partner_1_id
-        })) || [];
+        // Get partner information for display
+        const sessionsWithPartner = await Promise.all(
+          (data || []).map(async (session) => {
+            const partnerUserId = session.partner_1_user_id === user.id ? session.partner_2_user_id : session.partner_1_user_id;
+            
+            // Fetch partner profile for display name
+            const { data: partnerProfile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('user_id', partnerUserId)
+              .single();
+
+            return {
+              ...session,
+              partner_user_id: partnerUserId,
+              partner_name: partnerProfile?.name || 'Study Partner'
+            };
+          })
+        );
 
         console.log('Upcoming sessions with partner info:', sessionsWithPartner);
         setUpcomingSessions(sessionsWithPartner);
@@ -53,7 +69,7 @@ export const useUpcomingSessions = () => {
 
     fetchUpcomingSessions();
 
-    // Set up real-time subscription with broader filter
+    // Set up real-time subscription
     const channel = supabase
       .channel('upcoming-sessions')
       .on(
@@ -65,7 +81,6 @@ export const useUpcomingSessions = () => {
         },
         (payload) => {
           console.log('Real-time update received:', payload);
-          // Refetch data whenever any session changes
           fetchUpcomingSessions();
         }
       )
@@ -74,26 +89,39 @@ export const useUpcomingSessions = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [address]);
+  }, [user?.id]);
 
-  // Add a manual refresh function that can be called from components
+  // Manual refresh function
   const refreshUpcomingSessions = async () => {
-    if (!address) return;
+    if (!user?.id) return;
     
     try {
       const { data, error } = await supabase
         .from('study_sessions')
         .select('*')
-        .or(`partner_1_id.eq.${address},partner_2_id.eq.${address}`)
+        .or(`partner_1_user_id.eq.${user.id},partner_2_user_id.eq.${user.id}`)
         .eq('status', 'waiting')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
-      const sessionsWithPartner = data?.map(session => ({
-        ...session,
-        partner_wallet: session.partner_1_id === address ? session.partner_2_id : session.partner_1_id
-      })) || [];
+      const sessionsWithPartner = await Promise.all(
+        (data || []).map(async (session) => {
+          const partnerUserId = session.partner_1_user_id === user.id ? session.partner_2_user_id : session.partner_1_user_id;
+          
+          const { data: partnerProfile } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('user_id', partnerUserId)
+            .single();
+
+          return {
+            ...session,
+            partner_user_id: partnerUserId,
+            partner_name: partnerProfile?.name || 'Study Partner'
+          };
+        })
+      );
 
       setUpcomingSessions(sessionsWithPartner);
     } catch (error) {

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAccount } from 'wagmi';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface RecentSession {
   id: string;
   subject: string;
-  partner_wallet: string;
+  partner_name?: string;
   created_at: string;
   rating?: number;
   xp_earned?: number;
@@ -14,48 +14,53 @@ interface RecentSession {
 export const useRecentSessions = () => {
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const { address } = useAccount();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchRecentSessions = async () => {
-      if (!address) {
+      if (!user?.id) {
         setLoading(false);
         return;
       }
       try {
-        const lowerAddress = address.toLowerCase();
-        
         // Fetch completed sessions
         const { data: sessions, error } = await supabase
           .from('study_sessions')
           .select('*')
-          .or(`partner_1_id.eq.${lowerAddress},partner_2_id.eq.${lowerAddress}`)
+          .or(`partner_1_user_id.eq.${user.id},partner_2_user_id.eq.${user.id}`)
           .eq('status', 'completed')
           .order('created_at', { ascending: false })
           .limit(5);
 
         if (error) throw error;
 
-        // Get reviews for these sessions
+        // Get reviews and partner info for these sessions
         const sessionsWithDetails = await Promise.all(
           (sessions || []).map(async (session) => {
-            const partnerWallet = session.partner_1_id === lowerAddress ? session.partner_2_id : session.partner_1_id;
+            const partnerUserId = session.partner_1_user_id === user.id ? session.partner_2_user_id : session.partner_1_user_id;
+            
+            // Fetch partner profile
+            const { data: partnerProfile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('user_id', partnerUserId)
+              .single();
             
             // Fetch review for this session where current user was reviewed
             const { data: review } = await supabase
               .from('session_reviews')
               .select('rating')
               .eq('session_id', session.id)
-              .eq('reviewed_wallet', lowerAddress)
+              .eq('reviewed_id', user.id)
               .single();
 
             return {
               id: session.id,
               subject: session.subject,
-              partner_wallet: partnerWallet,
+              partner_name: partnerProfile?.name || 'Study Partner',
               created_at: session.created_at,
               rating: review?.rating,
-              xp_earned: review?.rating ? review.rating * 30 : 0 // Calculate Pass Points based on rating
+              xp_earned: review?.rating ? review.rating * 30 : 0
             };
           })
         );
@@ -69,7 +74,7 @@ export const useRecentSessions = () => {
     };
 
     fetchRecentSessions();
-  }, [address]);
+  }, [user?.id]);
 
   return { recentSessions, loading };
 };

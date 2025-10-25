@@ -5,7 +5,7 @@ import { PassPointsBadge } from "@/components/gamification/PassPointsBadge";
 import { Badge } from "@/components/gamification/Badge";
 import { ActiveSessionCard } from "@/components/ActiveSessionCard";
 import { CancelSessionModal } from "@/components/CancelSessionModal";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 import { useActiveSession } from "@/hooks/useActiveSession";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useUpcomingSessions } from "@/hooks/useUpcomingSessions";
@@ -15,15 +15,10 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
 import { NftBadge } from "@/components/gamification/NftBadge";
-
-
-
-const formatWalletAddress = (wallet: string) => {
-  return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
-};
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Dashboard() {
-  const { address } = useAccount();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
@@ -32,11 +27,8 @@ export default function Dashboard() {
   const { upcomingSessions, loading: upcomingLoading, refreshUpcomingSessions } = useUpcomingSessions();
   const { recentSessions, loading: recentLoading } = useRecentSessions();
   
-  const { data: badges } = useReadContract({
-      ...pair2PassContractConfig,
-      functionName: 'getBadgeTokens',
-      args: [address],
-    })
+  // NFT badges are optional for email-first users
+  const badges = [];
 
   const handleCancelClick = (sessionId: string) => {
     setSelectedSessionId(sessionId);
@@ -155,7 +147,7 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="font-semibold text-foreground">{session.subject}</h3>
-                        <p className="text-sm text-muted-foreground">with {formatWalletAddress(session.partner_wallet)}</p>
+                        <p className="text-sm text-muted-foreground">with {session.partner_name}</p>
                       </div>
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                         {session.goal}
@@ -211,7 +203,7 @@ export default function Dashboard() {
                   <div key={session.id} className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
                     <div>
                       <h4 className="font-medium text-foreground">{session.subject}</h4>
-                      <p className="text-sm text-muted-foreground">with {formatWalletAddress(session.partner_wallet)}</p>
+                      <p className="text-sm text-muted-foreground">with {session.partner_name}</p>
                       <p className="text-xs text-muted-foreground">{format(new Date(session.created_at), "MMM dd, yyyy")}</p>
                     </div>
                     <div className="text-right">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAccount } from 'wagmi';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ActiveSession {
   id: string;
@@ -16,23 +16,21 @@ interface ActiveSession {
 export const useActiveSession = () => {
   const [activeSession, setActiveSession] = useState<ActiveSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const { address } = useAccount();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!address) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
 
     const fetchActiveSession = async () => {
       try {
-        console.log('Fetching active session for address:', address);
-        // Use lowercase for case-insensitive wallet address matching
-        const lowerAddress = address.toLowerCase();
+        console.log('Fetching active session for user:', user.id);
         const { data, error } = await supabase
           .from('study_sessions')
           .select('*')
-          .or(`partner_1_id.eq.${lowerAddress},partner_2_id.eq.${lowerAddress}`)
+          .or(`partner_1_user_id.eq.${user.id},partner_2_user_id.eq.${user.id}`)
           .in('status', ['waiting', 'active'])
           .maybeSingle();
 
@@ -78,7 +76,7 @@ export const useActiveSession = () => {
           event: '*',
           schema: 'public',
           table: 'study_sessions',
-          filter: `partner_1_id=eq.${address.toLowerCase()}`,
+          filter: `partner_1_user_id=eq.${user.id}`,
         },
         fetchActiveSession
       )
@@ -88,7 +86,7 @@ export const useActiveSession = () => {
           event: '*',
           schema: 'public',
           table: 'study_sessions',
-          filter: `partner_2_id=eq.${address.toLowerCase()}`,
+          filter: `partner_2_user_id=eq.${user.id}`,
         },
         fetchActiveSession
       )
@@ -97,7 +95,7 @@ export const useActiveSession = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [address]);
+  }, [user?.id]);
 
   return { activeSession, loading };
 };
