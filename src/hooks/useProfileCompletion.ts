@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Profile } from "@/hooks/useProfile";
+import { Profile } from "@/hooks/useAuthProfile";
 
 interface ProfileCheckItem {
   label: string;

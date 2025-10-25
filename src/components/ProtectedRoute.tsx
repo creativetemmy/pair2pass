@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { useAccount } from 'wagmi';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { OnboardingGuard } from './OnboardingGuard';
 
@@ -11,14 +11,14 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireVerification = true }: ProtectedRouteProps) => {
-  const { isConnected, address } = useAccount();
-  const { profile, loading } = useProfile(address);
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useAuthProfile();
   const profileCompletion = useProfileCompletion(profile);
   const location = useLocation();
 
-  // First check: wallet connection
-  if (!isConnected) {
-    return <Navigate to="/" replace />;
+  // First check: user authentication
+  if (!authLoading && !user) {
+    return <Navigate to="/auth" replace />;
   }
 
   // Allow access to profile page and homepage without verification
@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children, requireVerification = true }: ProtectedRoute
   const isOnAllowedPath = allowedPaths.includes(location.pathname);
 
   // If verification is required and user is not on an allowed path
-  if (requireVerification && !isOnAllowedPath && !loading) {
+  if (requireVerification && !isOnAllowedPath && !profileLoading) {
     const isProfileComplete = profileCompletion.isComplete;
     const isEmailVerified = profile?.is_email_verified ?? false;
 

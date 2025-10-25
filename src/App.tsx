@@ -3,12 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { VerificationBanner } from "@/components/VerificationBanner";
-import { useAccount } from "wagmi";
+import { useAuth } from "@/contexts/AuthContext";
 
 import Home from "./pages/Home";
+import Auth from "./pages/Auth";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import FindPartner from "./pages/FindPartner";
@@ -28,29 +30,33 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const AppContent = () => {
   return (
     <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRouter />
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRouter />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 };
 
 const AppRouter = () => {
-  const { isConnected } = useAccount();
+  const { user } = useAuth();
   const location = useLocation();
-  const isHomepage = location.pathname === '/';
+  const isLandingPage = location.pathname === '/';
+  const isAuthPage = location.pathname === '/auth';
   
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 flex flex-col">
-      <Navigation />
-      {isConnected && !isHomepage && <VerificationBanner />}
+      {!isAuthPage && <Navigation />}
+      {user && !isLandingPage && !isAuthPage && <VerificationBanner />}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/homepage" element={<ProtectedRoute requireVerification={false}><Homepage /></ProtectedRoute>} />
           <Route path="/session" element={<ProtectedRoute requireVerification={false}><Dashboard /></ProtectedRoute>} />
           <Route path="/find-partner" element={<ProtectedRoute requireVerification={true}><FindPartner /></ProtectedRoute>} />
@@ -68,7 +74,7 @@ const AppRouter = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {isHomepage && <Footer />}
+      {isLandingPage && <Footer />}
     </div>
   );
 };

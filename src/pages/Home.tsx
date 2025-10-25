@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Shield, Zap, Trophy, ArrowRight, CheckCircle, Star, MessageSquare } from "lucide-react";
-import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 import heroImage from "@/assets/hero-image.jpg";
 import fuoyeLogo from "@/assets/institutions/fuoye-logo.png";
 import uniosunLogo from "@/assets/institutions/uniosun-logo.png";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import FAQ from "@/components/FAQ";
 
 const features = [
@@ -33,7 +33,7 @@ const features = [
 ];
 
 const steps = [
-  { step: 1, title: "Connect Wallet", description: "Link your Web3 wallet for verification" },
+  { step: 1, title: "Sign Up", description: "Create your account with email" },
   { step: 2, title: "Complete Profile", description: "Add your academic details and preferences" },
   { step: 3, title: "Find Partners", description: "Match with students in your courses" },
   { step: 4, title: "Study & Earn", description: "Complete sessions and earn XP rewards" },
@@ -73,7 +73,8 @@ const institutions = [
 ];
 
 export default function Home() {
-  const [showWalletDialog, setShowWalletDialog] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen transition-colors duration-300">
@@ -91,7 +92,14 @@ export default function Home() {
               Build your academic reputation while earning XP and NFT badges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <ConnectButton label="Open App"/>
+              <Button
+                size="lg"
+                onClick={() => navigate(user ? '/homepage' : '/auth')}
+                className="bg-white text-primary hover:bg-white/90 transition-all duration-300 text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl"
+              >
+                {user ? 'Go to Dashboard' : 'Get Started Free'}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -260,10 +268,10 @@ export default function Home() {
           
           <Button
             size="lg"
-            onClick={() => setShowWalletDialog(true)}
+            onClick={() => navigate(user ? '/homepage' : '/auth')}
             className="bg-white text-primary hover:bg-white/90 transition-all duration-300 text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl mb-8"
           >
-            Start Learning
+            {user ? 'Go to Dashboard' : 'Start Learning'}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           
@@ -272,11 +280,6 @@ export default function Home() {
           </p>
         </div>
       </section>
-      
-      <WalletConnectDialog 
-        open={showWalletDialog} 
-        onOpenChange={setShowWalletDialog} 
-      />
     </div>
   );
 }
