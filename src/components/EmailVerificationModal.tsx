@@ -178,7 +178,10 @@ export function EmailVerificationModal({
 
       setStep("success");
 
-      setTimeout(() => {
+      // Force profile refresh by triggering auth state change
+      setTimeout(async () => {
+        // Refresh the session to ensure all components get updated profile
+        await supabase.auth.refreshSession();
         onVerificationSuccess();
         onClose();
       }, 2000);
