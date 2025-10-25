@@ -17,7 +17,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHea
 import { Camera, Edit, Save, Trophy, Calendar, Users, BookOpen, Loader2, Target, Mail, AlertTriangle, CheckCircle, Award, RefreshCw } from "lucide-react";
 import { useAccount, useContractRead, useReadContract, useReadContracts, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { Navigate } from "react-router-dom";
-import { useProfile, type Profile } from "@/hooks/useProfile";
+import { useAuthProfile, type Profile } from "@/hooks/useAuthProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { useRecentSessions } from "@/hooks/useRecentSessions";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +62,7 @@ export default function Profile() {
   const { address, chainId, isConnected } = useAccount();
   const { user } = useAuth();
   const { data: ensName } = useEnsName({ address });
-  const { profile, loading, saving, saveProfile } = useProfile(address);
+  const { profile, loading, saving, updateProfile, refetch } = useAuthProfile();
   const profileCompletion = useProfileCompletion(profile);
   const { recentSessions, loading: sessionsLoading } = useRecentSessions();
   const [achievementsRefreshKey, setAchievementsRefreshKey] = useState(0);
@@ -157,20 +157,30 @@ export default function Profile() {
   }
 
 
-  // Update editedProfile when profile loads
+  // Update editedProfile when profile loads or user changes
   useEffect(() => {
     if (profile) {
-      setEditedProfile(profile);
+      setEditedProfile({
+        ...profile,
+        // Auto-fill email from auth user if not set in profile
+        email: profile.email || user?.email || "",
+      });
       setAvatarUrl(profile.avatar_url || "");
+    } else if (user && !loading) {
+      // First time setup - auto-fill email from auth
+      setEditedProfile(prev => ({
+        ...prev,
+        email: user.email || "",
+      }));
     }
-  }, [profile]);
+  }, [profile, user, loading]);
 
   // Auto-update ENS name when it changes
   useEffect(() => {
     if (ensName && profile && profile.ens_name !== ensName) {
       const updatedProfile = { ...editedProfile, ens_name: ensName };
       setEditedProfile(updatedProfile);
-      saveProfile(updatedProfile);
+      updateProfile(updatedProfile);
     }
   }, [ensName, profile]);
 
@@ -178,9 +188,10 @@ export default function Profile() {
   const isFirstTimeSetup = !loading && !profile;
 
   const handleSave = async () => {
-    const success = await saveProfile(editedProfile);
+    const success = await updateProfile(editedProfile);
     if (success) {
       setIsEditing(false);
+      await refetch(); // Refresh profile after save
     }
   };
 
@@ -257,7 +268,7 @@ export default function Profile() {
       setEditedProfile(updatedProfile);
       
       // Save the profile with the new avatar
-      await saveProfile(updatedProfile);
+      await updateProfile(updatedProfile);
       
       toast({
         title: "Success",
@@ -322,17 +333,13 @@ export default function Profile() {
   };
 
   const handleVerificationSuccess = async () => {
-    // Update local state to reflect verification
-    setEditedProfile(prev => ({ ...prev, is_email_verified: true }));
+    // Refetch profile to get updated verification status
+    await refetch();
     
-    // The XP is already awarded in the EmailVerificationModal
-    // Just update the profile verification status
-    const updatedProfile = { 
-      ...editedProfile, 
-      is_email_verified: true
-    };
-    
-    await saveProfile(updatedProfile);
+    toast({
+      title: "Success!",
+      description: "Your email has been verified successfully.",
+    });
   };
 
   const handleClaimPassport = async () => {
@@ -463,21 +470,10 @@ export default function Profile() {
                       id="email"
                       type="email"
                       value={editedProfile.email || ""}
-                      onChange={(e) => setEditedProfile(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="your.email@university.edu"
-                      className="flex-1"
+                      readOnly
+                      disabled
+                      className="flex-1 bg-muted"
                     />
-                    {editedProfile.email && !editedProfile.is_email_verified && (
-                      <Button 
-                        type="button"
-                        onClick={handleEmailVerification}
-                        size="sm"
-                        className="shrink-0"
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        Verify Email
-                      </Button>
-                    )}
                   </div>
                   {editedProfile.email && (
                     <>
@@ -485,14 +481,14 @@ export default function Profile() {
                         <div className="flex items-center gap-2 text-sm text-green-600">
                           <CheckCircle className="h-4 w-4" />
                           <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                            Verified
+                            ✅ Verified
                           </Badge>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-800">
                           <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                           <p className="text-sm text-amber-700 dark:text-amber-300">
-                            ⚠️ Please verify your email to unlock session invites, notifications, and rewards.
+                            ⚠️ Email verification is pending. Check your inbox or sign up again.
                           </p>
                         </div>
                       )}
