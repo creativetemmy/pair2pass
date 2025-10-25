@@ -41,7 +41,7 @@ const initialProfileData: Partial<Profile> = {
   ens_name: "",
   institution: "",
   department: "",
-  academic_level: "100 Level",
+  academic_level: "",
   bio: "",
   skills: [],
   interests: [],
@@ -188,6 +188,43 @@ export default function Profile() {
   const isFirstTimeSetup = !loading && !profile;
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!editedProfile.name?.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your full name.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!editedProfile.academic_level?.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please select your academic level.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!editedProfile.interests || editedProfile.interests.length === 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please add at least one course of interest.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!editedProfile.study_goals || editedProfile.study_goals.length === 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please select at least one study goal.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const success = await updateProfile(editedProfile);
     if (success) {
       setIsEditing(false);
@@ -239,12 +276,19 @@ export default function Profile() {
   };
 
   const uploadAvatar = async (file: File) => {
-    if (!address) return;
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "Please sign in to upload an avatar.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       setUploading(true);
       const fileExt = file.name.split('.').pop();
-      const fileName = `${address.toLowerCase()}.${fileExt}`;
+      const fileName = `${user.id}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -450,6 +494,14 @@ export default function Profile() {
             <CardTitle className="text-2xl text-center">
               {isFirstTimeSetup ? "Welcome! Let's set up your profile" : "Edit Profile"}
             </CardTitle>
+            {(isFirstTimeSetup || !profileCompletion.isComplete) && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                <p className="text-sm text-blue-900 dark:text-blue-100">
+                  <strong>Complete your profile to unlock all features!</strong> Fields marked with * are required 
+                  to match you with study partners and access the full platform.
+                </p>
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -518,13 +570,13 @@ export default function Profile() {
                 />
               </div>
               <div>
-                <Label htmlFor="level">Academic Level</Label>
+                <Label htmlFor="level">Academic Level *</Label>
                 <Select
-                  value={editedProfile.academic_level || "100 Level"}
+                  value={editedProfile.academic_level || ""}
                   onValueChange={(value) => setEditedProfile(prev => ({ ...prev, academic_level: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select your level" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="100 Level">100 Level</SelectItem>
@@ -578,7 +630,7 @@ export default function Profile() {
             <div>
               <Label className="flex items-center gap-2">
                 <Target className="h-4 w-4" />
-                Select Your Study Goals
+                Select Your Study Goals *
               </Label>
               <p className="text-sm text-muted-foreground mb-3">
                 These goals help us match you with the right study partners. You can update anytime.
@@ -634,7 +686,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <Label>Courses of Interest</Label>
+              <Label>Courses of Interest *</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={interestInput}
@@ -796,12 +848,20 @@ export default function Profile() {
                 {isEditing ? "Cancel" : <><Edit className="h-4 w-4 mr-1" />Edit</>}
               </Button>
             </CardHeader>
+            {isEditing && !profileCompletion.isComplete && (
+              <div className="mx-6 mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <p className="text-sm text-blue-900 dark:text-blue-100">
+                  <strong>Complete your profile to unlock all features!</strong> Fields marked with * are required 
+                  to match you with study partners and access the full platform.
+                </p>
+              </div>
+            )}
             <CardContent className="space-y-6">
               {isEditing ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">Full Name *</Label>
                       <Input
                         id="name"
                         value={editedProfile.name || ""}
@@ -873,13 +933,13 @@ export default function Profile() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="level">Academic Level</Label>
+                      <Label htmlFor="level">Academic Level *</Label>
                       <Select
-                        value={editedProfile.academic_level || "100 Level"}
+                        value={editedProfile.academic_level || ""}
                         onValueChange={(value) => setEditedProfile(prev => ({ ...prev, academic_level: value }))}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Select your level" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="100 Level">100 Level</SelectItem>
@@ -905,7 +965,7 @@ export default function Profile() {
                    <div>
                      <Label className="flex items-center gap-2">
                        <Target className="h-4 w-4" />
-                       Select Your Study Goals
+                       Select Your Study Goals *
                      </Label>
                      <p className="text-sm text-muted-foreground mb-3">
                        These goals help us match you with the right study partners. You can update anytime.
@@ -961,7 +1021,7 @@ export default function Profile() {
                     </div>
 
              <div>
-              <Label>Courses of Interest</Label>
+              <Label>Courses of Interest *</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={interestInput}
