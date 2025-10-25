@@ -26,7 +26,7 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.name);
+      const { data, error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.name);
       
       if (error) {
         toast({
@@ -38,20 +38,19 @@ export default function Auth() {
         return;
       }
 
-      // Wait a moment for the user to be created
-      setTimeout(() => {
-        if (user) {
-          setVerificationUserId(user.id);
-          setVerificationEmail(signUpForm.email);
-          setShowVerificationModal(true);
-          setIsLoading(false);
-        }
-      }, 1000);
-
-      toast({
-        title: 'Account Created! 🎉',
-        description: 'Please verify your email to continue.',
-      });
+      // Show verification modal with the newly created user
+      if (data?.user) {
+        setVerificationUserId(data.user.id);
+        setVerificationEmail(signUpForm.email);
+        setShowVerificationModal(true);
+        
+        toast({
+          title: 'Account Created! 🎉',
+          description: 'Please verify your email to continue.',
+        });
+      }
+      
+      setIsLoading(false);
     } catch (error: any) {
       toast({
         title: 'Error',
