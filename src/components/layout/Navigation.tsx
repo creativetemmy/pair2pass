@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserMenu } from "./UserMenu";
+import { MobileMenu } from "./MobileMenu";
 
 
 const allNavItems = [
@@ -110,7 +112,9 @@ export function Navigation() {
             {user && <NotificationBell />}
             <ThemeToggle />
             
-            {!user && (
+            {user ? (
+              <UserMenu />
+            ) : (
               <Button 
                 onClick={() => navigate('/auth')}
                 className="transition-all duration-300"
@@ -121,34 +125,13 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile Theme Toggle */}
+          {/* Mobile Menu & Theme Toggle */}
           <div className="flex md:hidden items-center space-x-2">
             <ThemeToggle />
+            {user && <MobileMenu />}
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-border transition-colors duration-300">
-          <div className="flex justify-around py-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  cn(
-                    "flex flex-col items-center space-y-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300",
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )
-                }
-              >
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </div>
-        </div>
       </div>
       
      
