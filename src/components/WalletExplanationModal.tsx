@@ -83,16 +83,15 @@ export function WalletExplanationModal({ open, onOpenChange, onConnected }: Wall
                   <li className="flex gap-2">
                     <span className="font-bold text-primary">1.</span>
                     <span>
-                      <strong>Install a wallet:</strong> We recommend{" "}
+                      <strong>Watch this guide:</strong>{" "}
                       <a 
-                        href="https://metamask.io" 
+                        href="https://www.youtube.com/watch?v=Af_lQ1zUnoM" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-primary hover:underline inline-flex items-center gap-1"
                       >
-                        MetaMask <ExternalLink className="h-3 w-3" />
+                        Complete Wallet Setup Tutorial <ExternalLink className="h-3 w-3" />
                       </a>
-                      {" "}(it's free and takes 1 minute)
                     </span>
                   </li>
                   <li className="flex gap-2">

@@ -27,39 +27,46 @@ export const useActiveSession = () => {
     const fetchActiveSession = async () => {
       try {
         console.log('Fetching active session for user:', user.id);
+        
+        // Only fetch sessions created within the last 24 hours and with active/waiting status
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        
         const { data, error } = await supabase
           .from('study_sessions')
           .select('*')
           .or(`partner_1_user_id.eq.${user.id},partner_2_user_id.eq.${user.id}`)
           .in('status', ['waiting', 'active'])
+          .gte('created_at', twentyFourHoursAgo)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         console.log('Active session query result:', { data, error });
 
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching active session:', error);
-        } else {
+          setActiveSession(null);
+        } else if (data) {
           // Filter out expired sessions (created_at + duration has passed)
-          if (data) {
-            const sessionStart = new Date(data.created_at).getTime();
-            const sessionDuration = data.duration * 60 * 1000; // Convert minutes to milliseconds
-            const sessionEnd = sessionStart + sessionDuration;
-            const now = Date.now();
-            
-            // Only set as active if session hasn't expired
-            if (now < sessionEnd) {
-              setActiveSession(data);
-              console.log('Active session set:', data);
-            } else {
-              console.log('Session expired, not setting as active');
-              setActiveSession(null);
-            }
+          const sessionStart = new Date(data.created_at).getTime();
+          const sessionDuration = data.duration * 60 * 1000; // Convert minutes to milliseconds
+          const sessionEnd = sessionStart + sessionDuration;
+          const now = Date.now();
+          
+          // Only set as active if session hasn't expired
+          if (now < sessionEnd) {
+            setActiveSession(data);
+            console.log('Active session set:', data);
           } else {
+            console.log('Session expired, not setting as active');
             setActiveSession(null);
           }
+        } else {
+          setActiveSession(null);
         }
       } catch (error) {
         console.error('Error fetching active session:', error);
+        setActiveSession(null);
       } finally {
         setLoading(false);
       }
