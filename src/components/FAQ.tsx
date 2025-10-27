@@ -16,7 +16,7 @@ const faqData = [
   },
   {
     question: "Do I need a crypto wallet to use Pair2Pass?",
-    answer: "Yes, a wallet is required to sign up and receive your Student Passport NFT. Don't worry — we make it simple, even if you're new to Web3."
+    answer: "No, a crypto wallet is not mandatory to use Pair2Pass. You can sign up with just your email and use all core features like finding study partners and joining sessions. However, a wallet is needed to mint your Student Passport NFT and claim Pass Points that you can redeem for rewards and exclusive benefits."
   },
   {
     question: "What are Pass Points?",
