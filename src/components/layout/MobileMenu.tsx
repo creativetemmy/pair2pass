@@ -89,8 +89,8 @@ export function MobileMenu() {
                   cn(
                     "flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "gradient-primary text-primary-foreground shadow-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-accent"
                   )
                 }
               >

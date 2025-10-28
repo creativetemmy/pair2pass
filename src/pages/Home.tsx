@@ -43,7 +43,7 @@ const stats = [
   { value: "15+", label: "Active Students" },
   { value: "10", label: "Study Sessions" },
   { value: "95%", label: "Success Rate" },
-  { value: "3+", label: "Universities" },
+  { value: "15+", label: "Universities" },
 ];
 
 const testimonials = [
