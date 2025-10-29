@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.55.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,9 +8,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation schema
+const CreateSessionSchema = z.object({
+  matchRequestId: z.string().uuid(),
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
+});
+
 interface CreateSessionRequest {
   matchRequestId: string;
-  walletAddress: string;
+  walletAddress?: string;
 }
 
 serve(async (req) => {
@@ -22,11 +29,16 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { matchRequestId, walletAddress } = await req.json() as CreateSessionRequest;
-
-    if (!walletAddress) {
-      throw new Error("Wallet address is required");
+    const requestBody = await req.json();
+    
+    // Validate input
+    const validation = CreateSessionSchema.safeParse(requestBody);
+    if (!validation.success) {
+      console.error('❌ Validation error:', validation.error.issues);
+      throw new Error(`Invalid input: ${validation.error.issues[0].message}`);
     }
+
+    const { matchRequestId, walletAddress } = validation.data as CreateSessionRequest;
 
     console.log("Creating session for match request:", matchRequestId);
     console.log("Requesting user:", walletAddress);

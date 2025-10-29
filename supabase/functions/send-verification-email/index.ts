@@ -1,14 +1,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation schema
+const SendVerificationSchema = z.object({
+  email: z.string().email().max(255),
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
+});
+
 interface SendVerificationRequest {
   email: string;
-  walletAddress: string;
+  walletAddress?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -18,19 +25,27 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, walletAddress }: SendVerificationRequest = await req.json();
+    const requestBody = await req.json();
     
-    console.log('📧 Sending verification email to:', email, 'for wallet:', walletAddress);
-
-    if (!email || !walletAddress) {
+    // Validate input
+    const validation = SendVerificationSchema.safeParse(requestBody);
+    if (!validation.success) {
+      console.error('❌ Validation error:', validation.error.issues);
       return new Response(
-        JSON.stringify({ error: 'Email and wallet address are required' }),
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validation.error.issues[0].message 
+        }),
         { 
           status: 400, 
           headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
+
+    const { email, walletAddress }: SendVerificationRequest = validation.data;
+    
+    console.log('📧 Sending verification email to:', email, 'for wallet:', walletAddress || 'N/A');
 
     // Initialize Supabase client with service role key for database operations
     const supabase = createClient(

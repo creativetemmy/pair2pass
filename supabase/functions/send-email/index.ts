@@ -1,5 +1,14 @@
 // supabase/functions/send-email/index.ts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+// Input validation schema
+const SendEmailSchema = z.object({
+  email: z.string().email().max(255),
+  userId: z.string().uuid().optional(),
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
+  otp: z.string().length(6).regex(/^\d{6}$/),
+});
 
 serve(async (req) => {
   // Handle preflight OPTIONS request
@@ -14,7 +23,24 @@ serve(async (req) => {
   }
 
   try {
-    const { email, userId, walletAddress, otp } = await req.json();
+    const requestBody = await req.json();
+    
+    // Validate input
+    const validation = SendEmailSchema.safeParse(requestBody);
+    if (!validation.success) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid input', 
+        details: validation.error.issues[0].message 
+      }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
+    const { email, userId, walletAddress, otp } = validation.data;
 
     const response = await fetch("https://send.api.mailtrap.io/api/send", {
       method: "POST",

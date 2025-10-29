@@ -1,16 +1,16 @@
 project_id = "sugpsvakosdaciiovwjk"
 
 [functions.send-email]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-verification-email]
-verify_jwt = false
+verify_jwt = true
 
 [functions.verify-email-code]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-notification-email]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-study-session]
-verify_jwt = false
+verify_jwt = true

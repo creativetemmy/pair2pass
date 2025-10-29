@@ -1,14 +1,22 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation schema
+const VerifyRequestSchema = z.object({
+  email: z.string().email().max(255),
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
+  otp: z.string().length(6).regex(/^\d{6}$/),
+});
+
 interface VerifyRequest {
   email: string;
-  walletAddress: string;
+  walletAddress?: string;
   otp: string;
 }
 
@@ -19,19 +27,27 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, walletAddress, otp }: VerifyRequest = await req.json();
+    const requestBody = await req.json();
     
-    console.log('🔍 Verifying OTP for:', email, 'wallet:', walletAddress);
-
-    if (!email || !walletAddress || !otp) {
+    // Validate input
+    const validation = VerifyRequestSchema.safeParse(requestBody);
+    if (!validation.success) {
+      console.error('❌ Validation error:', validation.error.issues);
       return new Response(
-        JSON.stringify({ error: 'Email, wallet address, and OTP are required' }),
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validation.error.issues[0].message 
+        }),
         { 
           status: 400, 
           headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
     }
+
+    const { email, walletAddress, otp }: VerifyRequest = validation.data;
+    
+    console.log('🔍 Verifying OTP for:', email, 'wallet:', walletAddress || 'N/A');
 
     // Initialize Supabase client with service role key
     const supabase = createClient(
