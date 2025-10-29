@@ -479,27 +479,36 @@ export default function Homepage() {
     console.log("Inviting partner:", partner);
     
     try {
-      // Fetch requester and target emails from profiles table
+      // Fetch requester and target profiles using wallet addresses
       const { data: requesterProfile } = await supabase
         .from('profiles')
-        .select('email, name, user_id')
-        .eq('user_id', address)
+        .select('email, name, wallet_address, user_id')
+        .eq('wallet_address', address?.toLowerCase())
         .maybeSingle();
 
       const { data: targetProfile } = await supabase
         .from('profiles')
-        .select('email, name, user_id')
-        .eq('user_id', partner.user_id || partner.id)
+        .select('email, name, wallet_address, user_id')
+        .eq('wallet_address', partner.wallet_address?.toLowerCase())
         .maybeSingle();
 
-      // Create match request in database
+      console.log('📧 Requester profile:', requesterProfile?.name, requesterProfile?.email);
+      console.log('📧 Target profile:', targetProfile?.name, targetProfile?.email);
+
+      if (!targetProfile) {
+        console.error('Target profile not found for wallet:', partner.wallet_address);
+        toast.error("Failed to send invitation. Partner profile not found.");
+        return;
+      }
+
+      // Create match request in database using wallet addresses
       const { data: matchRequest, error: matchError } = await supabase
         .from('match_requests')
         .insert({
-          requester_id: address,
-          target_id: partner.user_id || partner.id,
-          requester_wallet: '',
-          target_wallet: '',
+          requester_id: requesterProfile?.user_id || null,
+          target_id: targetProfile?.user_id || null,
+          requester_wallet: address?.toLowerCase() || '',
+          target_wallet: partner.wallet_address?.toLowerCase() || '',
           subject: sessionData?.subject || 'General Study',
           goal: sessionData?.goal || 'Study Together',
           duration: sessionData?.duration || 60,
@@ -514,22 +523,14 @@ export default function Homepage() {
         return;
       }
 
-      // Create notification for the target partner
-      const targetUserId = partner.user_id || partner.id;
-      
-      console.log('📧 Creating notification for user:', targetUserId);
-      console.log('📧 Match request ID:', matchRequest.id);
-      
-      if (!targetUserId) {
-        console.error('Target user ID not found');
-        toast.error("Failed to send invitation. Partner user ID missing.");
-        return;
-      }
+      console.log('📧 Match request created:', matchRequest.id);
 
+      // Create notification for the target partner using wallet address
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
-          user_id: targetUserId,
+          user_id: targetProfile?.user_id || null,
+          user_wallet: partner.wallet_address?.toLowerCase(),
           title: 'New Study Partner Request',
           message: `${requesterProfile?.name || profile?.name || 'Someone'} wants to study ${sessionData?.subject || ''} with you for ${sessionData?.goal || ''}. Accept?`,
           type: 'match_request',
@@ -550,9 +551,10 @@ export default function Homepage() {
         // Continue anyway - the match request was created
       }
 
-      // Send email notification to the target partner using their email from database
-      const targetEmail = targetProfile?.email || partner.email;
+      // Send email notification to the target partner
+      const targetEmail = targetProfile?.email;
       if (targetEmail) {
+        console.log('📧 Sending email to:', targetEmail);
         const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
           body: {
             email: targetEmail,
@@ -573,10 +575,10 @@ export default function Homepage() {
           console.error('Error sending invitation email:', emailError);
           // Don't fail the whole operation if email fails
         } else {
-          console.log('Email sent successfully to:', targetEmail);
+          console.log('✅ Email sent successfully to:', targetEmail);
         }
       } else {
-        console.log('No email found for target partner');
+        console.log('⚠️ No email found for target partner:', partner.wallet_address);
       }
 
       toast.success("Invitation sent! You'll be notified when they respond.");
