@@ -200,6 +200,24 @@ export default function Profile() {
       return;
     }
     
+    if (!editedProfile.institution?.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your institution/university.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!editedProfile.department?.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your department/faculty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!editedProfile.academic_level?.trim()) {
       toast({
         title: "Missing Information",
@@ -540,7 +558,7 @@ export default function Profile() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="institution">Institution</Label>
+                <Label htmlFor="institution">Institution *</Label>
                 <Input
                   id="institution"
                   value={editedProfile.institution || ""}
@@ -549,7 +567,7 @@ export default function Profile() {
                 />
               </div>
               <div>
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="department">Department *</Label>
                 <Input
                   id="department"
                   value={editedProfile.department || ""}
