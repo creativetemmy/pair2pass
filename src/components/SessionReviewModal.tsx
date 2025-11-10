@@ -17,7 +17,11 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import { awardPassPoints, updateSessionStats } from "@/lib/passPointsSystem";
-import { pair2PassContractConfig } from "@/contracts/pair2passsbt";
+import {
+  contractAddresses,
+  pair2PassContractConfig,
+  pair2PassContractConfigAbi,
+} from "@/contracts/pair2passsbt";
 import { baseSepolia } from "wagmi/chains";
 
 interface SessionReviewModalProps {
@@ -40,9 +44,10 @@ export const SessionReviewModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessView, setShowSuccessView] = useState(false);
   const [isMintingNFT, setIsMintingNFT] = useState(false);
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
 
   const { writeContract, data: hash, error: writeError } = useWriteContract();
+  const contractAddress = contractAddresses[chainId];
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
@@ -125,7 +130,7 @@ export const SessionReviewModal = ({
         .eq("wallet_address", address)
         .single();
 
-      const { data: partnerProfile }  = await supabase
+      const { data: partnerProfile } = await supabase
         .from("profiles")
         .select("name, email")
         .eq("wallet_address", partnerWallet)
@@ -155,8 +160,7 @@ export const SessionReviewModal = ({
           })
           .catch((err) => console.log("Email send failed:", err));
 
-
-          await supabase.functions
+        await supabase.functions
           .invoke("send-notification-email", {
             body: {
               type: "session_complete",
@@ -191,7 +195,8 @@ export const SessionReviewModal = ({
 
     try {
       writeContract({
-        ...pair2PassContractConfig,
+        address: contractAddress,
+        abi: pair2PassContractConfigAbi,
         functionName: "mintBadgeNft",
         args: ["Study Badge"],
         chain: baseSepolia,
@@ -236,9 +241,10 @@ export const SessionReviewModal = ({
               .single();
 
             if (session) {
-              const partner = session.partner_1_id === address.toLowerCase() 
-                ? session.partner_2_id 
-                : session.partner_1_id;
+              const partner =
+                session.partner_1_id === address.toLowerCase()
+                  ? session.partner_2_id
+                  : session.partner_1_id;
 
               // NOW award Pass Points after NFT mint
               await Promise.all([
@@ -319,8 +325,13 @@ export const SessionReviewModal = ({
                   Study Session Completed!
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  You've successfully completed your study session! 
-                  <strong className="text-foreground"> To earn Pass Points, you must mint an NFT badge.</strong> This prevents point spam and records your achievement on-chain.
+                  You've successfully completed your study session!
+                  <strong className="text-foreground">
+                    {" "}
+                    To earn Pass Points, you must mint an NFT badge.
+                  </strong>{" "}
+                  This prevents point spam and records your achievement
+                  on-chain.
                 </p>
               </div>
 
