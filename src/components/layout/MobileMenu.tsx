@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthProfile } from "@/hooks/useAuthProfile";
 import { NotificationBell } from "@/components/NotificationBell";
+import WalletStatusBar from "@/components/WalletStatusBar";
+import { Separator } from "@/components/ui/separator";
 
 const navItems = [
   { icon: Home, label: "Dashboard", path: "/homepage" },
@@ -87,28 +89,32 @@ export function MobileMenu() {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-accent"
                   )
                 }
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                <span>{item.label}</span>
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span className="truncate">{item.label}</span>
               </NavLink>
             </SheetClose>
           ))}
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute bottom-6 left-6 right-6 space-y-4">
+          <Separator />
+          <div className="px-2">
+            <WalletStatusBar />
+          </div>
           <Button
             variant="outline"
             className="w-full justify-start text-destructive border-destructive/50 hover:bg-destructive/10"
             onClick={handleLogout}
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Log out
+            <LogOut className="mr-2 h-4 w-4 shrink-0" />
+            <span>Log out</span>
           </Button>
         </div>
       </SheetContent>
