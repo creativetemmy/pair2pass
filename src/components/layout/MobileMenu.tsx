@@ -61,35 +61,37 @@ export function MobileMenu() {
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[280px] sm:w-[320px] bg-background">
-        <SheetHeader className="border-b border-border pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-12 w-12">
+      <SheetContent side="right" className="w-[300px] sm:w-[340px] bg-background flex flex-col">
+        <SheetHeader className="border-b border-border pb-4 shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage src={profile?.avatar_url} alt={profile?.name || 'User'} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <SheetTitle className="text-left text-base">{profile?.name || 'User'}</SheetTitle>
-                <p className="text-xs text-muted-foreground truncate max-w-[160px]">
+              <div className="flex flex-col min-w-0 flex-1">
+                <SheetTitle className="text-left text-sm truncate">{profile?.name || 'User'}</SheetTitle>
+                <p className="text-xs text-muted-foreground truncate">
                   {user?.email}
                 </p>
               </div>
             </div>
-            <NotificationBell />
+            <div className="shrink-0">
+              <NotificationBell />
+            </div>
           </div>
         </SheetHeader>
 
-        <nav className="mt-6 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-4 space-y-1">
           {navItems.map((item) => (
             <SheetClose asChild key={item.path}>
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-accent"
@@ -97,24 +99,23 @@ export function MobileMenu() {
                 }
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate flex-1">{item.label}</span>
               </NavLink>
             </SheetClose>
           ))}
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6 space-y-4">
-          <Separator />
+        <div className="shrink-0 border-t border-border pt-4 space-y-3">
           <div className="px-2">
             <WalletStatusBar />
           </div>
           <Button
             variant="outline"
-            className="w-full justify-start text-destructive border-destructive/50 hover:bg-destructive/10"
+            className="w-full justify-start gap-2 text-destructive border-destructive/50 hover:bg-destructive/10"
             onClick={handleLogout}
           >
-            <LogOut className="mr-2 h-4 w-4 shrink-0" />
-            <span>Log out</span>
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span className="truncate">Log out</span>
           </Button>
         </div>
       </SheetContent>
